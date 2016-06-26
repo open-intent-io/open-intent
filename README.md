@@ -1,4 +1,4 @@
-OpenIntent
+open-intent
 ====================
 
 Authors:
@@ -10,7 +10,7 @@ May 21st, 2016
 Description
 ---------------------
 
-OpenIntent is a natural language processing framework with the aim of finding user intents in sentences.
+open-intent is a natural language processing framework with the aim of finding user intents in sentences.
 It is made of several layers able to find a user intent until having a full conversation with a user.
 
 
@@ -34,7 +34,7 @@ To build, type:
 License
 ---------------------
 
-OpenIntent is **licensed** under the **[MIT License]**. The terms of the license are as follows:
+open-intent is **licensed** under the **[MIT License]**. The terms of the license are as follows:
 
     The MIT License (MIT)
 
