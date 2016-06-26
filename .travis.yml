@@ -5,7 +5,7 @@ compiler:
 before_script:
   - sudo apt-get update -qq
   - sudo apt-get install libboost-all-dev
-script: mkdir build && cd build && cmake -G "Unix Makefiles" . && make
+script: mkdir build && cd build && cmake -G "Unix Makefiles" .. && make
 notifications:
   email:
     recipients:
