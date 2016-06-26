@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.2)
+
+SET(TARGET domotic-test)
+
+SET(RES_FILES intent.json)
+
+COPY_RES_FILES(RES_FILES ${RES_FILES} SRC_DIR ../ DEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/json/src)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/..)
+
+ADD_EXECUTABLE(${TARGET} ../Domotic.cpp DomoticTest.cpp)
+TARGET_LINK_LIBRARIES(${TARGET} gtest gmock gmock_main intent-static)

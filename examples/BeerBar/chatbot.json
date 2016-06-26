@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "entities": {
+    "@waiter":
+    {
+      "Bob": ["Bobby"]
+    },
+    "@beverage":
+    {
+      "Coca-Cola": ["Coca", "Cola", "Coke"],
+      "Kronenbourg": ["Kro"],
+      "Heineken": ["Hein"],
+      "Leffe": [],
+      "Hoegarden": [],
+      "1664": [],
+      "Pale ale": [],
+      "Duff": [],
+      "Amstel": [],
+      "Pietra": [],
+      "Pelforth": []
+    },
+    "@number":
+    {
+      "0": ["zero"],
+      "1": ["one", "a"],
+      "2": ["two"],
+      "3": ["three"],
+      "4": ["four"],
+      "5": ["five"],
+      "6": ["six"],
+      "7": ["seven"],
+      "8": ["height"],
+      "9": ["nine"]
+    },
+    "@yes":
+    {
+      "Yes": []
+    },
+    "@no":
+    {
+      "No": []
+    },
+    "@nothing":
+    {
+      "Nothing": []
+    }
+  },
+
+
+  "intents": [
+    {
+      "id": "order1",
+      "intent": [
+        "@number",
+        "@beverage"
+      ],
+      "example": "I would like one Coca-Cola, please."
+    },
+    {
+      "id": "order2",
+      "intent": [
+        "@number",
+        "@beverage",
+        "@number",
+        "@beverage"
+      ],
+      "example": "I'd like to order one Heineken and 2 Pelforth"
+    },
+    {
+      "id": "yes",
+      "intent": ["@yes"],
+      "example": "Yes"
+    },
+    {
+      "id": "no",
+      "intent": ["@no"],
+      "example": "No"
+    },
+    {
+      "id": "nothing",
+      "intent": ["@nothing"],
+      "example": "Nothing"
+    },
+    {
+      "id": "ask_waiter",
+      "intent": ["@waiter"],
+      "example": "Bob!"
+    }
+  ],
+
+
+  "chatbot": {
+    "replies": {
+      "order_description": "Here is what you ordered: ${order_description}.",
+      "grab_it_reply": "Please come grab your order. It's gonna be ${price}$.",
+      "want_something_else_reply1": "I'm adding $[@number0] $[@beverage0]. Would you like something else?",
+      "want_something_else_reply2": "I'm adding $[@number0] $[@beverage0] and $[@number1] $[@beverage1]. Would you like something else?",
+      "what_else_reply": "What else?",
+      "what_can_i_get_you_reply": "What can I get you?",
+      "bye_reply": "Goodbye.",
+      "dont_understand_init": "I'm Bob, what can I do for you?",
+      "dont_understand_wait_order_reply": "I did not get it, what do you want to order?",
+      "dont_understand_wait_another_order_reply": "I'm sorry, I don't understand. Do you really want something else?"
+    },
+    "replies_by_action": {
+      "what_else": ["what_else_reply"],
+      "what_can_i_get_you": ["what_can_i_get_you_reply"],
+      "append_order1": ["want_something_else_reply1"],
+      "append_order2": ["want_something_else_reply2"],
+      "bye": ["bye_reply"],
+      "order_and_grab_it": ["order_description", "grab_it_reply", "bye_reply"],
+      "dont_understand_init": ["what_can_i_get_you_reply"],
+      "dont_understand_wait_order": ["dont_understand_wait_order_reply"],
+      "dont_understand_wait_another_order": ["dont_understand_wait_another_order_reply"]
+    }
+  },
+
+  "intent_story": {
+    "root": "init",
+    "terminals": ["bye"],
+    "graph": {
+      "init": {
+        "ask_waiter:what_can_i_get_you": "wait_order",
+        "_:dont_understand_init": "wait_order"
+      },
+      "wait_order": {
+        "order1:append_order1": "wait_another_order",
+        "order2:append_order2": "wait_another_order",
+        "nothing:bye": "bye",
+        "_:dont_understand_wait_order": "wait_order"
+      },
+      "wait_another_order": {
+        "no:order_and_grab_it": "bye",
+        "yes:what_else": "wait_another_order",
+        "nothing:order_and_grab_it": "bye",
+        "order1:append_order1": "wait_another_order",
+        "order2:append_order2": "wait_another_order",
+        "_:dont_understand_wait_another_order": "wait_another_order"
+      },
+      "bye": {}
+    }
+  }
+}
+

@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "entities": {
+    "@light":
+    {
+      "ligth": ["lamp", "lightbulb"]
+    },
+    "@window": {
+      "window": []
+    },
+    "@thermostat": {
+      "thermostat": ["temperature", "heating", "heater"]
+    },
+    "@higher_lower": {
+      "lower": [],
+      "higher": []
+    },
+    "@open_close": {
+      "open": [],
+      "close": []
+    },
+    "@on_off": {
+      "on": [],
+      "off": []
+    }
+  },
+
+  "intents": [
+    {
+      "id": "turn_the_light_X",
+      "intent": [
+        "@light",
+        "@on_off"
+      ],
+      "example": "Turn the light on"
+    },
+    {
+      "id": "turn_X_the_light",
+      "intent": [
+        "@on_off",
+        "@light"
+      ],
+      "example": "Turn on the light"
+    },
+    {
+      "id": "open_close_window",
+      "intent": [
+        "@open_close",
+        "@window"
+      ],
+      "example": "Open the window"
+    },
+    {
+      "id": "lower_higher_heating",
+      "intent": [
+        "@higher_lower",
+        "@thermostat"
+      ],
+      "example": "Lower the heating"
+    }
+  ]
+}
+

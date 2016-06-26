@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "entities": {
+    "@beverage":
+    {
+      "Coca-Cola": ["Coca", "Cola", "Coke"],
+      "Kronenbourg": ["Kro"],
+      "Heineken": ["Hein"],
+      "Leffe": [],
+      "Hoegarden": [],
+      "1664": [],
+      "Mojito": [],
+      "Bloody-Mary":[]
+    },
+    "@number":
+    {
+      "0": ["zero"],
+      "1": ["un", "une"],
+      "2": ["deux"],
+      "3": ["trois"],
+      "4": ["quatre"],
+      "5": ["cinq"],
+      "6": ["six"],
+      "7": ["sept"],
+      "8": ["huit"],
+      "9": ["neuf"]
+    },
+    "@quant":
+    {
+      "<": ["moins", "-"],
+      ">": ["plus", "+"]
+    },
+    "@question":
+    {
+      "Quel":["quoi", "quels"],
+      "Combien":["cmb"]
+    },
+    "@category":
+    {
+      "soft":["boisson non alcoolisées"],
+      "biere":["mousse"],
+      "cocktail":[]
+    },
+    "@attribute":
+    {
+      "prix":["cout"]
+    },
+    "@yes":
+    {
+      "ok":["yes"]
+    }
+  },
+
+  "intents": [
+    {
+      "id": "beverage_query",
+      "intent": [
+        "@quant",
+        "@number"
+      ],
+      "example": "moins de 100 €"
+    },
+    {
+      "id": "price_query",
+      "intent": [
+        "@question",
+        "@number",
+        "@beverage"
+      ],
+      "example": "Quel prix pour 1 biere?"
+    },
+    {
+      "id": "category_query",
+      "intent": ["@question","@category", "@quant", "@number"],
+      "example": "Quel sont les softs pour moins de 100"
+    },
+    {
+      "id": "ack",
+      "intent":["@yes"],
+      "example":"yes"
+    }
+  ],
+
+  "chatbot": {
+    "replies": {
+      "beveragelist_reply": "Voici les boissons : ${beverages}",
+      "price_reply": "Le prix est : ${price}€."
+    },
+    "commands": ["#beveragequery", "#pricequery", "#categoryquery"],
+    "actions": {
+      "price_action": ["#pricequery", "price_reply"],
+      "beverage_action": ["#beveragequery", "beveragelist_reply"],
+      "category_action": ["#categoryquery", "beveragelist_reply"]
+    }
+  },
+
+  "intent_story": {
+    "root": "init",
+    "graph": 
+    {
+      "init": 
+      {
+        "price_query": "price_action",
+        "beverage_query": "beverage_action",
+        "category_query": "category_action"
+      },
+      "price_action":
+      {
+        "ack":"init"
+      },
+      "beverage_action":
+      {
+        "ack":"init"
+      },
+      "category_action":
+      {
+        "ack":"init"
+      }
+
+    }
+  }
+}
+

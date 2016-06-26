@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.2)
+
+ADD_SUBDIRECTORY(BeerBar)
+ADD_SUBDIRECTORY(QueriesBar)
+ADD_SUBDIRECTORY(Domotic)
+ADD_SUBDIRECTORY(IntentViz)
+

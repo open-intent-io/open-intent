@@ -1,0 +1,18 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Example application using a REST chatbot",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "cors": "^2.7.1",
+    "express": "^4.13.4",
+    "open-intent-chatbot": "file:../../../modules/open-intent-chatbot",
+    "requestify": "^0.1.17"
+  },
+  "author": "Clément Michaud, Sergei Kireev",
+  "license": "MIT"
+}

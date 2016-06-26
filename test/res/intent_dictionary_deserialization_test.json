@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "entities": {
+    "@beverage": {
+      "Coca-Cola": [
+        "Coca",
+        "Cola",
+        "Coke"
+      ],
+      "Kronenbourg": ["Kro"],
+      "Heineken": ["Hein"]
+    },
+    "@number": {
+      "0": ["zero"],
+      "1": ["un", "une"],
+      "2": ["deux"],
+      "3": ["trois"],
+      "4": ["quatre"],
+      "5": ["cinq"],
+      "6": ["six"],
+      "7": ["sept"],
+      "8": ["huit"],
+      "9": ["neuf"]
+    },
+    "@phonenumber": {
+       "regex":"^[0-9]{10,}$"
+    }
+  },
+
+  "intents": [
+    {
+      "id": "order1",
+      "intent": [
+        "@number",
+        "@beverage"
+      ],
+      "example": "Je veux 1 Coca."
+    },
+    {
+      "id": "order2",
+      "intent": [
+        "@number:softnumber",
+        "@beverage:soft",
+        "@number:alcoholnumber",
+        "@beverage:alcohol"
+      ],
+      "example": "Je veux 1 Coca et 1 bière"
+    },
+    {
+      "id": "order_no_number",
+      "intent": [
+        "@beverage",
+        "@beverage"
+      ],
+      "example": "Je veux du @beverage et du @beverage"
+    },
+    {
+      "id": "order3",
+      "intent": [
+        "@number",
+	"@number",        
+	"@beverage"	
+	],
+      "example": "Je veux 1 1 Heineken"
+    }
+  ],
+
+
+  "replies": [
+    {
+      "id": "pay_2_conso",
+      "reply": "Veuillez régler vos 2 consommations."
+    },
+    {
+      "id": "credit_card",
+      "reply": "Sortez votre carte bancaire."
+    },
+    {
+      "id": "how_many",
+      "reply": "Combien en voulez-vous ?"
+    }
+  ],
+
+  "intent_story": {
+    "root": "root",
+    "terminals": ["end", "bye"],
+    "graph": {
+      "root": {
+        "order1": "credit_card",
+        "order2": "pay_2_conso",
+        "order_no_number": "how_many"
+      }
+    }
+  }
+}
+

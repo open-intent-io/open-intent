@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.2)
+
+SET(TARGET beerbar)
+
+SET(RES_FILES
+        chatbot.json)
+
+COPY_RES_FILES(RES_FILES ${RES_FILES} DEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/json/src)
+
+ADD_EXECUTABLE(${TARGET} main.cpp BeerBar.cpp)
+TARGET_LINK_LIBRARIES(${TARGET} intent-static ${Boost_LIBRARIES})
+
+ADD_SUBDIRECTORY(test)
