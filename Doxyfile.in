@@ -1,0 +1,25 @@
+
+PROJECT_NAME           = "OpenIntent"
+
+PROJECT_BRIEF          = "The first open source user intent matching natural language processing framework."
+
+DOXYFILE_ENCODING      = UTF-8
+
+PROJECT_NUMBER         = @VERSION@
+
+RECURSIVE              = YES
+
+INPUT                  = @CMAKE_SOURCE_DIR@/src \
+                         @CMAKE_SOURCE_DIR@/include
+
+OUTPUT_LANGUAGE        = English
+
+SHOW_INCLUDE_FILES     = YES
+
+WARN_IF_UNDOCUMENTED   = YES
+
+GENERATE_TREEVIEW      = YES
+
+FULL_PATH_NAMES        = YES
+
+STRIP_FROM_PATH        = @CMAKE_SOURCE_DIR@/include
