@@ -1,14 +1,18 @@
 language: cpp
-compiler:
-  - gcc
-  - clang
-before_script:
-  - sudo apt-get update -qq
-  - sudo apt-get install libboost-all-dev
-script: mkdir build && cd build && cmake -G "Unix Makefiles" .. && make
+
+services:
+  - docker
+
+before_install:
+  - docker build -t open-intent-build .
+
+script:
+  - docker run open-intent-build /src/scripts/build_and_test.sh
+
 notifications:
   email:
     recipients:
       - clement.michaud34@gmail.com
+      - sergei.kireev@hotmail.fr
     on_success: change
     on_failure: always
