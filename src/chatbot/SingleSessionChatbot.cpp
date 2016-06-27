@@ -46,16 +46,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace intent {
 SingleSessionChatbot::SingleSessionChatbot(
     const ChatbotModel& chatbotModel,
-    Chatbot::ReplyActionHandler::SharedPtr replyActionHandler,
     Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler)
     : Chatbot(chatbotModel),
-      m_replyActionHandler(replyActionHandler),
       m_userDefinedActionHandler(userDefinedActionHandler) {
   m_context.currentStateId =
       m_intentStoryService.getIntentStoryModel().rootStateId;
 }
 
-void SingleSessionChatbot::treatMessage(const std::string& message) {
+std::vector<std::string> SingleSessionChatbot::treatMessage(const std::string& message) {
   std::vector<std::string> replies;
   Chatbot::VariablesMap intentVariables;
   Chatbot::VariablesMap userDefinedVariables;
@@ -65,8 +63,6 @@ void SingleSessionChatbot::treatMessage(const std::string& message) {
   Chatbot::treatMessage(message, m_context, userDefinedAction, intentVariables,
                         userDefinedVariables);
 
-  std::for_each(
-      replies.begin(), replies.end(),
-      [this](const std::string& reply) { (*m_replyActionHandler)(reply); });
+  return replies;
 }
 }

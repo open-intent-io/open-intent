@@ -76,9 +76,6 @@ class ChatbotFactory {
 
   /**
    * \param model             The data model to be loaded in the chatbot.
-   * \param replyActionHandler        The user implementation of the
-   * replyActionHandler that will be used by the
-   * chatbot.
    * \param userDefinedActionHandler  The user implementation of the
    * userDefinedActionHandler that will be used
    * by the chatbot.
@@ -91,7 +88,6 @@ class ChatbotFactory {
   static SingleSessionChatbot::SharedPtr
   createSingleSessionChatbotFromJsonModel(
       std::istream& model,
-      Chatbot::ReplyActionHandler::SharedPtr replyActionHandler,
       Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler);
 
   /**
@@ -99,9 +95,6 @@ class ChatbotFactory {
    * chatbot.
    * \param interpreterModel              The data model describing the dialogs
    * enabled by the chatbot.
-   * \param replyActionHandler        The user implementation of the
-   * replyActionHandler that will be used by the
-   * chatbot.
    * \param userDefinedActionHandler  The user implementation of the
    * userDefinedActionHandler that will be used
    * by the chatbot.
@@ -113,7 +106,6 @@ class ChatbotFactory {
    */
   static SingleSessionChatbot::SharedPtr createSingleSessionChatbotFromOIML(
       std::istream& dictionaryModel, std::istream& interpreterModel,
-      Chatbot::ReplyActionHandler::SharedPtr replyActionHandler,
       Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler);
 
   /**
@@ -135,8 +127,6 @@ class ChatbotFactory {
   static typename MultiSessionChatbot<SessionIdType>::SharedPtr
   createMultiSessionChatbotFromJsonModel(
       std::istream& model,
-      typename MultiSessionChatbot<SessionIdType>::ReplyActionHandler::SharedPtr
-          replyActionHandler,
       typename MultiSessionChatbot<SessionIdType>::UserDefinedActionHandler::
           SharedPtr userDefinedActionHandler);
 
@@ -161,8 +151,6 @@ class ChatbotFactory {
   static typename MultiSessionChatbot<SessionIdType>::SharedPtr
   createMultiSessionChatbotFromOIML(
       std::istream& dictionaryModel, std::istream& interpreterModel,
-      typename MultiSessionChatbot<SessionIdType>::ReplyActionHandler::SharedPtr
-          replyActionHandler,
       typename MultiSessionChatbot<SessionIdType>::UserDefinedActionHandler::
           SharedPtr userDefinedActionHandler);
 

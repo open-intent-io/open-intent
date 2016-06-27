@@ -46,16 +46,6 @@ namespace intent
 {
     namespace test
     {
-        class ReplyHandlerMock : public Chatbot::ReplyActionHandler
-        {
-        public:
-            MOCK_METHOD1(reply, void (const std::string &message));
-
-            void operator()(const std::string &message)
-            {
-                reply(message);
-            }
-        };
 
         class UserDefinedCommandMock : public Chatbot::UserDefinedActionHandler
         {
@@ -68,21 +58,6 @@ namespace intent
                             Chatbot::VariablesMap &mutableVariables)
             {
                 execute(action, immutableVariables, mutableVariables);
-            }
-        };
-
-
-
-
-        class MultiSessionReplyHandlerMock :
-                public MultiSessionChatbot<std::string>::ReplyActionHandler
-        {
-        public:
-            MOCK_METHOD2(reply, void (const std::string &sessionId, const std::string &message));
-
-            void operator()(const std::string &sessionId, const std::string &message)
-            {
-                reply(sessionId, message);
             }
         };
 

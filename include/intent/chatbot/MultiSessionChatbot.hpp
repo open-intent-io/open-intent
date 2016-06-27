@@ -58,17 +58,6 @@ class MultiSessionChatbot : protected Chatbot {
   typedef std::shared_ptr<MultiSessionChatbot> SharedPtr;
 
   /**
-   * \brief The specific ReplyActionHandler for multi session chatbots
-   */
-  class ReplyActionHandler {
-   public:
-    virtual void operator()(const SessionIdType& sessionId,
-                            const std::string& message) = 0;
-
-    typedef std::shared_ptr<ReplyActionHandler> SharedPtr;
-  };
-
-  /**
    * \brief The specific UserDefinedActionHandler for multi session chatbots
    */
   class UserDefinedActionHandler {
@@ -84,14 +73,11 @@ class MultiSessionChatbot : protected Chatbot {
   /**
    * \param chatbotModel              The data model describing the dictionary,
    * the intent model and the actions.
-   * \param replyActionHandler        The user implementation of a
-   * ReplyActionHandler.
    * \param userDefinedActionHandler  The user implemenation of a
    * UserDefinedActionHandler.
    */
   MultiSessionChatbot(
       const ChatbotModel& chatbotModel,
-      typename ReplyActionHandler::SharedPtr replyActionHandler,
       typename UserDefinedActionHandler::SharedPtr userDefinedActionHandler);
 
   /**
@@ -99,8 +85,9 @@ class MultiSessionChatbot : protected Chatbot {
    * actions
    * \param sessionId The session ID of the session
    * \param message   The user message.
+   * \return The replies built by the chatbot
    */
-  void treatMessage(const SessionIdType& sessionId, const std::string& message);
+  std::vector<std::string> treatMessage(const SessionIdType& sessionId, const std::string& message);
 
   /**
    * \brief Register a session in the chatbot.
@@ -134,12 +121,6 @@ class MultiSessionChatbot : protected Chatbot {
   SessionIndex m_sessionIndex;
 
   /**
-   * The reply action handler provided by the user that will be called each time
-   * a reply must be sent
-   * by the chatbot.
-   */
-  typename ReplyActionHandler::SharedPtr m_replyActionHandler;
-  /**
    * The UserDefinedActionHandler provided by the user that will be called when
    * a user defined action
    * must be executed
@@ -165,8 +146,7 @@ class MultiSessionChatbot : protected Chatbot {
                     Chatbot::VariablesMap& userDefinedVariables) {
       (*m_userDefinedActionHandler)(m_sessionId, action, intentVariables,
                                     userDefinedVariables);
-      m_chatbot.prepareReplies(action, intentVariables, userDefinedVariables,
-                               m_replies);
+        m_replies = m_chatbot.prepareReplies(action, intentVariables, userDefinedVariables);
     }
 
    private:
@@ -175,24 +155,6 @@ class MultiSessionChatbot : protected Chatbot {
     SessionIdType m_sessionId;
     std::vector<std::string>& m_replies;
     MultiSessionChatbot& m_chatbot;
-  };
-
-  class ReplyActionHandlerAdapter : public Chatbot::ReplyActionHandler {
-   public:
-    ReplyActionHandlerAdapter(
-        const SessionIdType& sessionId,
-        typename MultiSessionChatbot::ReplyActionHandler::SharedPtr
-            replyActionHandler)
-        : m_replyActionHandler(replyActionHandler), m_sessionId(sessionId) {}
-
-    void operator()(const std::string& reply) {
-      (*m_replyActionHandler)(m_sessionId, reply);
-    }
-
-   private:
-    typename MultiSessionChatbot::ReplyActionHandler::SharedPtr
-        m_replyActionHandler;
-    SessionIdType m_sessionId;
   };
 };
 }

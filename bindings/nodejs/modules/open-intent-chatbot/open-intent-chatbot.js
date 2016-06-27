@@ -58,17 +58,12 @@ var talkInternal = function(chatbot, userCommandsDriver, sessionManager, req, re
 
         chatbot.treatMessage(context, message, function(actionId, intentVariables) {
             userCommandsDriver(actionId, sessionId, intentVariables, function(userDefinedVariables) {
-                var replies = [];
-                var replyCallback = function(reply) {
-                    replies.push(reply);
-                };
-
                 // Must create userDefinedVariables because it is mandatory in the C++ layer.
                 if(!userDefinedVariables) {
                     userDefinedVariables = {};
                 }
 
-                chatbot.prepareReplies(actionId, intentVariables, userDefinedVariables, replyCallback);
+                var replies = chatbot.prepareReplies(actionId, intentVariables, userDefinedVariables);
                 res.send(JSON.stringify(replies));
             });
         });

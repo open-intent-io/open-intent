@@ -109,13 +109,13 @@ std::string replaceTemplateVariables(
   return message;
 }
 
-void Chatbot::prepareReplies(const std::string& actionId,
+std::vector<std::string> Chatbot::prepareReplies(const std::string& actionId,
                              const Chatbot::VariablesMap& intentVariables,
-                             Chatbot::VariablesMap& userDefinedVariables,
-                             std::vector<std::string>& replies) {
+                             Chatbot::VariablesMap& userDefinedVariables) {
   LOG_INFO() << "Chatbot::prepareReplies starting";
 
   LOG_INFO() << "Chatbot::prepareReplies looking for reply : " << actionId;
+  std::vector<std::string> replies;
   ChatbotActionModel::ReplyIdsByActionIdIndex::const_iterator repliesIt =
       m_chatbotActionModel->replyIdsByActionId.find(actionId);
 
@@ -136,6 +136,7 @@ void Chatbot::prepareReplies(const std::string& actionId,
       }
     }
   }
+  return replies;
 }
 
 void executeActions(const ChatbotActionModel& chatbotActionModel,

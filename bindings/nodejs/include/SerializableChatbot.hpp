@@ -50,27 +50,6 @@ namespace intentjs
     typedef intent::Chatbot iChatbot;
     using namespace v8;
 
-    class SerializableReplyHandler : public intent::Chatbot::ReplyActionHandler
-    {
-    public:
-        SerializableReplyHandler(Isolate *isolate, Local <Function> cb)
-        {
-            m_isolate = isolate;
-            m_callback = cb;
-        }
-
-        void operator()(const std::string &message)
-        {
-            const unsigned argc = 1;
-            Local <Value> argv[argc] = {v8::String::NewFromUtf8(m_isolate, message.c_str())};
-            m_callback->Call(Null(m_isolate), argc, argv);
-        }
-
-    private:
-        Local <Function> m_callback;
-        Isolate *m_isolate;
-    };
-
     class SerializableUserDefinedActionsHandler : public intent::Chatbot::UserDefinedActionHandler
     {
     public:

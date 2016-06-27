@@ -42,7 +42,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <v8.h>
 #include <iostream>
 #include "SerializableChatbot.hpp"
-#include "Chatbot.hpp"
 #include "intent/chatbot/ChatbotFactory.hpp"
 #include "intent/utils/Logger.hpp"
 
@@ -186,7 +185,7 @@ namespace intentjs
         LOG_TRACE() << "Extracting variables from v8 map : \n";
         Local<Array> property_names = object->GetOwnPropertyNames();
 
-        for (int i = 0; i < property_names->Length(); ++i) {
+        for (unsigned int i = 0; i < property_names->Length(); ++i) {
             Local<Value> v8key = property_names->Get(i);
             Local<Value> v8value = object->Get(v8key);
             LOG_TRACE() << "value:key" << i
@@ -246,20 +245,19 @@ namespace intentjs
         intent::Chatbot::VariablesMap userVariables;
         extractMapFromObject(v8userVariables, userVariables);
 
+        std::vector<std::string> replies = obj->m_chatbot->prepareReplies(actionId, intentVariables, userVariables);
 
-        Local <Function> replyCallback = Local<Function>::Cast(args[3]);
-
-        std::vector<std::string> replies;
-        obj->m_chatbot->prepareReplies(actionId, intentVariables, userVariables, replies);
         LOG_TRACE() << "Chatbot::prepareReplies " << "\n";
-        std::for_each(replies.begin(), replies.end(), [&isolate, &replyCallback](const std::string& reply) {
-            int argc = 1;
-            LOG_TRACE() << "Response : " << reply;
-            Local <Value> argv[argc] = {
-                    v8::String::NewFromUtf8(isolate, reply.c_str())
-            };
-            replyCallback->Call(Null(isolate), argc, argv);
-        });
+        Local<Array> repliesArray = Array::New(isolate);
+        unsigned int i=0;
+
+        for(const std::string &reply: replies)
+        {
+            Local <Value> v8reply = v8::String::NewFromUtf8(isolate, reply.c_str());
+            repliesArray->Set(i++, v8reply);
+        }
+
+        args.GetReturnValue().Set(repliesArray);
     }
 
     void SerializableChatbot::GetInitialState(const FunctionCallbackInfo <Value> &args)
@@ -337,7 +335,7 @@ namespace intentjs
     {
         LOG_TRACE() << "collecting interpreter messages" << "\n";
         Local<Array> interpretMessages = Array::New(isolate, (int)feedback.size());
-        for (int i = 0; i<feedback.size(); ++i)
+        for (unsigned int i = 0; i<feedback.size(); ++i)
         {
             Local<Object> toInsert = Object::New(isolate);
             toInsert->Set(String::NewFromUtf8(isolate, "line"), Number::New(isolate, feedback[i].line.position));

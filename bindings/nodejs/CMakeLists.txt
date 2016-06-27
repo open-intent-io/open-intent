@@ -4,7 +4,6 @@ ADD_CUSTOM_TARGET(nodejs-binding-build ALL
         DEPENDS
             src/main.cpp
             src/SerialiazableChatbot.cpp
-            include/Chatbot.hpp
             include/SerializableChatbot.hpp
         DEPENDS intent-static
 

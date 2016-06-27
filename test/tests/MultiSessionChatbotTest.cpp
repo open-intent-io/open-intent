@@ -85,39 +85,29 @@ namespace intent
         {
             typedef MultiSessionChatbot<std::string> MyChatbot;
 
-            NiceMock< MultiSessionReplyHandlerMock > *replyHandlerMock =
-                    new NiceMock< MultiSessionReplyHandlerMock >();
-            MyChatbot::ReplyActionHandler::SharedPtr replyHandler(replyHandlerMock);
-
-
             MyChatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(
                     new NiceMock<MultiSessionUserDefinedCommandMock >());
 
-            EXPECT_CALL(*replyHandlerMock, reply("sess1", "Que puis-je vous offrir ?"));
-            EXPECT_CALL(*replyHandlerMock, reply("sess2", "Que puis-je vous offrir ?"));
-
-            MyChatbot chatbot(m_chatbotModel, replyHandler, userDefinedActionHandler);
+            MyChatbot chatbot(m_chatbotModel, userDefinedActionHandler);
 
             chatbot.addSession("sess1");
             chatbot.addSession("sess2");
 
-            chatbot.treatMessage("sess1", "Bob!");
-            chatbot.treatMessage("sess2", "Bob!");
+            std::vector<std::string> reply1 = chatbot.treatMessage("sess1", "Bob!");
+            std::vector<std::string> reply2 = chatbot.treatMessage("sess2", "Bob!");
+
+            EXPECT_THAT(reply1, ElementsAre("Que puis-je vous offrir ?"));
+            EXPECT_THAT(reply2, ElementsAre("Que puis-je vous offrir ?"));
         }
 
         TEST_F(OrderMultiSessionChatbotTest, test_session_creation_and_deletion)
         {
             typedef MultiSessionChatbot<std::string> MyChatbot;
 
-            NiceMock< MultiSessionReplyHandlerMock > *replyHandlerMock =
-                    new NiceMock< MultiSessionReplyHandlerMock >();
-            MyChatbot::ReplyActionHandler::SharedPtr replyHandler(replyHandlerMock);
-
-
             MyChatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(
                     new NiceMock<MultiSessionUserDefinedCommandMock >());
 
-            MyChatbot chatbot(m_chatbotModel, replyHandler, userDefinedActionHandler);
+            MyChatbot chatbot(m_chatbotModel, userDefinedActionHandler);
             EXPECT_EQ_SIGNED(0, chatbot.sessionCount());
 
             chatbot.addSession("sess1");

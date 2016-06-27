@@ -51,8 +51,6 @@ template <typename SessionIdType>
 typename MultiSessionChatbot<SessionIdType>::SharedPtr
 ChatbotFactory::createMultiSessionChatbotFromJsonModel(
     std::istream& model,
-    typename MultiSessionChatbot<SessionIdType>::ReplyActionHandler::SharedPtr
-        replyActionHandler,
     typename MultiSessionChatbot<SessionIdType>::UserDefinedActionHandler::
         SharedPtr userDefinedActionHandler) {
   typename intent::MultiSessionChatbot<SessionIdType>::SharedPtr chatbot;
@@ -60,7 +58,7 @@ ChatbotFactory::createMultiSessionChatbotFromJsonModel(
   ChatbotModel chatbotModel;
   if (ChatbotFactory::loadFromJsonModel(model, chatbotModel)) {
     chatbot.reset(new intent::MultiSessionChatbot<SessionIdType>(
-        chatbotModel, replyActionHandler, userDefinedActionHandler));
+        chatbotModel, userDefinedActionHandler));
   }
   return chatbot;
 }
@@ -69,8 +67,6 @@ template <typename SessionIdType>
 typename MultiSessionChatbot<SessionIdType>::SharedPtr
 ChatbotFactory::createMultiSessionChatbotFromOIML(
     std::istream& dictionaryModel, std::istream& interpreterModel,
-    typename MultiSessionChatbot<SessionIdType>::ReplyActionHandler::SharedPtr
-        replyActionHandler,
     typename MultiSessionChatbot<SessionIdType>::UserDefinedActionHandler::
         SharedPtr userDefinedActionHandler) {
   typename intent::MultiSessionChatbot<SessionIdType>::SharedPtr chatbot;
@@ -80,7 +76,7 @@ ChatbotFactory::createMultiSessionChatbotFromOIML(
   if (ChatbotFactory::loadFromOIML(dictionaryModel, interpreterModel,
                                    chatbotModel, feedback)) {
     chatbot.reset(new intent::MultiSessionChatbot<SessionIdType>(
-        chatbotModel, replyActionHandler, userDefinedActionHandler));
+        chatbotModel, userDefinedActionHandler));
   }
   return chatbot;
 }

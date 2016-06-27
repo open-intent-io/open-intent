@@ -52,6 +52,11 @@ ADD_CUSTOM_COMMAND(TARGET run-all-tests POST_BUILD
 )
 
 ADD_CUSTOM_COMMAND(TARGET run-all-tests POST_BUILD
+        COMMAND ${CMAKE_BINARY_DIR}/examples/BeerBar/test/beerbar-test
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/examples/BeerBar/test
+        )
+
+ADD_CUSTOM_COMMAND(TARGET run-all-tests POST_BUILD
         COMMAND ${CMAKE_BINARY_DIR}/test/tests/intent-test
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/tests/
 )

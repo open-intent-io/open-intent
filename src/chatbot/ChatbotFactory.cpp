@@ -75,13 +75,12 @@ Chatbot::SharedPtr ChatbotFactory::createChatbotFromOIML(
 SingleSessionChatbot::SharedPtr
 ChatbotFactory::createSingleSessionChatbotFromJsonModel(
     std::istream& model,
-    Chatbot::ReplyActionHandler::SharedPtr replyActionHandler,
     Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler) {
   ChatbotModel chatbotModel;
   intent::SingleSessionChatbot::SharedPtr chatbot;
   if (ChatbotFactory::loadFromJsonModel(model, chatbotModel)) {
     chatbot.reset(new intent::SingleSessionChatbot(
-        chatbotModel, replyActionHandler, userDefinedActionHandler));
+        chatbotModel, userDefinedActionHandler));
   }
   return chatbot;
 }
@@ -89,7 +88,6 @@ ChatbotFactory::createSingleSessionChatbotFromJsonModel(
 SingleSessionChatbot::SharedPtr
 ChatbotFactory::createSingleSessionChatbotFromOIML(
     std::istream& dictionaryModel, std::istream& interpreterModel,
-    Chatbot::ReplyActionHandler::SharedPtr replyActionHandler,
     Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler) {
   ChatbotModel chatbotModel;
   intent::SingleSessionChatbot::SharedPtr chatbot;
@@ -97,7 +95,7 @@ ChatbotFactory::createSingleSessionChatbotFromOIML(
   if (ChatbotFactory::loadFromOIML(dictionaryModel, interpreterModel,
                                    chatbotModel, feedback)) {
     chatbot.reset(new intent::SingleSessionChatbot(
-        chatbotModel, replyActionHandler, userDefinedActionHandler));
+        chatbotModel, userDefinedActionHandler));
   }
   return chatbot;
 }

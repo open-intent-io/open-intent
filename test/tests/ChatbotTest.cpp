@@ -79,17 +79,14 @@ namespace intent
 
         TEST_F(ChatbotTest, do_not_match_any_intent)
         {
-            ReplyHandlerMock *replyHandlerMock = new NiceMock<ReplyHandlerMock>();
-            Chatbot::ReplyActionHandler::SharedPtr replyHandler(replyHandlerMock);
-
             Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(
                     new NiceMock<UserDefinedCommandMock>());
 
-            EXPECT_CALL(*replyHandlerMock, reply("Je ne comprends pas.")).Times(1);
+            SingleSessionChatbot chatbot(m_chatbotModel, userDefinedActionHandler);
 
-            SingleSessionChatbot chatbot(m_chatbotModel, replyHandler, userDefinedActionHandler);
+            std::vector<std::string> reply1 = chatbot.treatMessage("Paulo");
 
-            chatbot.treatMessage("Paulo");
+            EXPECT_THAT(reply1, ElementsAre("Je ne comprends pas."));
         }
 
 

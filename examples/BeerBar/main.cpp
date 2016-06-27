@@ -8,6 +8,14 @@ public:
         std::cout << output;
         return *this;
     }
+
+    StdOutputWriter& operator<<(const std::vector<std::string> &replies)
+    {
+        for(const std::string &reply: replies) {
+            std::cout << reply << "\n";
+        }
+        return *this;
+    }
 };
 
 class StdInputReader : public InputReader

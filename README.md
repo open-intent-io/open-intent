@@ -1,4 +1,4 @@
-open-intent
+open-intent [![Build Status](https://travis-ci.org/open-intent-io/open-intent.svg?branch=master)](https://travis-ci.org/open-intent-io/open-intent)
 ====================
 
 Authors:
@@ -35,9 +35,9 @@ You can also use docker to build the project.
 
 To build, just type:
 
-   docker build open-intent-build .
+    docker build open-intent-build .
 
-   docker run open-intent-build make -j 4
+    docker run open-intent-build make -j 4
 
 That's it!
 

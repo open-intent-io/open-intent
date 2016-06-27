@@ -241,48 +241,42 @@ void pushVariables(const std::string &action, const Chatbot::VariablesMap &immut
 
 TEST_F(InterpreterWithChatbotTest, test_full_scenario)
 {
-    ReplyHandlerMock *replyHandlerMock = new NiceMock<ReplyHandlerMock>();
-    Chatbot::ReplyActionHandler::SharedPtr replyHandler(replyHandlerMock);
-
     UserDefinedCommandMock *userDefinedCommandMock = new NiceMock<UserDefinedCommandMock>();
     Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(userDefinedCommandMock);
 
-    SingleSessionChatbot chatbot(m_chatbotModel, replyHandler, userDefinedActionHandler);
+    SingleSessionChatbot chatbot(m_chatbotModel, userDefinedActionHandler);
 
     ON_CALL(*userDefinedCommandMock, execute(_, _, _)).WillByDefault(Invoke(pushVariables));
 
-    EXPECT_CALL(*replyHandlerMock, reply("Que puis-je vous offrir ?"));
-    EXPECT_CALL(*replyHandlerMock,
-                reply("Vous-voulez quelque chose d'autre ?"));
-    EXPECT_CALL(*replyHandlerMock,
-                reply("Veuillez récupérer vos consommations au bar. Vous devrez payer 10.5€."));
+    std::vector<std::string> reply1 = chatbot.treatMessage("Bob!");
+    std::vector<std::string> reply2 = chatbot.treatMessage("Je veux un Coca et deux Hein");
+    std::vector<std::string> reply3 = chatbot.treatMessage("Rien");
 
-    chatbot.treatMessage("Bob!");
-    chatbot.treatMessage("Je veux un Coca et deux Hein");
-    chatbot.treatMessage("Rien");
+    EXPECT_THAT(reply1, ElementsAre("Que puis-je vous offrir ?"));
+    EXPECT_THAT(reply2,
+                ElementsAre("Vous-voulez quelque chose d'autre ?"));
+    EXPECT_THAT(reply3,
+                ElementsAre("Veuillez récupérer vos consommations au bar. Vous devrez payer 10.5€."));
 }
 
 
 TEST_F(InterpreterWithChatbotTest, test_fallback_reply_on_edges)
 {
-    ReplyHandlerMock *replyHandlerMock = new NiceMock<ReplyHandlerMock>();
-    Chatbot::ReplyActionHandler::SharedPtr replyHandler(replyHandlerMock);
-
     UserDefinedCommandMock *userDefinedCommandMock = new NiceMock<UserDefinedCommandMock>();
     Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(userDefinedCommandMock);
 
-    SingleSessionChatbot chatbot(m_chatbotModel, replyHandler, userDefinedActionHandler);
+    SingleSessionChatbot chatbot(m_chatbotModel, userDefinedActionHandler);
 
     ON_CALL(*userDefinedCommandMock, execute(_, _, _)).WillByDefault(Invoke(pushVariables));
 
-    EXPECT_CALL(*replyHandlerMock, reply("Je n'ai pas compris votre demande"));
-    EXPECT_CALL(*replyHandlerMock, reply("Que puis-je vous offrir ?"));
-    EXPECT_CALL(*replyHandlerMock,
-                reply("Soyez le plus précis possible"));
+    std::vector<std::string> reply1 = chatbot.treatMessage("Je veux un Coca et deux Hein");
+    std::vector<std::string> reply2 = chatbot.treatMessage("Bob!");
+    std::vector<std::string> reply3 = chatbot.treatMessage("Blabla");
 
-    chatbot.treatMessage("Je veux un Coca et deux Hein");
-    chatbot.treatMessage("Bob!");
-    chatbot.treatMessage("Blabla");
+    EXPECT_THAT(reply1, ElementsAre("Je n'ai pas compris votre demande"));
+    EXPECT_THAT(reply2, ElementsAre("Que puis-je vous offrir ?"));
+    EXPECT_THAT(reply3,
+                ElementsAre("Soyez le plus précis possible"));
 }
 
 class InterpreterFeedbackTest : public ::testing::Test
