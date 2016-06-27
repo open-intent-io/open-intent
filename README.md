@@ -31,6 +31,16 @@ To build, type:
     make
 
 
+You can also use docker to build the project.
+
+To build, just type:
+
+   docker build open-intent-build .
+
+   docker run open-intent-build make -j 4
+
+That's it!
+
 License
 ---------------------
 
