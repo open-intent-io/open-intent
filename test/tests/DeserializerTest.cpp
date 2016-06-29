@@ -107,6 +107,28 @@ TEST(IntentDictionaryDeserializerTest, test_simple_deserialization_from_json_str
     test_simple_deserialization(*intentServiceModel.dictionaryModel, *intentServiceModel.intentModel);
 }
 
+TEST(IntentDictionaryDeserializerTest, test_simple_deserialization_from_invalid_istream)
+{
+    const intent::test::ResourceManager &resourceManager = intent::test::gTestContext->getResourceManager();
+
+    std::string jsonContent = resourceManager.getResource(test::ResourceManager::ResourceId::
+                                                          INTENT_DICTIONARY_DESERIALIZATION_INVALID_JSON_EXAMPLE);
+
+    bool exceptionCatched = false;
+    try {
+        std::stringstream ss;
+        ss << jsonContent;
+
+        Deserializer deserializer;
+        IntentServiceModel intentServiceModel = deserializer.deserialize<IntentServiceModel>(ss);
+    }
+    catch (...)
+    {
+        exceptionCatched = true;
+    }
+    ASSERT_TRUE(exceptionCatched);
+}
+
 TEST(IntentDictionaryDeserializerTest, test_simple_deserialization_from_istream)
 {
     const intent::test::ResourceManager &resourceManager = intent::test::gTestContext->getResourceManager();
@@ -122,7 +144,6 @@ TEST(IntentDictionaryDeserializerTest, test_simple_deserialization_from_istream)
 
     test_simple_deserialization(*intentServiceModel.dictionaryModel, *intentServiceModel.intentModel);
 }
-
 
 TEST(IntentDictionaryDeserializerTest, test_intent_story_deserialization_from_istream)
 {

@@ -1,0 +1,15 @@
+{
+  "version": 1
+  "entities": {
+    "@beverage": {
+      "Coca-Cola": [
+        "Coca",
+        "Cola",
+        "Coke"
+      ],
+      "Kronenbourg": ["Kro"],
+      "Heineken": ["Hein"]
+    }
+  }
+}
+

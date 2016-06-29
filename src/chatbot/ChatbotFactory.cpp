@@ -47,6 +47,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "intent/interpreter/Interpreter.hpp"
 #include "intent/utils/Deserializer.hpp"
 
+#include "intent/utils/Logger.hpp"
+
 #include <fstream>
 
 namespace intent {
@@ -105,8 +107,16 @@ bool ChatbotFactory::loadFromJsonModel(std::istream& model,
   bool loaded = false;
   if (model.good()) {
     intent::Deserializer deserializer;
-    chatbotModel = deserializer.deserialize<ChatbotModel>(model);
-    loaded = true;
+    try
+    {
+        chatbotModel = deserializer.deserialize<ChatbotModel>(model);
+        loaded = true;
+    }
+    catch (...)
+    {
+        LOG_ERROR() << "[ChatbotFactory::loadFromJsonModel] chatbotModel is a flawed json";
+        loaded = false;
+    }
   }
 
   return loaded;
@@ -119,20 +129,25 @@ bool ChatbotFactory::loadFromOIML(std::istream& dictionaryModel,
   bool loaded = false;
   if (dictionaryModel.good() && interpreterModel.good()) {
     intent::Deserializer deserializer;
-    chatbotModel.intentStoryServiceModel.intentServiceModel.dictionaryModel =
-        deserializer.deserialize<DictionaryModel::SharedPtr>(dictionaryModel);
+    try
+    {
+      chatbotModel.intentStoryServiceModel.intentServiceModel.dictionaryModel =
+          deserializer.deserialize<DictionaryModel::SharedPtr>(dictionaryModel);
+      std::istreambuf_iterator<char> eos;
+      std::string content(std::istreambuf_iterator<char>(interpreterModel), eos);
 
-    std::istreambuf_iterator<char> eos;
-    std::string content(std::istreambuf_iterator<char>(interpreterModel), eos);
+      chatbotModel = Interpreter::build(
+          content, chatbotModel.intentStoryServiceModel.intentServiceModel.dictionaryModel, feedback);
 
-    chatbotModel = Interpreter::build(
-        content,
-        chatbotModel.intentStoryServiceModel.intentServiceModel.dictionaryModel,
-        feedback);
-
-    loaded = true;
+      loaded = true;
+    }
+    catch (...)
+    {
+      LOG_ERROR() << "[ChatbotFactory::loadFromOIML] dictionaryModel is a flawed json";
+      loaded = false;
+    }
   }
-
   return loaded;
 }
+
 }

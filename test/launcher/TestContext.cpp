@@ -38,6 +38,8 @@ namespace intent
         {
             m_resourceManager.registerFile(ResourceManager::ResourceId::INTENT_DICTIONARY_DESERIALIZATION_JSON_EXAMPLE,
                                            "intent_dictionary_deserialization_test.json");
+            m_resourceManager.registerFile(ResourceManager::ResourceId::INTENT_DICTIONARY_DESERIALIZATION_INVALID_JSON_EXAMPLE,
+                                           "intent_dictionary_deserialization_invalid_test.json");
             m_resourceManager.registerFile(ResourceManager::ResourceId::ORDER_BEVERAGE_INTENT_JSON,
                                            "order_beverage_intent.json");
             m_resourceManager.registerFile(ResourceManager::ResourceId::CHATBOT_MODE_JSON,

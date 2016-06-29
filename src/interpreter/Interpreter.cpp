@@ -44,6 +44,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "intent/interpreter/SentenceToIntentTranslator.hpp"
 #include "intent/interpreter/ReplyTemplateInterpreter.hpp"
 
+#include "intent/utils/Logger.hpp"
+
 #include <boost/algorithm/string.hpp>
 #include <cassert>
 
