@@ -18,12 +18,13 @@ SET(RES_FILES
         res/chatbot_model.json
         res/template_replies.json
         res/intent_dictionary_deserialization_test.json
+        res/intent_dictionary_deserialization_invalid_test.json
         res/order_beverage_intent.json
         res/queries_model.json
         res/interpreter_model.txt
         res/chatbot_model_without_intent_story.json)
 
-# Copy ressource files
+# Copy ressource files
 include(Custom)
 COPY_RES_FILES(RES_FILES ${RES_FILES} DEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests)
 
