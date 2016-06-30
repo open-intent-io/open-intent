@@ -53,7 +53,8 @@ SingleSessionChatbot::SingleSessionChatbot(
       m_intentStoryService.getIntentStoryModel().rootStateId;
 }
 
-std::vector<std::string> SingleSessionChatbot::treatMessage(const std::string& message) {
+std::vector<std::string> SingleSessionChatbot::treatMessage(
+    const std::string& message) {
   std::vector<std::string> replies;
   Chatbot::VariablesMap intentVariables;
   Chatbot::VariablesMap userDefinedVariables;

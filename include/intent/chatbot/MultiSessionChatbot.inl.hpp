@@ -65,7 +65,6 @@ std::vector<std::string> MultiSessionChatbot<SessionIdType>::treatMessage(
     std::string currentStateId = it->second.currentStateId;
     Chatbot::treatMessage(message, it->second, actionHandler, intentVariables,
                           userDefinedVariables);
-
   }
   return replies;
 }

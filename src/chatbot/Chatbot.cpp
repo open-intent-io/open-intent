@@ -109,9 +109,9 @@ std::string replaceTemplateVariables(
   return message;
 }
 
-std::vector<std::string> Chatbot::prepareReplies(const std::string& actionId,
-                             const Chatbot::VariablesMap& intentVariables,
-                             Chatbot::VariablesMap& userDefinedVariables) {
+std::vector<std::string> Chatbot::prepareReplies(
+    const std::string& actionId, const Chatbot::VariablesMap& intentVariables,
+    Chatbot::VariablesMap& userDefinedVariables) {
   LOG_INFO() << "Chatbot::prepareReplies starting";
 
   LOG_INFO() << "Chatbot::prepareReplies looking for reply : " << actionId;

@@ -109,12 +109,13 @@ class SingleSessionChatbot : protected Chatbot {
                     Chatbot::VariablesMap& userDefinedVariables) {
       (*m_userDefinedActionHandler)(action, intentVariables,
                                     userDefinedVariables);
-        m_replies = m_chatbot.prepareReplies(action, intentVariables, userDefinedVariables);
+      m_replies = m_chatbot.prepareReplies(action, intentVariables,
+                                           userDefinedVariables);
     }
 
-  private:
+   private:
     typename Chatbot::UserDefinedActionHandler::SharedPtr
-              m_userDefinedActionHandler;
+        m_userDefinedActionHandler;
     SingleSessionChatbot& m_chatbot;
     std::vector<std::string>& m_replies;
   };

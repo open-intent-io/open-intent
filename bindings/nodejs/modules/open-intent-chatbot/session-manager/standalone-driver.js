@@ -37,22 +37,30 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+var Q = require('q');
+
 module.exports = function() {
 
     this._sessions = {};
 
-    this.save = function(sessionId, context, fn) {
+    this.save = function(sessionId, context) {
+        var deferred = Q.defer();
+
         this._sessions[sessionId] = context;
-        if(fn) fn(undefined);
+        deferred.resolve();
+        return deferred.promise;
     }
 
-    this.load = function(sessionId, fn) {
-        if(fn && sessionId in this._sessions) {
-            fn(undefined, this._sessions[sessionId]);
+    this.load = function(sessionId) {
+        var deferred = Q.defer();
+
+        if(sessionId in this._sessions) {
+            deferred.resolve(this._sessions[sessionId]);
         }
         else {
-            if(fn) fn('No session ' + sessionId + ' stored');
+            deferred.reject('No session ' + sessionId + ' stored');
         }
+        return deferred.promise;
     }
 
     return this;

@@ -65,7 +65,9 @@ void Logger::initialize(SeverityLevel::type severityLevel) {
       boostSeverityLevel = boost::log::trivial::fatal;
       break;
   }
+  Logger::getInstance();
 
+  boost::log::core::get()->reset_filter();
   boost::log::core::get()->set_filter(boost::log::trivial::severity >=
                                       boostSeverityLevel);
 }

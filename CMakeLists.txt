@@ -44,7 +44,7 @@ if(DOXYGEN_FOUND)
 endif(DOXYGEN_FOUND)
 
 ADD_CUSTOM_TARGET(run-all-tests
-        DEPENDS domotic-test intent-test)
+        DEPENDS domotic-test intent-test beerbar-test run-nodejs-tests)
 
 ADD_CUSTOM_COMMAND(TARGET run-all-tests POST_BUILD
         COMMAND ${CMAKE_BINARY_DIR}/examples/Domotic/test/domotic-test

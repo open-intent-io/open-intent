@@ -79,8 +79,8 @@ ChatbotFactory::createSingleSessionChatbotFromJsonModel(
   ChatbotModel chatbotModel;
   intent::SingleSessionChatbot::SharedPtr chatbot;
   if (ChatbotFactory::loadFromJsonModel(model, chatbotModel)) {
-    chatbot.reset(new intent::SingleSessionChatbot(
-        chatbotModel, userDefinedActionHandler));
+    chatbot.reset(new intent::SingleSessionChatbot(chatbotModel,
+                                                   userDefinedActionHandler));
   }
   return chatbot;
 }
@@ -94,8 +94,8 @@ ChatbotFactory::createSingleSessionChatbotFromOIML(
   InterpreterFeedback feedback;
   if (ChatbotFactory::loadFromOIML(dictionaryModel, interpreterModel,
                                    chatbotModel, feedback)) {
-    chatbot.reset(new intent::SingleSessionChatbot(
-        chatbotModel, userDefinedActionHandler));
+    chatbot.reset(new intent::SingleSessionChatbot(chatbotModel,
+                                                   userDefinedActionHandler));
   }
   return chatbot;
 }

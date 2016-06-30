@@ -87,7 +87,8 @@ class MultiSessionChatbot : protected Chatbot {
    * \param message   The user message.
    * \return The replies built by the chatbot
    */
-  std::vector<std::string> treatMessage(const SessionIdType& sessionId, const std::string& message);
+  std::vector<std::string> treatMessage(const SessionIdType& sessionId,
+                                        const std::string& message);
 
   /**
    * \brief Register a session in the chatbot.
@@ -146,7 +147,8 @@ class MultiSessionChatbot : protected Chatbot {
                     Chatbot::VariablesMap& userDefinedVariables) {
       (*m_userDefinedActionHandler)(m_sessionId, action, intentVariables,
                                     userDefinedVariables);
-        m_replies = m_chatbot.prepareReplies(action, intentVariables, userDefinedVariables);
+      m_replies = m_chatbot.prepareReplies(action, intentVariables,
+                                           userDefinedVariables);
     }
 
    private:

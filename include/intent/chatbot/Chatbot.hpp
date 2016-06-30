@@ -146,9 +146,9 @@ class Chatbot {
    * \brief prepares replies and executes user reply handler
    */
 
-  std::vector<std::string> prepareReplies(const std::string& actionId,
-                      const Chatbot::VariablesMap& intentVariables,
-                      Chatbot::VariablesMap& userDefinedVariables);
+  std::vector<std::string> prepareReplies(
+      const std::string& actionId, const Chatbot::VariablesMap& intentVariables,
+      Chatbot::VariablesMap& userDefinedVariables);
 
   /**
    * \brief Returns the initial state of the model

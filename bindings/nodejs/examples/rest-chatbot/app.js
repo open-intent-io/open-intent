@@ -38,8 +38,8 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var OpenIntentChatbot = require('open-intent-chatbot');
-var vmUserDefinedActionDriver = require('open-intent-chatbot/user-defined-actions/vm-driver');
-var standaloneSessionManager = require('open-intent-chatbot/session-manager/standalone-driver')();
+var VMUserDefinedActionDriver = require('open-intent-chatbot/user-defined-actions/vm-driver');
+var StandaloneSessionManager = require('open-intent-chatbot/session-manager/standalone-driver')();
 
 var rest_client = require('./rest-client');
 var cors = require('cors');
@@ -56,10 +56,15 @@ var model = fs.readFileSync(file);
 
 var userCommands = require('./userCommands');
 
-var userDefinedActionDriver = vmUserDefinedActionDriver(userCommands);
-var chatbot = OpenIntentChatbot.fromJsonModel(model, userDefinedActionDriver, standaloneSessionManager);
+var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
+var sessionManager = new(StandaloneSessionManager);
+var chatbot = OpenIntentChatbot.fromJsonModel(model, sessionManager, userDefinedActionDriver);
+
+var SERVICE_PORT = process.env.SERVICE_PORT || 3000;
 
 app.post('/talk', function(req, res) {
+    var sessionId = req.body.sessionId;
+    var message = req.body.message;
     chatbot.talk(req, res);
 });
 
@@ -71,9 +76,8 @@ app.get('/getState', function(req, res) {
     chatbot.getState(req, res);
 });
 
-app.listen('3001');
+app.listen(SERVICE_PORT);
 
 // Test with a REST client that sends requests with user input on stdin
-var host = 'http://127.0.0.1:3001';
-console.log("Chatbot initial state is ", chatbot.getInitialState());
-rest_client(host, chatbot.getInitialState());
+var host = 'http://127.0.0.1:' + SERVICE_PORT;
+rest_client(host);

@@ -42,13 +42,8 @@ var readline = require('readline');
 
 var SESSION_ID = '12345';
 
-module.exports = function(host, initialState, terminalState) {
+module.exports = function(host) {
     var rl = readline.createInterface(process.stdin, process.stdout);
-
-    requestify.post(host + '/setState', {
-        sessionId: SESSION_ID,
-        state: initialState
-    });
 
 
     rl.setPrompt('> ');
