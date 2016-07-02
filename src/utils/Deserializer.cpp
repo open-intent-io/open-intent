@@ -278,8 +278,13 @@ DictionaryModel::SharedPtr Deserializer::deserialize(
     std::istream& is, Type2Type<DictionaryModel::SharedPtr> type) {
   std::istreambuf_iterator<char> eos;
   std::string s(std::istreambuf_iterator<char>(is), eos);
-  nlohmann::json document = nlohmann::json::parse(s);
-
+  nlohmann::json document;
+  try {
+    document = nlohmann::json::parse(s);
+  }
+  catch (...) {
+    throw DeserializerException("Error while parsing JSON");
+  }
   return deserialize(document, type);
 }
 
@@ -300,7 +305,13 @@ IntentServiceModel Deserializer::deserialize(
     std::istream& is, Type2Type<IntentServiceModel> type) {
   std::istreambuf_iterator<char> eos;
   std::string s(std::istreambuf_iterator<char>(is), eos);
-  nlohmann::json document = nlohmann::json::parse(s);
+
+  nlohmann::json document;
+  try {
+    document = nlohmann::json::parse(s);
+  } catch (...) {
+    throw DeserializerException("Error while parsing JSON");
+  }
 
   return deserialize(document, type);
 }
@@ -326,7 +337,13 @@ IntentStoryServiceModel Deserializer::deserialize(
     std::istream& is, Type2Type<IntentStoryServiceModel> type) {
   std::istreambuf_iterator<char> eos;
   std::string s(std::istreambuf_iterator<char>(is), eos);
-  nlohmann::json document = nlohmann::json::parse(s);
+
+  nlohmann::json document;
+  try {
+    document = nlohmann::json::parse(s);
+  } catch (...) {
+    throw DeserializerException("Error while parsing JSON");
+  }
 
   return deserialize(document, type);
 }
@@ -424,7 +441,13 @@ ChatbotModel Deserializer::deserialize(std::istream& is,
                                        Type2Type<ChatbotModel> type) {
   std::istreambuf_iterator<char> eos;
   std::string s(std::istreambuf_iterator<char>(is), eos);
-  nlohmann::json document = nlohmann::json::parse(s);
+
+  nlohmann::json document;
+  try {
+    document = nlohmann::json::parse(s);
+  } catch (...) {
+    throw DeserializerException("Error while parsing JSON");
+  }
 
   return deserialize(document, type);
 }

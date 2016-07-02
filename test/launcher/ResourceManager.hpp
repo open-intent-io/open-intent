@@ -24,6 +24,7 @@ namespace intent
                 enum Id
                 {
                     INTENT_DICTIONARY_DESERIALIZATION_JSON_EXAMPLE,
+                    INTENT_DICTIONARY_DESERIALIZATION_INVALID_JSON_EXAMPLE,
                     ORDER_BEVERAGE_INTENT_JSON,
                     CHATBOT_MODE_JSON,
                     TEMPLATE_REPLIES_JSON,
