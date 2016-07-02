@@ -14,7 +14,7 @@ typedef std::map<std::string, int> Cart;
 
 static Menu menu;
 
-class StdOutReply : public intent::Chatbot::ReplyActionHandler
+class StdOutReply
 {
 public:
     void operator()(const std::string &message)
@@ -210,13 +210,11 @@ int main(int argc, char **argv)
     std::cout << "#####   Query bar   #####" << std::endl;
     std::cout << "##########################" << std::endl;
 
-    intent::Chatbot::ReplyActionHandler::SharedPtr replyActionHandler(new StdOutReply());
     intent::Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(new ActionHandler());
 
     std::ifstream modelFile("chatbot.json");
     intent::SingleSessionChatbot::SharedPtr chatbot =
-            ChatbotFactory::createSingleSessionChatbotFromJsonModel(modelFile, replyActionHandler,
-                                                                    userDefinedActionHandler);
+            ChatbotFactory::createSingleSessionChatbotFromJsonModel(modelFile, userDefinedActionHandler);
 
     std::string inputLine;
 

@@ -13,23 +13,6 @@ typedef std::map<std::string, int> Cart;
 
 static Menu menu;
 
-class StdOutReply : public intent::Chatbot::ReplyActionHandler
-{
-public:
-    StdOutReply(OutputWriter &outputWriter)
-            : m_outputWriter(outputWriter)
-    {
-    }
-
-    void operator()(const std::string &message)
-    {
-        m_outputWriter << (message + "\n");
-    }
-
-private:
-    OutputWriter &m_outputWriter;
-};
-
 class ActionHandler : public intent::Chatbot::UserDefinedActionHandler
 {
 public:
@@ -120,13 +103,11 @@ void BeerBar::run(InputReader &istream, OutputWriter &ostream)
     ostream << "#######  Beer Bar  #######\n";
     ostream << "##########################\n";
 
-    intent::Chatbot::ReplyActionHandler::SharedPtr replyActionHandler(new StdOutReply(ostream));
     intent::Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(new ActionHandler());
 
     std::ifstream modelFile("chatbot.json");
     intent::SingleSessionChatbot::SharedPtr chatbot =
-            ChatbotFactory::createSingleSessionChatbotFromJsonModel(modelFile, replyActionHandler,
-                                                                    userDefinedActionHandler);
+            ChatbotFactory::createSingleSessionChatbotFromJsonModel(modelFile, userDefinedActionHandler);
     std::string inputLine;
     ostream << "Say \"Hello Bob!\"\n"
                 "Type 'q' then  'Enter' to quit.\n";
@@ -137,7 +118,7 @@ void BeerBar::run(InputReader &istream, OutputWriter &ostream)
 
         if(inputLine != "q")
         {
-            chatbot->treatMessage(inputLine);
+            ostream << chatbot->treatMessage(inputLine);
         }
     }
     ostream << "You left the conversation.\n";

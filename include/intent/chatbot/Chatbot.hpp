@@ -82,18 +82,6 @@ class Chatbot {
   };
 
   /**
-   * \brief ReplyActionHandler is the interface the user should implement to
-   * handle replies.
-   */
-  class ReplyActionHandler {
-   public:
-    virtual ~ReplyActionHandler() {}
-    virtual void operator()(const std::string& message) = 0;
-
-    typedef std::shared_ptr<ReplyActionHandler> SharedPtr;
-  };
-
-  /**
    * \brief UserDefinedActionHandler is the interface the user should implement
    * to handle user defined actions.
    */
@@ -120,7 +108,6 @@ class Chatbot {
 
  private:
   friend class Interpreter;
-  friend class ReplyHandlerFactory;
 
  public:
   /**
@@ -159,10 +146,9 @@ class Chatbot {
    * \brief prepares replies and executes user reply handler
    */
 
-  void prepareReplies(const std::string& actionId,
-                      const Chatbot::VariablesMap& intentVariables,
-                      Chatbot::VariablesMap& userDefinedVariables,
-                      std::vector<std::string>& replies);
+  std::vector<std::string> prepareReplies(
+      const std::string& actionId, const Chatbot::VariablesMap& intentVariables,
+      Chatbot::VariablesMap& userDefinedVariables);
 
   /**
    * \brief Returns the initial state of the model

@@ -38,41 +38,45 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var vm = require('vm');
+var Q = require('q');
 
-function runUserCommandsInVM(userCommands, actionId, sessionId, intentVariables, next) {
+function runUserCommandsInVM(userCommands, actionId, sessionId, intentVariables) {
+    var deferred = Q.defer();
+
     var context = {
-        'actionId': actionId,
         'sessionId': sessionId,
         'intentVariables': intentVariables,
+        'next': deferred.resolve,
         'userCommands': userCommands,
-        'next': next
+        'actionId': actionId,
+        'requireFromString': require('require-from-string')
     }
 
     var sandbox = vm.createContext(context);
     vm.createContext(sandbox);
-
-    var script = ' \
-        if(actionId in userCommands) { \
-            userCommands[actionId](intentVariables, sessionId, function(userDefinedVariables) { \
-                next(userDefinedVariables); \
-            }); \
-        } \
-        else {\
-            next(); \
-        }';
-
-    vm.runInContext(script, sandbox, { 'timeout': 5000 });
+    vm.runInContext(" \
+var userCommandsDict = requireFromString(userCommands); \
+if(actionId in userCommandsDict) { \
+    userCommandsDict[actionId](intentVariables, sessionId, next); \
+} else { \
+    next() \
+} \
+", sandbox, { 'timeout': 2000 });
+    return deferred.promise;
 }
 
 
 module.exports = function(userCommands) {
 
-    if (!(userCommands !== null && userCommands.constructor.name === 'Object')) {
-        throw 'user commands must be an object with action id as keys and functions as values.';
+    if (!(userCommands !== null && typeof userCommands == 'string')) {
+        throw new Error('Bad user commands (must be a string).');
     }
 
-    return function(actionId, sessionId, intentVariables, next) {
-        var uc = userCommands;
-        runUserCommandsInVM(uc, actionId, sessionId, intentVariables, next);
+    this._userCommands = userCommands;
+
+    this.execute = function(actionId, sessionId, intentVariables) {
+        return runUserCommandsInVM(this._userCommands, actionId, sessionId, intentVariables);
     }
+
+    return this;
 }

@@ -62,14 +62,14 @@ class SingleSessionChatbot : protected Chatbot {
    */
   SingleSessionChatbot(
       const ChatbotModel& chatbotModel,
-      Chatbot::ReplyActionHandler::SharedPtr replyActionHandler,
       Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler);
 
   /**
    * \brief Handles a user intent and reply or perform actions
    * \param message   The user message.
+   * \return The replies built by the chatbot
    */
-  void treatMessage(const std::string& message);
+  std::vector<std::string> treatMessage(const std::string& message);
 
   /**
    * \brief   Returns the single session context.
@@ -85,12 +85,6 @@ class SingleSessionChatbot : protected Chatbot {
    */
   Chatbot::Context m_context;
 
-  /**
-   * The reply action handler provided by the user that will be called each time
-   * a reply must be sent
-   * by the chatbot.
-   */
-  ReplyActionHandler::SharedPtr m_replyActionHandler;
   /**
    * The UserDefinedActionHandler provided by the user that will be called when
    * a user defined action
@@ -115,15 +109,15 @@ class SingleSessionChatbot : protected Chatbot {
                     Chatbot::VariablesMap& userDefinedVariables) {
       (*m_userDefinedActionHandler)(action, intentVariables,
                                     userDefinedVariables);
-      m_chatbot.prepareReplies(action, intentVariables, userDefinedVariables,
-                               m_replies);
+      m_replies = m_chatbot.prepareReplies(action, intentVariables,
+                                           userDefinedVariables);
     }
 
    private:
     typename Chatbot::UserDefinedActionHandler::SharedPtr
         m_userDefinedActionHandler;
-    std::vector<std::string>& m_replies;
     SingleSessionChatbot& m_chatbot;
+    std::vector<std::string>& m_replies;
   };
 };
 }

@@ -45,33 +45,28 @@ namespace intent {
 template <typename SessionIdType>
 MultiSessionChatbot<SessionIdType>::MultiSessionChatbot(
     const ChatbotModel& chatbotModel,
-    typename ReplyActionHandler::SharedPtr replyActionHandler,
     typename UserDefinedActionHandler::SharedPtr userDefinedActionHandler)
     : Chatbot(chatbotModel),
-      m_replyActionHandler(replyActionHandler),
       m_userDefinedActionHandler(userDefinedActionHandler) {}
 
 template <typename SessionIdType>
-void MultiSessionChatbot<SessionIdType>::treatMessage(
+std::vector<std::string> MultiSessionChatbot<SessionIdType>::treatMessage(
     const SessionIdType& sessionId, const std::string& message) {
   typename SessionIndex::iterator it = m_sessionIndex.find(sessionId);
 
+  std::vector<std::string> replies;
+
   if (it != m_sessionIndex.end()) {
-    std::vector<std::string> replies;
     UserDefinedActionHandlerAdapter actionHandler(*this, replies, it->first,
                                                   m_userDefinedActionHandler);
-    ReplyActionHandlerAdapter replyHandler(it->first, m_replyActionHandler);
 
     Chatbot::VariablesMap userDefinedVariables;
     Chatbot::VariablesMap intentVariables;
     std::string currentStateId = it->second.currentStateId;
     Chatbot::treatMessage(message, it->second, actionHandler, intentVariables,
                           userDefinedVariables);
-
-    std::for_each(
-        replies.begin(), replies.end(),
-        [&replyHandler](const std::string& reply) { replyHandler(reply); });
   }
+  return replies;
 }
 
 template <typename SessionIdType>

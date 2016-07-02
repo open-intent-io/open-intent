@@ -1,11 +1,22 @@
 {
   "name": "open-intent-chatbot",
   "version": "1.0.0",
-  "description": "A library for REST chatbots",
+  "description": "An API for the open-intent chatbots",
   "main": "open-intent-chatbot.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --reporter spec"
+  },
   "dependencies": {
-    "express": "^4.13.3",
+    "q": "^1.4.1",
     "redis": "^2.6.0-2",
+    "requestify": "^0.1.17",
+    "require-from-string": "^1.2.0"
+  },
+  "devDependencies": {
+    "sinon": "^1.17.4",
+    "chai": "^3.5.0",
+    "express": "^4.14.0",
+    "mocha": "^2.5.3",
     "body-parser": "^1.15.1"
   },
   "author": "Clément Michaud, Sergei Kireev",

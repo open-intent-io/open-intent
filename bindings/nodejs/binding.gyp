@@ -9,15 +9,17 @@
                 "<!(node -e \"require('nan')\")"
             ],
             'include_dirs': [
-                'include', '../../include', "../../../include"
+                'include', '../../include', '../../../include', '../../thirdparty/json/src'
             ],
             "cflags": [
                 "-std=c++11",
-                "-frtti"
+                "-frtti",
+                "-fexceptions"
             ],
             'cflags_cc': [
                 "-std=c++11",
-                "-frtti"
+                "-frtti",
+                "-fexceptions"
             ],
             'libraries': [
                 '-L$(BINARY_DIR)/src', '-lintent-static', '-lboost_regex', '-lboost_log'

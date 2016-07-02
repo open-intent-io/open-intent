@@ -41,21 +41,35 @@ var redis = require('redis');
 
 var REDIS_CONTEXT_KEY = 'context';
 
-module.exports = function() {
+module.exports = function(redisUrl, redisPort) {
     this._redisClient = undefined;
 
-
-    this.save = function(sessionId, context, fn) {
-        this._redisClient.hset(sessionId, REDIS_CONTEXT_KEY, context, fn);
+    this.save = function(sessionId, context) {
+        var deferred = Q.defer();
+        this._redisClient.hset(sessionId, REDIS_CONTEXT_KEY, JSON.stringify(context), function(err) {
+            if(err) {
+                deferred.reject(err);
+            }
+            else {
+                deferred.resolve();
+            }
+        });
+        return deferred.promise;
     }
 
-    this.load = function(sessionId, fn) {
-        this._redisClient.hget(sessionId, REDIS_CONTEXT_KEY, fn);
-    }
+    this.load = function(sessionId) {
+        var deferred = Q.defer();
 
-    // Constructor
-    var redisUrl = process.env.REDIS_URI || "127.0.0.1";
-    var redisPort = process.env.REDIS_PORT || 6379;
+        this._redisClient.hget(sessionId, REDIS_CONTEXT_KEY, function(err, data) {
+            if(err) {
+                deferred.reject(err);
+            }
+            else {
+                deferred.resolve(JSON.parse(data));
+            }
+        });
+        return deferred.promise;
+    }
 
     this._redisClient = redis.createClient(redisPort, redisUrl);
 

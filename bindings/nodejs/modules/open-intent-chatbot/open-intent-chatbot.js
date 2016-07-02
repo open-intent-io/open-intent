@@ -37,124 +37,153 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var OpenIntent = require('./open-intent.node');
+var OpenIntentChatbotFactory = require('./open-intent-chatbot-factory');
+var Q = require('q');
 
-var talkInternal = function(chatbot, userCommandsDriver, sessionManager, req, res) {
-    var sessionId = req.body.sessionId;
-    var message = req.body.msg;
+var NO_CHATBOT_ERROR_MESSAGE = 'No model loaded in the chatbot';
 
-    sessionManager.load(sessionId, function(err, ctx) {
-        var context = {};
+module.exports = function(sessionManagerDriver) {
+    this._chatbot = undefined;
+    this._model = undefined;
+    this._sessionManagerDriver = sessionManagerDriver;
 
-        if (!ctx) {
-            context = {
-                _state: "",
-                _userDefinedVariables: {}
-            };
+    this.setModel = function(botmodel) {
+        var deferred = Q.defer();
+        var userCommandsDriver = undefined;
+
+        if('commands' in botmodel) {
+            var userCommandsEntry = botmodel['commands'];
+            if('type' in userCommandsEntry && 'script' in userCommandsEntry && userCommandsEntry['type'] == 'js') {
+                var VMUserCommandsDriver = require('./user-defined-actions/vm-driver');
+                userCommandsDriver = new VMUserCommandsDriver(userCommandsEntry['script']);
+            }
+            else if('type' in userCommandsEntry && userCommandsEntry['type'] == 'REST') {
+                var RestUserCommandsDriver = require('./user-defined-actions/rest-driver');
+                userCommandsDriver = new RestUserCommandsDriver();
+            }
+        }
+        else
+        {
+            deferred.reject('Missing "commands" property.');
+            return deferred.promise;
+        }
+
+
+        if('model' in botmodel) {
+            var botmodelEntry = botmodel['model'];
+            if('json' in botmodelEntry) {
+                this._chatbot = OpenIntentChatbotFactory.fromJsonModel(botmodelEntry['json'],
+                    this._sessionManagerDriver, userCommandsDriver);
+            }
         }
         else {
-            context = JSON.parse(ctx);
+            deferred.reject('Missing "model" property.');
+            return deferred.promise;
         }
 
-        chatbot.treatMessage(context, message, function(actionId, intentVariables) {
-            userCommandsDriver(actionId, sessionId, intentVariables, function(userDefinedVariables) {
-                var replies = [];
-                var replyCallback = function(reply) {
-                    replies.push(reply);
-                };
+        if(this._chatbot) {
+            this._model = botmodel;
+            deferred.resolve();
+        }
+        else {
+            deferred.reject('Error while instantiating the chatbot');
+        }
 
-                // Must create userDefinedVariables because it is mandatory in the C++ layer.
-                if(!userDefinedVariables) {
-                    userDefinedVariables = {};
-                }
+        return deferred.promise;
+    }
+    
+    this.getModel = function() {
+        var deferred = Q.defer();
+        if(this._model) {
+            deferred.resolve(this._model);
+        }
+        else {
+            deferred.reject(NO_CHATBOT_ERROR_MESSAGE);
+        }
+        return deferred.promise;
+    }
 
-                chatbot.prepareReplies(actionId, intentVariables, userDefinedVariables, replyCallback);
-                res.send(JSON.stringify(replies));
-            });
+    this.talk = function(sessionId, message) {
+        var deferred = Q.defer();
+
+        if(!sessionId) {
+            deferred.reject('No sessionId provided');
+            return deferred.promise;
+        }
+
+        if(!message) {
+            deferred.reject('No message provided');
+            return deferred.promise;
+        }
+
+        if(!this._chatbot) {
+            deferred.reject(NO_CHATBOT_ERROR_MESSAGE);
+            return deferred.promise;
+        }
+
+        this._chatbot.talk(sessionId, message)
+        .then(function(replies) {
+            deferred.resolve(replies);
+        })
+        .fail(function(err) {
+            deferred.reject(err);
+        })
+
+        return deferred.promise;
+    }
+
+    this.setState = function(sessionId, state) {
+        var deferred = Q.defer();
+
+        if(!sessionId) {
+            deferred.reject('No sessionId provided');
+            return deferred.promise;
+        }
+
+        if(!state) {
+            deferred.reject('No state provided');
+            return deferred.promise;
+        }
+
+        if(!this._chatbot) {
+            deferred.reject(NO_CHATBOT_ERROR_MESSAGE);
+            return deferred.promise;
+        }
+
+        this._chatbot.setState(sessionId, state)
+        .then(function() {
+            deferred.resolve();
+        })
+        .fail(function(err) {
+            deferred.reject(err);
         });
 
-        sessionManager.save(sessionId, JSON.stringify(context));
-    });
-}
-
-var setStateInternal = function(sessionManager, req, res) {
-    var context = {
-        _state: req.body.state,
-        _userDefinedVariables: {}
-    };
-
-    sessionManager.save(req.body.sessionId, JSON.stringify(context), function(error) {
-        if(error) {
-            res.send('{ "code": "NOK" }');
-        }
-        else {
-            res.send('{ "code": "OK" }');
-        }
-    });
-}
-
-function getStateInternal(sessionId, req, res) {
-
-    sessionManager.load(sessionId, function(err, ctx) {
-        var context = {};
-
-        if (!ctx) {
-            res.send('{ "code": "NOK" }');
-        }
-        else {
-            context = JSON.parse(ctx);
-            res.send('{ "code": "OK", "state": "' + context._state + '" }');
-        }
-    });
-}
-
-var getInitialStateInternal = function(chatbot) {
-    return chatbot.getInitialState();
-}
-
-var getTerminalStatesInternal = function(chatbot) {
-    return chatbot.getTerminalStates();
-}
-
-function OpenIntentChatbot(serializableChatbot, userCommandsDriver, sessionManagerDriver) {
-
-    var _this = this;
-    this._serializableChatbot = serializableChatbot;
-    this._userCommandsDriver = userCommandsDriver;
-    this._sessionManager = sessionManagerDriver;
-
-    this.talk = (req, fn) => talkInternal(_this._serializableChatbot, _this._userCommandsDriver, _this._sessionManager, req, fn);
-    this.setState = (req, fn) => setStateInternal(_this._sessionManager, req, fn);
-    this.getState = (req, fn) => getStateInternal(_this._sessionManager, req, fn);
-    this.getInitialState = () => getInitialStateInternal(_this._serializableChatbot);
-    this.getTerminalStates = () => getTerminalStatesInternal(_this._serializableChatbot);
-}
-
-
-function createFromOIML(dictionaryModel, openIntentMLModel, userCommandsDriver, sessionManagerDriver) {
-
-    if(!sessionManagerDriver) {
-        var redisDriver = require('./session-manager/redis-driver');
-        sessionManagerDriver = redisDriver();
+        return deferred.promise;
     }
 
-    var openIntentChatbot = new OpenIntentChatbot(OpenIntent.createSerializableChatbotFromOIML(dictionaryModel, openIntentMLModel),
-        userCommandsDriver, sessionManagerDriver);
-    return openIntentChatbot;
-}
+    this.getState = function(sessionId) {
+        var deferred = Q.defer();
 
+        if(!sessionId) {
+            deferred.reject('No sessionId provided');
+            return deferred.promise;
+        }
 
-function createFromJsonModel(jsonModel, userCommandsDriver, sessionManagerDriver) {
+        if(!this._chatbot) {
+            deferred.reject(NO_CHATBOT_ERROR_MESSAGE);
+            return deferred.promise;
+        }
 
-    if(!sessionManagerDriver) {
-        var redisDriver = require('./session-manager/redis-driver');
-        sessionManagerDriver = redisDriver();
+        this._chatbot.getState(sessionId)
+        .then(function(state) {
+            deferred.resolve(state);
+        })
+        .fail(function(err) {
+            deferred.reject(err);
+        });
+
+        return deferred.promise;
     }
 
-    var openIntentChatbot = new OpenIntentChatbot(OpenIntent.createSerializableChatbotFromJsonModel(jsonModel),
-        userCommandsDriver, sessionManagerDriver);
-    return openIntentChatbot;
+    return this;
 }
-
-module.exports.fromOIML = createFromOIML;
-module.exports.fromJsonModel = createFromJsonModel;

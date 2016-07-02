@@ -15,7 +15,6 @@
 #include <fstream>
 
 
-
 class InputReader
 {
 public:
@@ -26,6 +25,7 @@ class OutputWriter
 {
 public:
     virtual OutputWriter& operator<<(const std::string &output) = 0;
+    virtual OutputWriter& operator<<(const std::vector<std::string> &replies) = 0;
 };
 
 class BeerBar

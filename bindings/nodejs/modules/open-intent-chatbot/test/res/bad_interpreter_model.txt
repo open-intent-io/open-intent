@@ -1,0 +1,45 @@
+{
+@root
+    -Bob!
+        #wake
+        *Je n'ai pas compris votre demande
+    -Que puis-je vous offrir ?
+
+@wait_order
+    -No intent matching
+        #append_order1
+        *Soyez le plus précis possible
+    -Vous-voulez quelque chose d'autre ?
+
+@wait_another_order
+    -Je voudrais une kro et un coca
+        #append_order2
+    -Vous-voulez quelque chose d'autre ?
+
+@wait_another_order
+    -Je voudrais une kro
+    -Vous-voulez quelque chose d'autre ?
+
+@wait_another_order
+    -Rien
+        #grab_it
+    -Veuillez récupérer vos consommations au bar. Vous devrez payer _.
+
+@bye
+}
+
+{
+@wait_order
+    -Je voudrais une kro et un coca
+        #append_order2
+    -Vous-voulez quelque chose d'autre ?
+@wait_another_order
+}
+
+{
+@wait_order
+    -Rien
+        #bye
+    -Au revoir et à bientôt.
+@bye
+}

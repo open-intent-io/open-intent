@@ -42,7 +42,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <v8.h>
 #include <iostream>
 #include "SerializableChatbot.hpp"
-#include "Chatbot.hpp"
 #include "intent/chatbot/ChatbotFactory.hpp"
 #include "intent/utils/Logger.hpp"
 
@@ -83,8 +82,11 @@ namespace intentjs
                 }
                 else
                 {
+                    std::string error = "Current state must be a string.";
+                    LOG_ERROR() << error << "\n";
+
                     isolate->ThrowException(v8::Exception::TypeError(
-                            String::NewFromUtf8(isolate, "Current state must be a string.")));
+                            String::NewFromUtf8(isolate, error.c_str())));
                 }
             }
         }
@@ -134,7 +136,6 @@ namespace intentjs
      * @brief SerializableChatbot::TreatMessage
      * @param args : Context, Message, replyCallback, actionCallback,
      */
-
     void SerializableChatbot::TreatMessage(const FunctionCallbackInfo <Value> &args)
     {
         LOG_TRACE() << "SerializableChatbot::TreatMessage\n";
@@ -144,29 +145,33 @@ namespace intentjs
 
         if (!args[0]->IsObject())
         {
+            std::string error = "Context must be an object.";
+            LOG_ERROR() << error << "\n";
             isolate->ThrowException(v8::Exception::TypeError(
-                    String::NewFromUtf8(isolate, "Context must be an object.")));
+                    String::NewFromUtf8(isolate, error.c_str())));
             return;
         }
         Local <Object> sessionContext = Local<Object>::Cast(args[0]);
 
         if (!args[1]->IsString())
         {
+            std::string error = "The message must be a string.";
+            LOG_ERROR() << error << "\n";
             isolate->ThrowException(v8::Exception::TypeError(
-                    String::NewFromUtf8(isolate, "The message must be a string.")));
+                    String::NewFromUtf8(isolate, error.c_str())));
             return;
         }
         v8::String::Utf8Value messageValue(args[1]->ToString());
-        LOG_TRACE() << std::string(*messageValue);
 
         if (!args[2]->IsFunction())
         {
+            std::string error = "The user defined actions handler must be a function.";
+            LOG_ERROR() << error << "\n";
             isolate->ThrowException(v8::Exception::TypeError(
-                    String::NewFromUtf8(isolate, "The user defined actions handler must be a function.")));
+                    String::NewFromUtf8(isolate, error.c_str())));
             return;
         }
         Local <Function> userDefinedActionsCallback = Local<Function>::Cast(args[2]);
-
 
         intent::Chatbot::Context context;
         parseContext(isolate, sessionContext, context);
@@ -176,7 +181,8 @@ namespace intentjs
 
         intent::Chatbot::VariablesMap userDefinedVariables;
         intent::Chatbot::VariablesMap intentVariables;
-        LOG_TRACE() << "calling chatbot::treatmessage c++ function";
+
+        LOG_TRACE() << "Call to C++ method treatMessage from chatbot";
         obj->m_chatbot->treatMessage(message, context, userDefinedActionHandler, intentVariables, userDefinedVariables);
     }
 
@@ -186,19 +192,14 @@ namespace intentjs
         LOG_TRACE() << "Extracting variables from v8 map : \n";
         Local<Array> property_names = object->GetOwnPropertyNames();
 
-        for (int i = 0; i < property_names->Length(); ++i) {
+        for (unsigned int i = 0; i < property_names->Length(); ++i) {
             Local<Value> v8key = property_names->Get(i);
             Local<Value> v8value = object->Get(v8key);
-            LOG_TRACE() << "value:key" << i
-            << ((v8key->IsString()) ? std::string("true") : std::string("false"))
-            << ((v8value->IsString()) ? std::string("true") : std::string("false")) << "\n";
             String::Utf8Value utf8_key(v8key);
             std::string key(*utf8_key);
-            LOG_TRACE() << key << "\n";
             if (v8value->IsString()) {
                 String::Utf8Value utf8_value(v8value);
                 std::string value(*utf8_value);
-                LOG_TRACE() << key << " : " << value << "\n";
                 map[key] = value;
             } else {
                 // Throw an error or something
@@ -246,20 +247,19 @@ namespace intentjs
         intent::Chatbot::VariablesMap userVariables;
         extractMapFromObject(v8userVariables, userVariables);
 
+        std::vector<std::string> replies = obj->m_chatbot->prepareReplies(actionId, intentVariables, userVariables);
 
-        Local <Function> replyCallback = Local<Function>::Cast(args[3]);
-
-        std::vector<std::string> replies;
-        obj->m_chatbot->prepareReplies(actionId, intentVariables, userVariables, replies);
         LOG_TRACE() << "Chatbot::prepareReplies " << "\n";
-        std::for_each(replies.begin(), replies.end(), [&isolate, &replyCallback](const std::string& reply) {
-            int argc = 1;
-            LOG_TRACE() << "Response : " << reply;
-            Local <Value> argv[argc] = {
-                    v8::String::NewFromUtf8(isolate, reply.c_str())
-            };
-            replyCallback->Call(Null(isolate), argc, argv);
-        });
+        Local<Array> repliesArray = Array::New(isolate);
+        unsigned int i=0;
+
+        for(const std::string &reply: replies)
+        {
+            Local <Value> v8reply = v8::String::NewFromUtf8(isolate, reply.c_str());
+            repliesArray->Set(i++, v8reply);
+        }
+
+        args.GetReturnValue().Set(repliesArray);
     }
 
     void SerializableChatbot::GetInitialState(const FunctionCallbackInfo <Value> &args)
@@ -308,8 +308,10 @@ namespace intentjs
 
             if (!chatbot.get())
             {
+                std::string error = "Error while creating chatbot.";
+                LOG_ERROR() << error << "\n";
                 isolate->ThrowException(v8::Exception::TypeError(
-                        String::NewFromUtf8(isolate, "Error while creating chatbot.")));
+                        String::NewFromUtf8(isolate, error.c_str())));
             }
 
             SerializableChatbot *obj = new SerializableChatbot(chatbot);
@@ -335,9 +337,9 @@ namespace intentjs
 
     void wrapInterpreterFeedback(Isolate* isolate, Local<Object>& v8feedback, intent::InterpreterFeedback& feedback)
     {
-        LOG_TRACE() << "collecting interpreter messages" << "\n";
+        LOG_TRACE() << "Collecting interpreter messages" << "\n";
         Local<Array> interpretMessages = Array::New(isolate, (int)feedback.size());
-        for (int i = 0; i<feedback.size(); ++i)
+        for (unsigned int i = 0; i<feedback.size(); ++i)
         {
             Local<Object> toInsert = Object::New(isolate);
             toInsert->Set(String::NewFromUtf8(isolate, "line"), Number::New(isolate, feedback[i].line.position));
@@ -352,14 +354,26 @@ namespace intentjs
     {
         Isolate *isolate = args.GetIsolate();
 
-        Local <Value> dictionaryFilepathValue(args[0]->ToString());
-        Local <Value> oimlFilePathValue(args[1]->ToString());
-        Local <Object> interpreterFeedback = Local<Object>::Cast(args[2]);
+        if (!args[0]->IsString())
+        {
+            isolate->ThrowException(v8::Exception::TypeError(
+                    String::NewFromUtf8(isolate, "dictionary must be a string")));
+            return;
+        }
+        Local <Value> dictionaryValue(args[0]->ToString());
+
+        if (!args[1]->IsString())
+        {
+            isolate->ThrowException(v8::Exception::TypeError(
+                    String::NewFromUtf8(isolate, "script must be a string")));
+            return;
+        }
+        Local <Value> oimlValue(args[1]->ToString());
 
         if (args.IsConstructCall())
         {
-            v8::String::Utf8Value v0(dictionaryFilepathValue);
-            v8::String::Utf8Value v1(oimlFilePathValue);
+            v8::String::Utf8Value v0(dictionaryValue);
+            v8::String::Utf8Value v1(oimlValue);
 
             std::string dictionaryModel = std::string(*v0);
             std::string interpreterModel = std::string(*v1);
@@ -373,12 +387,20 @@ namespace intentjs
                     intent::ChatbotFactory::createChatbotFromOIML(
                             dictionaryStream, interpreterModelStream, feedback);
 
-            wrapInterpreterFeedback(isolate, interpreterFeedback, feedback);
-
-            if (!chatbot.get())
+            if(!feedback.empty())
             {
+                Local <Object> interpreterFeedback = Object::New(isolate);
+                wrapInterpreterFeedback(isolate, interpreterFeedback, feedback);
+                std::string error = "Error while interpreting the model.";
+                LOG_ERROR() << error << "\n";
+                isolate->ThrowException(interpreterFeedback);
+            }
+            else if (!chatbot.get())
+            {
+                std::string error = "Error while creating chatbot.";
+                LOG_ERROR() << error << "\n";
                 isolate->ThrowException(v8::Exception::TypeError(
-                        String::NewFromUtf8(isolate, "Error while creating chatbot.")));
+                        String::NewFromUtf8(isolate, error.c_str())));
             }
 
             SerializableChatbot *obj = new SerializableChatbot(chatbot);
@@ -388,7 +410,7 @@ namespace intentjs
         else
         {
             int argc = 3;
-            Local <Value> argv[argc] = {dictionaryFilepathValue, oimlFilePathValue, interpreterFeedback};
+            Local <Value> argv[argc] = { dictionaryValue, oimlValue, args[2] };
 
             Local <Context> context = isolate->GetCurrentContext();
             Local <Function> cons = Local<Function>::New(isolate, constructorFromOIML);

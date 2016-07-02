@@ -38,24 +38,48 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var requestify = require("requestify");
+var Q = require('q');
 
-function sendRESTRequest(url, actionId, sessionId, intentVariables, next) {
+function sendRESTRequest(url, endpointByActionId, actionId, sessionId, intentVariables) {
+    var deferred = Q.defer();
+    var URI = url;
 
-    requestify.post(url + '/' + actionId, {
+    if(endpointByActionId) {
+        if(actionId in endpointByActionId) {
+            URI += endpointByActionId[actionId];
+        }
+    }
+    else {
+        URI += '/' + actionId;
+    }
+
+    requestify.post(URI, {
             sessionId: sessionId,
             intentVariables: intentVariables,
-    })
+    }, { 'timeout': 3000 })
     .then(function(response) {
         var userDefinedVariables = JSON.parse(response.body);
-        next(userDefinedVariables);
-    });
+        deferred.resolve(userDefinedVariables);
+    })
+    .fail(function() {
+        deferred.reject()
+    })
+
+    return deferred.promise;
 }
 
 
-module.exports = function(serviceUrl) {
+module.exports = function(serviceUrl, config) {
+    this._serviceUrl = serviceUrl;
+    this._endpointByActionId = undefined;
 
-    return function(actionId, sessionId, intentVariables, repliesVariables, next) {
-        var url = serviceUrl;
-        sendRESTRequest(url, actionId, sessionId, intentVariables, next);
+    if(config && 'endpoints' in config) {
+        this._endpointByActionId = config['endpoints'];
     }
+
+    this.execute = function(actionId, sessionId, intentVariables) {
+        return sendRESTRequest(this._serviceUrl, this._endpointByActionId, actionId, sessionId, intentVariables);
+    }
+
+    return this;
 }
