@@ -33,38 +33,63 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY,
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef INTENT_EXCEPTION_HPP
-#define INTENT_EXCEPTION_HPP
+var ChatbotService = require('open-intent').RestChatbotServer;
+var ChatbotClient = require('open-intent').RestChatbotClient;
 
-/**
- * @brief Exception class used by chatbot-api
- */
-class Exception {
- public:
-  /**
-   * \brief The exception does not contain any error message.
-   */
-  Exception() {}
+var fs = require('fs');
 
-  /**
-   * \brief The exception does contain an error message.
-   * \param errorMessage is the error message that caused the exception.
-   */
-  Exception(const std::string errorMessage) : m_errorMessage(errorMessage) {}
+var DEBUG = process.env.DEBUG;
+var SERVICE_HOST = process.env.SERVICE_HOST || 'http://127.0.0.1' 
+var SERVICE_PORT = process.env.SERVICE_PORT || 10010;
 
-  /**
-   * \brief Returns the error message.
-   * \return the error message.
-   */
-  const std::string& message() const { return m_errorMessage; }
+var DICTIONARY_FILE = 'res/dictionary.json';
+var SCRIPT_FILE = 'res/script.txt';
+var USERCOMMANDS_FILE = 'res/user_commands.js';
 
- private:
-  std::string m_errorMessage;
-};
+var dictionary = fs.readFileSync(DICTIONARY_FILE, 'utf-8');
+var script = fs.readFileSync(SCRIPT_FILE, 'utf-8');
+var userCommands = fs.readFileSync(USERCOMMANDS_FILE, 'utf-8');
 
-#endif  // INTENT_EXCEPTION_HPP
+var host = SERVICE_HOST + ':' + SERVICE_PORT;
+
+var botmodel = {
+    'model': {
+        'script': script,
+        'dictionary': dictionary
+    },
+    'commands': {
+        'type': 'js',
+        'script': userCommands
+    }
+}
+
+function example(stdin, stdout, done) {
+    var restChatbotService = new ChatbotService(SERVICE_PORT, function() {
+        var restClient = new ChatbotClient(host);
+        
+        restClient.setModel(botmodel)
+        .then(function(response) {
+            if(DEBUG == 'true') {
+                var TerminalClient = require('./terminal-client');
+                var terminal = TerminalClient(restClient, stdin, stdout);
+                done();
+            }
+        })
+        .fail(function(err) {
+            console.error(err);
+        });
+    });
+
+    process.on('SIGINT', function() {
+        console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
+        process.exit(0);
+    });
+
+    return restChatbotService;
+}
+
+module.exports = example;

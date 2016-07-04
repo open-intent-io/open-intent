@@ -33,38 +33,81 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY,
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef INTENT_EXCEPTION_HPP
-#define INTENT_EXCEPTION_HPP
-
-/**
- * @brief Exception class used by chatbot-api
- */
-class Exception {
- public:
-  /**
-   * \brief The exception does not contain any error message.
-   */
-  Exception() {}
-
-  /**
-   * \brief The exception does contain an error message.
-   * \param errorMessage is the error message that caused the exception.
-   */
-  Exception(const std::string errorMessage) : m_errorMessage(errorMessage) {}
-
-  /**
-   * \brief Returns the error message.
-   * \return the error message.
-   */
-  const std::string& message() const { return m_errorMessage; }
-
- private:
-  std::string m_errorMessage;
+module.exports = {
+    talk: talk,
+    setstate: setstate,
+    getstate: getstate,
+    setmodel: setmodel,
+    getmodel: getmodel
 };
 
-#endif  // INTENT_EXCEPTION_HPP
+
+function talk(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var sessionId = req.swagger.params.sessionId.value;
+    var message = req.swagger.params.message.value;
+
+    chatbot.talk(sessionId, message)
+    .then(function(replies) {
+        res.json({ 'replies': replies });
+    }).fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}
+
+
+function setstate(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var sessionId = req.swagger.params.sessionId.value;
+    var state = req.swagger.params.state.value;
+
+    chatbot.setState(sessionId, state)
+    .then(function(state) {
+        res.json({ 'message': 'OK' });
+    })
+    .fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}
+
+function getstate(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var sessionId = req.swagger.params.sessionId.value;
+
+    chatbot.getState(sessionId)
+    .then(function(state) {
+        res.json({ 'state': state });
+    })
+    .fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}
+
+function setmodel(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var botmodel = req.swagger.params.botmodel.value;
+
+    chatbot.setModel(botmodel)
+    .then(function() {
+        res.json({ 'message': 'OK' });
+    })
+    .fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}
+
+function getmodel(req, res) {
+    var chatbot = req.app.get('chatbot');
+
+    chatbot.getModel()
+    .then(function(model) {
+        res.json(model);
+    })
+    .fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}

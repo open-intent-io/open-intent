@@ -281,8 +281,7 @@ DictionaryModel::SharedPtr Deserializer::deserialize(
   nlohmann::json document;
   try {
     document = nlohmann::json::parse(s);
-  }
-  catch (...) {
+  } catch (...) {
     throw DeserializerException("Error while parsing JSON");
   }
   return deserialize(document, type);

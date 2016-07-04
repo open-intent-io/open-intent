@@ -33,38 +33,79 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY,
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef INTENT_EXCEPTION_HPP
-#define INTENT_EXCEPTION_HPP
+var requestify = require("requestify");
+var Q = require('q');
 
-/**
- * @brief Exception class used by chatbot-api
- */
-class Exception {
- public:
-  /**
-   * \brief The exception does not contain any error message.
-   */
-  Exception() {}
+var REQUEST_TIMEOUT = 5000;
 
-  /**
-   * \brief The exception does contain an error message.
-   * \param errorMessage is the error message that caused the exception.
-   */
-  Exception(const std::string errorMessage) : m_errorMessage(errorMessage) {}
+module.exports = function(uri) {
 
-  /**
-   * \brief Returns the error message.
-   * \return the error message.
-   */
-  const std::string& message() const { return m_errorMessage; }
+    this.talk = function(sessionId, message) {
+        var deferred = Q.defer();
+        var url = uri + '/talk/' + sessionId;
 
- private:
-  std::string m_errorMessage;
-};
+        requestify.post(url,
+            { 'message': message }, { 
+            'timeout': REQUEST_TIMEOUT,
+            'dataType': 'form-url-encoded'
+        })
+        .then(function(response) {
+            var replies = JSON.parse(response.body).replies;
+            deferred.resolve(replies);
+        })
+        .fail(function(error) {
+            deferred.reject(error);
+        });
 
-#endif  // INTENT_EXCEPTION_HPP
+        return deferred.promise;
+    }
+
+    this.setState = function(sessionId, state) {
+        var url = uri + '/state/' + sessionId;
+        return requestify.put(url, {
+            'state': state,
+            'dataType': 'form-url-encoded'
+        }, { 'timeout': REQUEST_TIMEOUT });
+    }
+
+    this.getState = function(sessionId) {
+        var url = uri + '/state/' + sessionId;
+        var deferred = Q.defer();
+
+        requestify.get(url,
+            { 'timeout': REQUEST_TIMEOUT })
+        .then(function(response) {
+            deferred.resolve(JSON.parse(response.body).state);
+        })
+        .fail(function(error) {
+            deferred.reject(error);
+        });
+        return deferred.promise;
+    }
+
+    this.setModel = function(botmodel) {
+        var url = uri + '/model';
+        return requestify.put(url, botmodel,
+            { 'timeout': REQUEST_TIMEOUT });
+    }
+
+    this.getModel = function() {
+        var url = uri + '/model';
+        var deferred = Q.defer();
+
+        requestify.get(url, { 'timeout': REQUEST_TIMEOUT })
+        .then(function(response) {
+            deferred.resolve(JSON.parse(response.body).model);
+        })
+        .fail(function(error) {
+            deferred.reject(error);
+        })
+        return deferred.promise;
+    }
+
+    return this;
+}

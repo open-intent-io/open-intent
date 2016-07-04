@@ -33,38 +33,58 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY,
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef INTENT_EXCEPTION_HPP
-#define INTENT_EXCEPTION_HPP
+var redis = require('redis');
 
-/**
- * @brief Exception class used by chatbot-api
- */
-class Exception {
- public:
-  /**
-   * \brief The exception does not contain any error message.
-   */
-  Exception() {}
+var REDIS_CONTEXT_KEY = 'context';
 
-  /**
-   * \brief The exception does contain an error message.
-   * \param errorMessage is the error message that caused the exception.
-   */
-  Exception(const std::string errorMessage) : m_errorMessage(errorMessage) {}
+module.exports = function(redisHost, redisPort) {
+    this._redisClient = undefined;
 
-  /**
-   * \brief Returns the error message.
-   * \return the error message.
-   */
-  const std::string& message() const { return m_errorMessage; }
+    this.save = function(sessionId, context) {
+        var deferred = Q.defer();
+        this._redisClient.hset(sessionId, REDIS_CONTEXT_KEY, JSON.stringify(context), function(err) {
+            if(err) {
+                deferred.reject(err);
+            }
+            else {
+                deferred.resolve();
+            }
+        });
+        return deferred.promise;
+    };
 
- private:
-  std::string m_errorMessage;
-};
+    this.load = function(sessionId) {
+        var deferred = Q.defer();
 
-#endif  // INTENT_EXCEPTION_HPP
+        this._redisClient.hget(sessionId, REDIS_CONTEXT_KEY, function(err, data) {
+            if(err) {
+                deferred.reject(err);
+            }
+            else {
+                deferred.resolve(JSON.parse(data));
+            }
+        });
+        return deferred.promise;
+    };
+
+    if(!redisPort) {
+        redisPort = 6379;
+    }
+
+    if(!redisHost) {
+        redisHost = '127.0.0.1';
+    }
+    
+    this._redisClient = redis.createClient(redisPort, redisHost);
+
+    this._redisClient.on("error", function (err) {
+        console.error(err);
+    });
+
+
+    return this;
+}

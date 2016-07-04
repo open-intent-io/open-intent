@@ -1,0 +1,24 @@
+{
+@root
+    -Hello
+        #greetings
+    -Would you want to eat a pizza, a hamburger or a salad?
+@get_food_type
+    -Pizza, please.
+        #get_food_type
+        * I did not understand. Pizza, hamburger or salad?
+    -Got it, you want _, right?
+@yesno
+    -Yes!
+        #confirm
+    -I'm ordering, it is gonna be _$.
+@end
+}
+
+{
+@yesno
+    -No
+        #notunderstood
+    -Tell me what you want.
+@get_food_type
+}

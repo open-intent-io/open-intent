@@ -33,38 +33,51 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY,
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef INTENT_EXCEPTION_HPP
-#define INTENT_EXCEPTION_HPP
+'use strict';
+var OpenIntentChatbot = require('./chatbot-api/chatbot');
 
-/**
- * @brief Exception class used by chatbot-api
- */
-class Exception {
- public:
-  /**
-   * \brief The exception does not contain any error message.
-   */
-  Exception() {}
+module.exports = function(port, ready) {
+    var chatbot = new OpenIntentChatbot();
+    var config = {
+        appRoot: __dirname // required config
+    };
 
-  /**
-   * \brief The exception does contain an error message.
-   * \param errorMessage is the error message that caused the exception.
-   */
-  Exception(const std::string errorMessage) : m_errorMessage(errorMessage) {}
+    var SwaggerExpress = require('swagger-express-mw');
+    var SwaggerUi = require('swagger-tools/middleware/swagger-ui');
+    var express = require('express');
 
-  /**
-   * \brief Returns the error message.
-   * \return the error message.
-   */
-  const std::string& message() const { return m_errorMessage; }
+    var _this = this;
+    _this._app = new express();
+    _this._server = undefined;
+    _this._app.set('chatbot', chatbot);
 
- private:
-  std::string m_errorMessage;
-};
+    SwaggerExpress.create(config, function(err, swaggerExpress) {
+        if (err) { throw err; }
 
-#endif  // INTENT_EXCEPTION_HPP
+        // Add swagger-ui (This must be before swaggerExpress.register)
+        _this._app.use(SwaggerUi(swaggerExpress.runner.swagger));
+
+        // install middleware
+        swaggerExpress.register(_this._app);
+
+        var _port = port || 10010;
+        _this._server = _this._app.listen(_port, ready);
+
+        //console.log('To watch the doc, visit http://127.0.0.1:' + port + '/docs');
+    });
+
+    _this.close = function() {
+        if(_this._server) {
+            _this._server.close();
+        }
+        else {
+            console.error('Server not set');
+        }
+    }
+
+    return _this;
+}

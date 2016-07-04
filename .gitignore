@@ -4,3 +4,5 @@ build-dir/
 
 *.old
 *.user
+
+*.vscode

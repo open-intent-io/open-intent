@@ -1,0 +1,28 @@
+{
+  "name": "open-intent",
+  "version": "1.0.0",
+  "description": "An API for the open-intent chatbots",
+  "main": "open-intent.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --reporter spec --recursive"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "q": "^1.4.1",
+    "redis": "^2.6.0-2",
+    "requestify": "^0.1.17",
+    "require-from-string": "^1.2.0",
+    "express": "^4.12.3",
+    "swagger-express-mw": "^0.1.0",
+    "swagger-tools": "^0.10.1"
+  },
+  "devDependencies": {
+    "should": "^7.1.0",
+    "supertest": "^1.0.0",
+    "sinon": "^1.17.4",
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3"
+  },
+  "author": "Clément Michaud, Sergei Kireev",
+  "license": "MIT"
+}

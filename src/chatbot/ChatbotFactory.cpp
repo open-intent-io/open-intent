@@ -107,15 +107,13 @@ bool ChatbotFactory::loadFromJsonModel(std::istream& model,
   bool loaded = false;
   if (model.good()) {
     intent::Deserializer deserializer;
-    try
-    {
-        chatbotModel = deserializer.deserialize<ChatbotModel>(model);
-        loaded = true;
-    }
-    catch (...)
-    {
-        LOG_ERROR() << "[ChatbotFactory::loadFromJsonModel] chatbotModel is a flawed json";
-        loaded = false;
+    try {
+      chatbotModel = deserializer.deserialize<ChatbotModel>(model);
+      loaded = true;
+    } catch (...) {
+      LOG_ERROR() << "[ChatbotFactory::loadFromJsonModel] chatbotModel is a "
+                     "flawed json";
+      loaded = false;
     }
   }
 
@@ -129,25 +127,25 @@ bool ChatbotFactory::loadFromOIML(std::istream& dictionaryModel,
   bool loaded = false;
   if (dictionaryModel.good() && interpreterModel.good()) {
     intent::Deserializer deserializer;
-    try
-    {
+    try {
       chatbotModel.intentStoryServiceModel.intentServiceModel.dictionaryModel =
           deserializer.deserialize<DictionaryModel::SharedPtr>(dictionaryModel);
       std::istreambuf_iterator<char> eos;
-      std::string content(std::istreambuf_iterator<char>(interpreterModel), eos);
+      std::string content(std::istreambuf_iterator<char>(interpreterModel),
+                          eos);
 
-      chatbotModel = Interpreter::build(
-          content, chatbotModel.intentStoryServiceModel.intentServiceModel.dictionaryModel, feedback);
+      chatbotModel =
+          Interpreter::build(content, chatbotModel.intentStoryServiceModel
+                                          .intentServiceModel.dictionaryModel,
+                             feedback);
 
       loaded = true;
-    }
-    catch (...)
-    {
-      LOG_ERROR() << "[ChatbotFactory::loadFromOIML] dictionaryModel is a flawed json";
+    } catch (...) {
+      LOG_ERROR()
+          << "[ChatbotFactory::loadFromOIML] dictionaryModel is a flawed json";
       loaded = false;
     }
   }
   return loaded;
 }
-
 }
