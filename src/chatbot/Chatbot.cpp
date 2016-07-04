@@ -150,7 +150,7 @@ void executeActions(const ChatbotActionModel& chatbotActionModel,
   userDefinedActionHandler(actionId, intentVariables, templateRepliesVariables);
 }
 
-void Chatbot::treatMessage(const std::string& msg, Context& context,
+bool Chatbot::treatMessage(const std::string& msg, Context& context,
                            UserDefinedActionHandler& userDefinedActionHandler,
                            Chatbot::VariablesMap& intentVariables,
                            Chatbot::VariablesMap& userDefinedVariables) {
@@ -173,6 +173,8 @@ void Chatbot::treatMessage(const std::string& msg, Context& context,
                    userDefinedActionHandler, intentVariables,
                    userDefinedVariables);
   }
+
+  return result.found;
 }
 
 std::string Chatbot::getInitialState() const {

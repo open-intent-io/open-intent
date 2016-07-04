@@ -1,0 +1,16 @@
+{
+  "entities": {
+    "greetings": {
+      "hello": ["hi", "yep", "yo", "hey"]
+    },
+    "food_type": {
+      "pizza": [],
+      "hamburger": ["big mac", "cheeseburger", "burger"],
+      "salad": []
+    },
+    "yes_no": {
+      "yes": [],
+      "no": []
+    }
+  }
+}

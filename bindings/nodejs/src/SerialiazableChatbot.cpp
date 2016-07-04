@@ -183,7 +183,9 @@ namespace intentjs
         intent::Chatbot::VariablesMap intentVariables;
 
         LOG_TRACE() << "Call to C++ method treatMessage from chatbot";
-        obj->m_chatbot->treatMessage(message, context, userDefinedActionHandler, intentVariables, userDefinedVariables);
+        bool intentFound = obj->m_chatbot->treatMessage(message, context, userDefinedActionHandler, intentVariables, userDefinedVariables);
+
+        args.GetReturnValue().Set(intentFound);
     }
 
 

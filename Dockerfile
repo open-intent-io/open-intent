@@ -4,14 +4,13 @@ RUN apt-get update && \
     apt-get install -y libboost-system1.58-dev \
         libboost-regex1.58-dev \
         libboost-log1.58-dev \
-        cmake g++ \
-        doxygen node-gyp nodejs npm
+        cmake g++ git \
+        doxygen node-gyp nodejs npm clang-format-3.7
 
-ADD . /src/
+VOLUME /src
 
-WORKDIR /build
-
+WORKDIR /src
 RUN ln -s /usr/bin/nodejs /usr/bin/node
-RUN npm install -g swagger 
-RUN cd /build && cmake -G "Unix Makefiles" /src
+#RUN npm install -g swagger 
+
 
