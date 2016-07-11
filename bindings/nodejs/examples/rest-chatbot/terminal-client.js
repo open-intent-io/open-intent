@@ -33,38 +33,44 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY,
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef INTENT_EXCEPTION_HPP
-#define INTENT_EXCEPTION_HPP
+var readline = require('readline');
 
-/**
- * @brief Exception class used by chatbot-api
- */
-class Exception {
- public:
-  /**
-   * \brief The exception does not contain any error message.
-   */
-  Exception() {}
+var SESSION_ID = '12345';
 
-  /**
-   * \brief The exception does contain an error message.
-   * \param errorMessage is the error message that caused the exception.
-   */
-  Exception(const std::string errorMessage) : m_errorMessage(errorMessage) {}
+function initializeTerminal(chatbotClient, rl) {
+}
 
-  /**
-   * \brief Returns the error message.
-   * \return the error message.
-   */
-  const std::string& message() const { return m_errorMessage; }
+module.exports = function(chatbotClient, stdin, stdout) {
 
- private:
-  std::string m_errorMessage;
-};
+    var rl = readline.createInterface({
+        input: stdin,
+        output: stdout,
+        prompt: '> '
+    });
 
-#endif  // INTENT_EXCEPTION_HPP
+    rl.prompt();
+
+    rl.on('line', function(line) {
+        if(line == 'quit') {
+            process.exit();
+        }
+
+        chatbotClient.talk(SESSION_ID, line)
+        .then(function(replies) {
+            var output = '';
+            for(var i in replies) {
+                output += replies[i] + '\n';
+            }
+            stdout.write(output);
+            rl.prompt();
+        })
+        .fail(function(response) {
+            console.error(JSON.parse(response.body).message);
+            rl.prompt();
+        });
+    });
+}

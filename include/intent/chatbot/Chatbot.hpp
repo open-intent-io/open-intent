@@ -124,6 +124,7 @@ class Chatbot {
    * \param context   The context from which you want to match the intent.
    * \param userDefinedActionHandler The implementation of the user defined
    * action handler provided by the user.
+   * \return true if an intent has been found, false otherwise
    *
    * \brief Handles the user intent going from the state in the context (execute
    * associated user actions).
@@ -132,7 +133,7 @@ class Chatbot {
    * execute the transition of the
    * finite state automaton to the next state.
    */
-  void treatMessage(const std::string& message, Context& context,
+  bool treatMessage(const std::string& message, Context& context,
                     UserDefinedActionHandler& userDefinedActionHandler,
                     VariablesMap& intentVariables,
                     VariablesMap& userDefinedVariables);

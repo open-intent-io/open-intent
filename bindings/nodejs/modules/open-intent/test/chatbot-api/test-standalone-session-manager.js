@@ -33,38 +33,40 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY,
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef INTENT_EXCEPTION_HPP
-#define INTENT_EXCEPTION_HPP
+var expect    = require("chai").expect;
+var assert    = require("chai").assert;
+var sinon = require('sinon');
 
-/**
- * @brief Exception class used by chatbot-api
- */
-class Exception {
- public:
-  /**
-   * \brief The exception does not contain any error message.
-   */
-  Exception() {}
+var StandaloneSessionManager = require('../../chatbot-api/session-manager/standalone-driver');
 
-  /**
-   * \brief The exception does contain an error message.
-   * \param errorMessage is the error message that caused the exception.
-   */
-  Exception(const std::string errorMessage) : m_errorMessage(errorMessage) {}
 
-  /**
-   * \brief Returns the error message.
-   * \return the error message.
-   */
-  const std::string& message() const { return m_errorMessage; }
+describe("Test standalone session manager driver", function() {
 
- private:
-  std::string m_errorMessage;
-};
+    describe("Test save a context and load it back for 1 sessionId", function() {
+        var context = {
+            'state': 'MyState'
+        }
 
-#endif  // INTENT_EXCEPTION_HPP
+        it('should save the context successfully', function(done) {
+            var sessionManager = new StandaloneSessionManager();
+
+            sessionManager.save('MySession', context).then(function() {
+                done();
+            });
+        });
+
+        it('should load the context back successfully', function(done) {
+            var sessionManager = new StandaloneSessionManager();
+
+            sessionManager.save('MySession', context);
+            sessionManager.load('MySession').then(function(savedContext) {
+                expect(savedContext).to.deep.equal(context);
+                done();
+            });
+        })
+    });
+});

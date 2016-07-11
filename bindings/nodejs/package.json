@@ -1,5 +1,5 @@
 {
-  "name": "open-intent-js",
+  "name": "open-intent",
   "version": "1.0.0",
   "description": "Nodejs wrapper of the OpenIntent framework",
   "main": "index.js",
