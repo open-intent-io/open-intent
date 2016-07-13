@@ -73,7 +73,7 @@ describe('Testing the REST Chatbot', function() {
         var server1 = undefined;
 
         before(function() {
-            server1 = new RestChatbotServer(SERVICE_PORT);
+            server1 = new RestChatbotServer({ 'port': SERVICE_PORT });
         });
 
         after(function() {

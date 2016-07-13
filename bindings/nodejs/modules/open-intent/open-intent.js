@@ -40,5 +40,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 module.exports = {
     'Chatbot': require('./chatbot-api/chatbot'),
     'RestChatbotServer': require('./rest-server'),
-    'RestChatbotClient': require('./rest-client')
+    'RestChatbotClient': require('./rest-client'),
+    'IRCChatbotClient': require('./irc-client'),
+
+    // The REST Chatbot example
+    'RestChatbot': require('./examples/rest-chatbot/app')
 }

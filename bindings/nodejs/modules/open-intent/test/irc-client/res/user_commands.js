@@ -37,59 +37,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var ChatbotService = require('open-intent').RestChatbotServer;
-var ChatbotClient = require('open-intent').RestChatbotClient;
-
-var fs = require('fs');
-
-var DEBUG = process.env.DEBUG;
-var SERVICE_HOST = process.env.SERVICE_HOST || 'http://127.0.0.1' 
-var SERVICE_PORT = process.env.SERVICE_PORT || 10010;
-
-var DICTIONARY_FILE = 'res/dictionary.json';
-var SCRIPT_FILE = 'res/script.txt';
-var USERCOMMANDS_FILE = 'res/user_commands.js';
-
-var dictionary = fs.readFileSync(DICTIONARY_FILE, 'utf-8');
-var script = fs.readFileSync(SCRIPT_FILE, 'utf-8');
-var userCommands = fs.readFileSync(USERCOMMANDS_FILE, 'utf-8');
-
-var host = SERVICE_HOST + ':' + SERVICE_PORT;
-
-var botmodel = {
-    'model': {
-        'script': script,
-        'dictionary': dictionary
+module.exports = {
+    "#get_food_type": function(intentVariables, sessionId, next) {
+        var replyVariables = {};
+        replyVariables['0'] = intentVariables['food_type0'];
+        next(replyVariables);
     },
-    'commands': {
-        'type': 'js',
-        'script': userCommands
+    "#confirm": function(intentVariables, sessionId, next) {
+        var replyVariables = {};
+        replyVariables['0'] = '5';
+        next(replyVariables);
     }
 }
-
-function example(stdin, stdout, done) {
-    var restChatbotService = new ChatbotService(SERVICE_PORT, function() {
-        var restClient = new ChatbotClient(host);
-        
-        restClient.setModel(botmodel)
-        .then(function(response) {
-            if(DEBUG == 'true') {
-                var TerminalClient = require('./terminal-client');
-                var terminal = TerminalClient(restClient, stdin, stdout);
-                done();
-            }
-        })
-        .fail(function(err) {
-            console.error(err);
-        });
-    });
-
-    process.on('SIGINT', function() {
-        console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
-        process.exit(0);
-    });
-
-    return restChatbotService;
-}
-
-module.exports = example;

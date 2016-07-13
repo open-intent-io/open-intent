@@ -1,43 +1,38 @@
-open-intent [![Build Status](https://travis-ci.org/open-intent-io/open-intent.svg?branch=master)](https://travis-ci.org/open-intent-io/open-intent)
+[![][logo]][website]
 ====================
+[![Build Status](https://travis-ci.org/open-intent-io/open-intent.svg?branch=master)](https://travis-ci.org/open-intent-io/open-intent)
 
-Authors:
-+ Clément Michaud
-+ Sergeï Kireev.
+open-intent is a natural language processing framework with the aim of finding user intents in sentences based on entity matching.
+The framework allows you to build and deploy easily your conversational bot in minutes.
 
-May 21st, 2016
-
-Description
----------------------
-
-open-intent is a natural language processing framework with the aim of finding user intents in sentences.
-It is made of several layers able to find a user intent until having a full conversation with a user.
+# Example
 
 
-Install
----------------------
+
+# Source
+Our latest source of open-intent can be found on [GitHub]. Fork us!
+
+# Contributing to open-intent
+Follow [contributing](CONTRIBUTING.md) file.
+
+# Install
 
 The whole project is built with CMake.
 
 To build it, configure with CMake and build.
 
-To configure, create a directory, for example build-dir/ at the root of the repo and type:
-
+    mkdir build-dir/
+    cd build-dir/
     cmake -G "Unix Makefiles" ..
-
-
-To build, type:
-
-    make
+    make -j 4
 
 
 You can also use docker to build the project.
 
 To build, just type:
 
-    docker build open-intent-build .
-
-    docker run open-intent-build make -j 4
+    docker build -t open-intent-build .
+    docker run open-intent-build build.sh
 
 That's it!
 
@@ -69,3 +64,5 @@ open-intent is **licensed** under the **[MIT License]**. The terms of the licens
 
 
 [MIT License]: https://opensource.org/licenses/MIT
+[GitHub]: https://github.com/open-intent-io/open-intent
+[logo]: https://scontent-lhr3-1.xx.fbcdn.net/v/t1.0-9/13501692_561633667353075_4274869735130433589_n.png?oh=36dbc4724cd3e337bdd198f8198c99df&oe=582452E7

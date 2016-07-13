@@ -25,8 +25,3 @@ ADD_CUSTOM_COMMAND(TARGET run-nodejs-tests POST_BUILD
         COMMAND npm test
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/modules/open-intent
 )
-
-ADD_CUSTOM_COMMAND(TARGET run-nodejs-tests POST_BUILD
-        COMMAND npm install && npm test
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/examples/rest-chatbot
-)
