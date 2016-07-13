@@ -37,40 +37,8 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var readline = require('readline');
+var example = require('./example')
 
-var SESSION_ID = '12345';
-
-function initializeTerminal(chatbotClient, rl) {
-}
-
-module.exports = function(chatbotClient, stdin, stdout) {
-
-    var rl = readline.createInterface({
-        input: stdin,
-        output: stdout,
-        prompt: '> '
-    });
-
-    rl.prompt();
-
-    rl.on('line', function(line) {
-        if(line == 'quit') {
-            process.exit();
-        }
-
-        chatbotClient.talk(SESSION_ID, line)
-        .then(function(replies) {
-            var output = '';
-            for(var i in replies) {
-                output += replies[i] + '\n';
-            }
-            stdout.write(output);
-            rl.prompt();
-        })
-        .fail(function(response) {
-            console.error(JSON.parse(response.body).message);
-            rl.prompt();
-        });
-    });
+module.exports = function() {
+    return example(process.stdin, process.stdout);
 }

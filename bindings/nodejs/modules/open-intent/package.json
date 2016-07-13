@@ -1,22 +1,27 @@
 {
   "name": "open-intent",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An API for the open-intent chatbots",
   "main": "open-intent.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha --reporter spec --recursive"
+    "test": "DEBUG=true ./node_modules/.bin/mocha --reporter spec --recursive",
+    "install_model": "cp -r examples/rest-chatbot/res .",
+    "prototype": "nodemon -w res/* -e js,txt,json examples/rest-chatbot/app.js"
   },
   "dependencies": {
     "body-parser": "^1.15.1",
+    "express": "^4.12.3",
+    "nodemon": "^1.9.2",
     "q": "^1.4.1",
+    "readline": "^1.3.0",
     "redis": "^2.6.0-2",
     "requestify": "^0.1.17",
     "require-from-string": "^1.2.0",
-    "express": "^4.12.3",
     "swagger-express-mw": "^0.1.0",
     "swagger-tools": "^0.10.1"
   },
   "devDependencies": {
+    "mock-utf8-stream": "^0.1.1",
     "should": "^7.1.0",
     "supertest": "^1.0.0",
     "sinon": "^1.17.4",

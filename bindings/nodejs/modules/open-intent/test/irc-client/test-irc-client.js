@@ -38,10 +38,32 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var expect    = require("chai").expect;
-var assert    = require("chai").assert;
 var stream = require("mock-utf8-stream");
 var Q = require('q');
-var cli = require('../example');;
+var RestChatbot = require('../../open-intent').RestChatbotServer;
+var IRCClient = require('../../open-intent').IRCChatbotClient;
+var fs = require('fs');
+
+var CHATBOT_PORT = 8080;
+
+var DICTIONARY_FILE = 'test/irc-client/res/dictionary.json';
+var SCRIPT_FILE = 'test/irc-client/res/script.txt';
+var USERCOMMANDS_FILE = 'test/irc-client/res/user_commands.js';
+
+var dictionary = fs.readFileSync(DICTIONARY_FILE, 'utf-8');
+var script = fs.readFileSync(SCRIPT_FILE, 'utf-8');
+var userCommands = fs.readFileSync(USERCOMMANDS_FILE, 'utf-8');
+
+var botmodel = {
+    'model': {
+        'script': script,
+        'dictionary': dictionary
+    },
+    'commands': {
+        'type': 'js',
+        'script': userCommands
+    }
+}
 
 function talkInternal(stdin, stdout, input) {
     var deferred = Q.defer();
@@ -57,16 +79,12 @@ function talkInternal(stdin, stdout, input) {
     return deferred.promise;
 }
 
-function expectEqAndTalk(output, expectedOutput, input) {
-    expect(data).to.equal(expectedOutput);
-    return talk(input);
-}
-
-describe('Test the example application', function() {
+describe('Test the IRC client', function() {
     var stdin = undefined;
     var stdout = undefined;
     var chatbot = undefined;
     var talk = undefined;
+    var uri = 'http://localhost:' + CHATBOT_PORT;
 
     var createAssertEqFunction = function(input, expected) {
         return function(data) {
@@ -101,6 +119,8 @@ describe('Test the example application', function() {
         stdin = new stream.MockReadableStream();
         stdout = new stream.MockWritableStream();
 
+        chatbot = new RestChatbot({ 'port': CHATBOT_PORT, 'model': botmodel });
+
         talk = function(input) {
             return talkInternal(stdin, stdout, input);
         }
@@ -122,9 +142,8 @@ describe('Test the example application', function() {
             "I'm ordering, it is gonna be 5$.\n"
         ];
 
-        chatbot = cli(stdin, stdout, function() {
-            handleScript(script, done);
-        });
+        IRCClient(uri, stdin, stdout);
+        handleScript(script, done);
     });
 
     it('should handle a conversation in which the user order a salad', function(done) {
@@ -137,9 +156,8 @@ describe('Test the example application', function() {
             "I'm ordering, it is gonna be 5$.\n"
         ];
 
-        chatbot = cli(stdin, stdout, function() {
-            handleScript(script, done);
-        });
+        IRCClient(uri, stdin, stdout);
+        handleScript(script, done);
     });
 
     it('should handle a conversation in which the user order a pizza', function(done) {
@@ -152,9 +170,8 @@ describe('Test the example application', function() {
             "I'm ordering, it is gonna be 5$.\n"
         ];
 
-        chatbot = cli(stdin, stdout, function() {
-            handleScript(script, done);
-        });
+        IRCClient(uri, stdin, stdout);
+        handleScript(script, done);
     });
 
     it('should handle a conversation in which the chatbot does not understand the item', function(done) {
@@ -165,9 +182,8 @@ describe('Test the example application', function() {
             "I did not understand. Pizza, hamburger or salad?\n"
         ];
 
-        chatbot = cli(stdin, stdout, function() {
-            handleScript(script, done);
-        });
+        IRCClient(uri, stdin, stdout);
+        handleScript(script, done);
     });
 
     it('should handle a conversation in which the user made a mistake during ordering', function(done) {
@@ -185,8 +201,7 @@ describe('Test the example application', function() {
 
         ];
 
-        chatbot = cli(stdin, stdout, function() {
-            handleScript(script, done);
-        });
+        IRCClient(uri, stdin, stdout);
+        handleScript(script, done);
     });
 });

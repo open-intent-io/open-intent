@@ -1,13 +1,13 @@
 {
   "name": "rest-chatbot",
   "version": "1.0.0",
-  "description": "Example application using a REST chatbot",
+  "description": "REST Chatbot service",
   "main": "app.js",
   "scripts": {
     "test": "DEBUG=true ./node_modules/.bin/mocha --reporter spec"
   },
   "dependencies": {
-    "open-intent": "file:../../modules/open-intent"
+    "open-intent": "file:../../open-intent"
   },
   "devDependencies": {
     "mock-utf8-stream": "^0.1.1",

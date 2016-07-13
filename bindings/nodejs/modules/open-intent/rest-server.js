@@ -40,9 +40,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
 var OpenIntentChatbot = require('./chatbot-api/chatbot');
 
-module.exports = function(port, ready) {
+module.exports = function(config, ready) {
     var chatbot = new OpenIntentChatbot();
-    var config = {
+    var swaggerConfig = {
         appRoot: __dirname // required config
     };
 
@@ -55,7 +55,7 @@ module.exports = function(port, ready) {
     _this._server = undefined;
     _this._app.set('chatbot', chatbot);
 
-    SwaggerExpress.create(config, function(err, swaggerExpress) {
+    SwaggerExpress.create(swaggerConfig, function(err, swaggerExpress) {
         if (err) { throw err; }
 
         // Add swagger-ui (This must be before swaggerExpress.register)
@@ -64,7 +64,14 @@ module.exports = function(port, ready) {
         // install middleware
         swaggerExpress.register(_this._app);
 
-        var _port = port || 10010;
+        var _port = 10010;
+        if(config && 'port' in config) {
+            _port = config.port;
+        }
+
+        if(config && 'model' in config) {
+            chatbot.setModel(config.model);
+        }
         _this._server = _this._app.listen(_port, ready);
 
         //console.log('To watch the doc, visit http://127.0.0.1:' + port + '/docs');

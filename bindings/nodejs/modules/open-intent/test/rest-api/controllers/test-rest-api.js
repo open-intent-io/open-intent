@@ -52,7 +52,7 @@ describe('controllers', function() {
     var userCommands = fs.readFileSync(file,'utf-8');
 
     before(function() {
-        server = new RestChatbotServer(10010);
+        server = new RestChatbotServer({ 'port': 10010 });
     });
 
     after(function() {
