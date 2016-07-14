@@ -42,8 +42,8 @@ var assert    = require("chai").assert;
 var sinon = require('sinon')
 var fs = require('fs');
 
-var RestChatbotClient = require('../../open-intent').RestChatbotClient;
-var RestChatbotServer = require('../../open-intent').RestChatbotServer;
+var RestChatbotClient = require('../../rest-client');
+var RestChatbotServer = require('../../rest-server');
 
 var SERVICE_HOST = 'http://127.0.0.1';
 var SERVICE_PORT = 10010;

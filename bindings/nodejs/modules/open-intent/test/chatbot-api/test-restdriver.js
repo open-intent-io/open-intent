@@ -37,11 +37,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var expect    = require("chai").expect;
-var assert    = require("chai").assert;
 var sinon = require('sinon');
 
-var RestUserCommandsDriver = require('../../chatbot-api/user-defined-actions/rest-driver');
+var RestUserCommandsDriver = require('../../lib/chatbot-api/user-defined-actions/rest-driver');
 
 var REST_SERVICE_PORT = process.env.REST_SERVICE_PORT || 23000;
 var serviceUrl = 'http://localhost:' + REST_SERVICE_PORT;

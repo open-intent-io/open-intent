@@ -37,15 +37,59 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-module.exports = {
-    "#get_food_type": function(intentVariables, sessionId, next) {
-        var replyVariables = {};
-        replyVariables['0'] = intentVariables['food_type0'];
-        next(replyVariables);
-    },
-    "#confirm": function(intentVariables, sessionId, next) {
-        var replyVariables = {};
-        replyVariables['0'] = '5';
-        next(replyVariables);
+var IRCChatbotClient = require('../../irc-client');
+var RestChatbotServer = require('../../rest-server');
+var Q = require('q');
+
+var fs = require('fs');
+var path = require('path');
+
+function RestChatbot(config) {
+    var deferred = Q.defer();
+
+    var port = 10010;
+    if(config && 'port' in config) {
+        port = config.port
     }
+
+    var modelDirectory = process.cwd();
+    if(config && 'model_directory' in config) {
+        modelDirectory = config.model_directory;
+    }
+
+    var DICTIONARY_FILE = path.join(modelDirectory, 'dictionary.json');
+    var SCRIPT_FILE = path.join(modelDirectory, 'script.txt');
+    var USERCOMMANDS_FILE = path.join(modelDirectory, 'user_commands.js');;
+
+    var dictionary = fs.readFileSync(DICTIONARY_FILE, 'utf-8');
+    var script = fs.readFileSync(SCRIPT_FILE, 'utf-8');
+    var userCommands = fs.readFileSync(USERCOMMANDS_FILE, 'utf-8');
+
+    var botmodel = {
+        'model': {
+            'script': script,
+            'dictionary': dictionary
+        },
+        'commands': {
+            'type': 'js',
+            'script': userCommands
+        }
+    }
+
+
+    var restChatbotService = new RestChatbotServer({
+        'port': port,
+        'model': botmodel
+    }, function() {
+        deferred.resolve(restChatbotService);
+    });
+
+    process.on('SIGINT', function() {
+        console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
+        process.exit(0);
+    });
+
+    return deferred.promise;
 }
+
+module.exports = RestChatbot;

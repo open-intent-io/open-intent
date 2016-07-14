@@ -41,7 +41,7 @@ var expect    = require("chai").expect;
 var assert    = require("chai").assert;
 var sinon = require('sinon');
 
-var StandaloneSessionManager = require('../../chatbot-api/session-manager/standalone-driver');
+var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/standalone-driver');
 
 
 describe("Test standalone session manager driver", function() {

@@ -41,7 +41,7 @@ var expect    = require("chai").expect;
 var assert    = require("chai").assert;
 var sinon = require('sinon');
 
-var OpenIntentChatbot = require('../../chatbot-api/chatbot');
+var OpenIntentChatbot = require('../../lib/chatbot-api/chatbot');
 
 var fs = require('fs');
 

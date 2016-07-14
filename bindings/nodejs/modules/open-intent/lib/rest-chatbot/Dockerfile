@@ -22,8 +22,5 @@ COPY package.json /usr/src/
 #position the workspace in an example
 WORKDIR /usr/src
 
-ENV SUPPRESS_NO_CONFIG_WARNING=y
-#VOLUME /usr/src/res
-
 # Lock outgoing packets for security reason
 CMD ["nodemon", "-w", "/usr/src/*", "-w", "/usr/src/res/*", "-e", "js,txt,json", "app.js"]

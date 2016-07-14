@@ -41,7 +41,7 @@ var expect    = require("chai").expect;
 var assert    = require("chai").assert;
 var sinon = require('sinon');
 
-var VMUserDefinedActionDriver = require('../../chatbot-api/user-defined-actions/vm-driver');
+var VMUserDefinedActionDriver = require('../../lib/chatbot-api/user-defined-actions/vm-driver');
 
 describe("Test VM user commands driver", function() {
 
