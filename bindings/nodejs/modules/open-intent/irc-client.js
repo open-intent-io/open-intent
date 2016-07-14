@@ -2,6 +2,10 @@
 var SESSION_ID = '12345';
 
 module.exports = function(uri) {
+    return new IRCClient(uri);
+}
+
+function IRCClient(uri) {
     var readline = require('readline');
     var RestChatbotClient = require('./rest-client');
     var stdio = require('./lib/stdio');

@@ -2,15 +2,14 @@
 @root
     -Hello
         #greetings
-        *Did not understand...
     -Would you want to eat a pizza, a hamburger or a salad?
 @get_food_type
     -Pizza, please.
         #get_food_type
-        *I did not understand. Pizza, hamburger or salad?
+        * I did not understand. Pizza, hamburger or salad?
     -Got it, you want _, right?
 @yesno
-    -Yes!
+    -Oups!
         #confirm
     -I'm ordering, it is gonna be _$.
 @end

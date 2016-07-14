@@ -137,10 +137,12 @@ paths:
 definitions:
   ModelObject:
     properties:
+      oiml:
+        type: string
       commands:
         type: object
-      model:
-        type: object
+      dictionary:
+        type: string
 
   GetStateResponse:
     required:
@@ -150,11 +152,13 @@ definitions:
         type: string
 
   GetModelResponse:
-    required:
-      - model
     properties:
-      model:
+      oiml:
+        type: string
+      commands:
         type: object
+      dictionary:
+        type: string
 
   TalkResponse:
       required:

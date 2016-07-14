@@ -37,6 +37,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+
+
+var deserialize = require('../../lib/chatbot-api/model-serializer').deserialize;
+var serialize = require('../../lib/chatbot-api/model-serializer').serialize;
+
 module.exports = {
     talk: talk,
     setstate: setstate,
@@ -91,7 +96,8 @@ function setmodel(req, res) {
     var chatbot = req.app.get('chatbot');
     var botmodel = req.swagger.params.botmodel.value;
 
-    chatbot.setModel(botmodel)
+    var model = deserialize(botmodel);
+    chatbot.setModel(model)
     .then(function() {
         res.json({ 'message': 'OK' });
     })
@@ -105,7 +111,8 @@ function getmodel(req, res) {
 
     chatbot.getModel()
     .then(function(model) {
-        res.json(model);
+        var serializedModel = serialize(model);
+        res.json(serializedModel);
     })
     .fail(function(err) {
         res.status(500).send({'message': err});

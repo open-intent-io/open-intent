@@ -39,8 +39,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 'use strict';
 var OpenIntentChatbot = require('./lib/chatbot-api/chatbot');
+var Q = require('q');
 
 module.exports = function(config, ready) {
+    var deferred = Q.defer();
+    deferred.resolve(new RestChatbotServer(config, ready));
+    return deferred.promise;
+}
+
+
+function RestChatbotServer(config, ready) {
     var chatbot = new OpenIntentChatbot();
     var swaggerConfig = {
         appRoot: __dirname // required config
@@ -71,7 +79,10 @@ module.exports = function(config, ready) {
         }
 
         if(config && 'model' in config) {
-            chatbot.setModel(config.model);
+            chatbot.setModel(config.model)
+            .fail(function(err) {
+                console.error('Error:', err);
+            })
         }
         _this._server = _this._app.listen(_port, ready);
 

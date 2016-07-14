@@ -53,43 +53,27 @@ function ChatbotInterface(config) {
         var deferred = Q.defer();
         var userCommandsDriver = undefined;
 
-        if('commands' in botmodel) {
-            var userCommandsEntry = botmodel['commands'];
-            if('type' in userCommandsEntry && 'script' in userCommandsEntry && userCommandsEntry['type'] == 'js') {
-                var VMUserCommandsDriver = require('./user-defined-actions/vm-driver');
-                userCommandsDriver = new VMUserCommandsDriver(userCommandsEntry['script']);
-            }
-            else if('type' in userCommandsEntry && userCommandsEntry['type'] == 'REST') {
-                var RestUserCommandsDriver = require('./user-defined-actions/rest-driver');
-                userCommandsDriver = new RestUserCommandsDriver();
-            }
-        }
-        else
-        {
-            deferred.reject('Missing "commands" property.');
+        if(!botmodel) {
+            deferred.reject('You must provide a model');
             return deferred.promise;
         }
 
-
-        if('model' in botmodel) {
-            var botmodelEntry = botmodel['model'];
-            if('json' in botmodelEntry) {
-                this._chatbot = OpenIntentChatbotFactory.fromJsonModel(botmodelEntry['json'],
-                    this._sessionManagerDriver, userCommandsDriver);
-            }
-            else if('script' in botmodelEntry && 'dictionary' in botmodelEntry) {
-                try {
-                    this._chatbot = OpenIntentChatbotFactory.fromOIML(botmodelEntry['dictionary'], botmodelEntry['script'],
-                        this._sessionManagerDriver, userCommandsDriver);
-                }
-                catch(err) {
-                    deferred.reject(err);
-                    return deferred.promise;
-                }
-            }
+        if(botmodel.hasJsCommands()) {
+            var VMUserCommandsDriver = require('./user-defined-actions/vm-driver');
+            userCommandsDriver = new VMUserCommandsDriver(botmodel.commands());
         }
-        else {
-            deferred.reject('Missing "model" property.');
+        else if(botmodel.hasRestCommands()) {
+            var RestUserCommandsDriver = require('./user-defined-actions/rest-driver');
+            userCommandsDriver = new RestUserCommandsDriver();
+        }
+
+
+        try {
+            this._chatbot = OpenIntentChatbotFactory.fromOIML(botmodel.dictionary(), botmodel.oiml(),
+                this._sessionManagerDriver, userCommandsDriver);
+        }
+        catch(err) {
+            deferred.reject(err);
             return deferred.promise;
         }
 
