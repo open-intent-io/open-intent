@@ -37,8 +37,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var example = require('./example')
+module.exports = {
+    'Chatbot': require('./lib/chatbot-api/chatbot'),
+    'RestChatbotServer': require('./rest-server'),
+    'RestChatbotClient': require('./rest-client'),
+    'IRCChatbotClient': require('./irc-client'),
 
-module.exports = function() {
-    return example(process.stdin, process.stdout);
+    'startRestChatbot': require('./lib/rest-chatbot/rest-chatbot')
 }

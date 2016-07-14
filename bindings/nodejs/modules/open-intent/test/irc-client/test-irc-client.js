@@ -40,9 +40,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var expect    = require("chai").expect;
 var stream = require("mock-utf8-stream");
 var Q = require('q');
-var RestChatbot = require('../../open-intent').RestChatbotServer;
-var IRCClient = require('../../open-intent').IRCChatbotClient;
+var RestChatbot = require('../../rest-server');
 var fs = require('fs');
+var proxyquire = require('proxyquire');
 
 var CHATBOT_PORT = 8080;
 
@@ -54,37 +54,22 @@ var dictionary = fs.readFileSync(DICTIONARY_FILE, 'utf-8');
 var script = fs.readFileSync(SCRIPT_FILE, 'utf-8');
 var userCommands = fs.readFileSync(USERCOMMANDS_FILE, 'utf-8');
 
-var botmodel = {
-    'model': {
-        'script': script,
-        'dictionary': dictionary
-    },
-    'commands': {
-        'type': 'js',
-        'script': userCommands
-    }
-}
-
-function talkInternal(stdin, stdout, input) {
-    var deferred = Q.defer();
-
-    var onData = function(data) {
-        deferred.resolve(data);
-        stdout.removeListener('data', onData);
-    }
-
-    stdout.on('data', onData);
-    stdin.write(input);
-
-    return deferred.promise;
-}
-
 describe('Test the IRC client', function() {
-    var stdin = undefined;
-    var stdout = undefined;
-    var chatbot = undefined;
-    var talk = undefined;
+    var chatbot;
+    var IRCClient;
+    var talk;
     var uri = 'http://localhost:' + CHATBOT_PORT;
+
+    var botmodel = {
+        'model': {
+            'script': script,
+            'dictionary': dictionary
+        },
+        'commands': {
+            'type': 'js',
+            'script': userCommands
+        }
+    }
 
     var createAssertEqFunction = function(input, expected) {
         return function(data) {
@@ -93,7 +78,9 @@ describe('Test the IRC client', function() {
         }
     }
 
-    var handleScript = function(script, done) {        
+    var handleScript = function(script, done) {
+        IRCClient(uri);
+
         var promise = talk(script[0]);
         for(var i=2; i < script.length; i += 2) {
             var input = script[i];
@@ -116,15 +103,37 @@ describe('Test the IRC client', function() {
     }
 
     beforeEach(function() {
-        stdin = new stream.MockReadableStream();
-        stdout = new stream.MockWritableStream();
+        var stdinMock = new stream.MockReadableStream();
+        var stdoutMock = new stream.MockReadableStream();
 
-        chatbot = new RestChatbot({ 'port': CHATBOT_PORT, 'model': botmodel });
+        var stub = {
+            './lib/stdio': {
+                stdin: stdinMock,
+                stdout: stdoutMock
+            }
+        };
+
+        IRCClient = proxyquire('../../irc-client', stub);
 
         talk = function(input) {
-            return talkInternal(stdin, stdout, input);
-        }
-    })
+            var deferred = Q.defer();
+
+            var onData = function(data) {
+                deferred.resolve(data);
+                stdoutMock.removeListener('data', onData);
+            };
+
+            stdoutMock.on('data', onData);
+            stdinMock.write(input);
+
+            return deferred.promise;
+        };
+
+        chatbot = new RestChatbot({
+            port: CHATBOT_PORT,
+            model: botmodel
+        });
+    });
 
     afterEach(function() {
         chatbot.close();
@@ -142,7 +151,6 @@ describe('Test the IRC client', function() {
             "I'm ordering, it is gonna be 5$.\n"
         ];
 
-        IRCClient(uri, stdin, stdout);
         handleScript(script, done);
     });
 
@@ -156,7 +164,6 @@ describe('Test the IRC client', function() {
             "I'm ordering, it is gonna be 5$.\n"
         ];
 
-        IRCClient(uri, stdin, stdout);
         handleScript(script, done);
     });
 
@@ -170,7 +177,6 @@ describe('Test the IRC client', function() {
             "I'm ordering, it is gonna be 5$.\n"
         ];
 
-        IRCClient(uri, stdin, stdout);
         handleScript(script, done);
     });
 
@@ -182,7 +188,6 @@ describe('Test the IRC client', function() {
             "I did not understand. Pizza, hamburger or salad?\n"
         ];
 
-        IRCClient(uri, stdin, stdout);
         handleScript(script, done);
     });
 
@@ -201,7 +206,6 @@ describe('Test the IRC client', function() {
 
         ];
 
-        IRCClient(uri, stdin, stdout);
         handleScript(script, done);
     });
 });

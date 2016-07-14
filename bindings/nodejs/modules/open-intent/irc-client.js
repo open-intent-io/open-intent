@@ -1,22 +1,16 @@
-var readline = require('readline');
-var RestChatbotClient = require('./rest-client');
 
 var SESSION_ID = '12345';
 
-module.exports = function(uri, stdin, stdout) {
-
-    if(!stdin) {
-        stdin = process.stdin;
-    }
-    if(!stdout) {
-        stdout = process.stdout;
-    }
+module.exports = function(uri) {
+    var readline = require('readline');
+    var RestChatbotClient = require('./rest-client');
+    var stdio = require('./lib/stdio');
 
     var chatbotClient = new RestChatbotClient(uri);
 
     var rl = readline.createInterface({
-        input: stdin,
-        output: stdout,
+        input: stdio.stdin,
+        output: stdio.stdout,
         prompt: '> '
     });
 
@@ -33,7 +27,7 @@ module.exports = function(uri, stdin, stdout) {
             for(var i in replies) {
                 output += replies[i] + '\n';
             }
-            stdout.write(output);
+            stdio.stdout.write(output);
             rl.prompt();
         })
         .fail(function(response) {

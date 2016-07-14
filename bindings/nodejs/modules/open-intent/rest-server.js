@@ -38,7 +38,7 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 'use strict';
-var OpenIntentChatbot = require('./chatbot-api/chatbot');
+var OpenIntentChatbot = require('./lib/chatbot-api/chatbot');
 
 module.exports = function(config, ready) {
     var chatbot = new OpenIntentChatbot();
@@ -46,6 +46,7 @@ module.exports = function(config, ready) {
         appRoot: __dirname // required config
     };
 
+    process.env.SUPPRESS_NO_CONFIG_WARNING = 'true';
     var SwaggerExpress = require('swagger-express-mw');
     var SwaggerUi = require('swagger-tools/middleware/swagger-ui');
     var express = require('express');
