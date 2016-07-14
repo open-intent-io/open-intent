@@ -39,6 +39,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var requestify = require("requestify");
 var Q = require('q');
+var serialize = require('./lib/chatbot-api/model-serializer').serialize;
+var deserialize = require('./lib/chatbot-api/model-serializer').deserialize;
 
 var REQUEST_TIMEOUT = 5000;
 
@@ -89,7 +91,7 @@ module.exports = function(uri) {
 
     this.setModel = function(botmodel) {
         var url = uri + '/model';
-        return requestify.put(url, botmodel,
+        return requestify.put(url, serialize(botmodel),
             { 'timeout': REQUEST_TIMEOUT });
     }
 
@@ -99,7 +101,7 @@ module.exports = function(uri) {
 
         requestify.get(url, { 'timeout': REQUEST_TIMEOUT })
         .then(function(response) {
-            deferred.resolve(JSON.parse(response.body).model);
+            deferred.resolve(deserialize(JSON.parse(response.body).model));
         })
         .fail(function(error) {
             deferred.reject(error);

@@ -38,20 +38,16 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var expect    = require("chai").expect;
-var assert    = require("chai").assert;
 var sinon = require('sinon');
 
 var OpenIntentChatbot = require('../../lib/chatbot-api/chatbot');
+var foodBotModel = require('../food-bot-model');
+var badFoodBotModel = require('../bad-food-bot-model');
 
 var fs = require('fs');
 
-var file = 'test/chatbot-api/res/chatbot.json';
-var jsonModel = fs.readFileSync(file);
-
 describe("Test open intent chatbot", function() {
-
     describe("Almost all methods should fail when there is no model", function () {
-        
         it('should fail when getState is called', function(done) {
             var chatbot = OpenIntentChatbot();
             var SESSION_ID = 'abc';
@@ -95,16 +91,7 @@ describe("Test open intent chatbot", function() {
     describe('When a good model is provided', function() {
         it('should correctly update the model', function(done) {
             var chatbot = OpenIntentChatbot();
-
-            var botmodel = {
-                'commands': {
-                    'type': 'js',
-                    'script': 'module.exports = {}'
-                },
-                'model': {
-                    'json': jsonModel
-                }
-            };
+            var botmodel = foodBotModel;
             
             chatbot.setModel(botmodel)
             .then(function() {
@@ -116,23 +103,14 @@ describe("Test open intent chatbot", function() {
     describe('When a model is loaded', function() {
         it('should return the initial state when getstate is called on any session', function(done) {
             var chatbot = new OpenIntentChatbot();
-
-            var botmodel = {
-                'commands': {
-                    'type': 'js',
-                    'script': 'module.exports = {}'
-                },
-                'model': {
-                    'json': jsonModel
-                }
-            };
+            var botmodel = foodBotModel;
 
             chatbot.setModel(botmodel)
             .then(function() {
                 return chatbot.getState('ABC');
             })
             .then(function(state) {
-                expect(state).to.equal('init');
+                expect(state).to.equal('@root');
                 done();
             });
         });
@@ -142,25 +120,8 @@ describe("Test open intent chatbot", function() {
         it('should update correctly the next models', function(done) {
             var chatbot = OpenIntentChatbot();
 
-            var botmodel1 = {
-                'commands': {
-                    'type': 'js',
-                    'script': 'module.exports = {}'
-                },
-                'model': {
-                    'json': jsonModel
-                }
-            };
-            
-            var botmodel2 = {
-                'commands': {
-                    'type': 'js',
-                    'script': 'module.exports = { "command1": function()) {} }'
-                },
-                'model': {
-                    'json': jsonModel
-                }
-            };
+            var botmodel1 = foodBotModel;
+            var botmodel2 = foodBotModel;
 
             chatbot.setModel(botmodel1)
             .then(function() {
@@ -173,15 +134,7 @@ describe("Test open intent chatbot", function() {
     });
 
     describe('After updating the model all methods should be callable', function() {
-        var botmodel = {
-            'commands': {
-                'type': 'js',
-                'script': 'module.exports = {}'
-            },
-            'model': {
-                'json': jsonModel
-            }
-        };
+        var botmodel = foodBotModel;
 
         it('should succeed on getState call', function(done) {
             var chatbot = OpenIntentChatbot();
@@ -227,7 +180,7 @@ describe("Test open intent chatbot", function() {
 
             chatbot.setModel(botmodel)
             .then(function() {
-                return chatbot.talk(SESSION_ID, 'Bob');
+                return chatbot.talk(SESSION_ID, 'Hello');
             })
             .then(function(replies) {
                 done();
@@ -238,25 +191,7 @@ describe("Test open intent chatbot", function() {
     });
 
     describe('When right script, dictionary and js script are provided', function() {
-        var file = 'test/chatbot-api/res/food_bot/dictionary.json';
-        var dictionary = fs.readFileSync(file, 'utf-8');
-
-        var file = 'test/chatbot-api/res/food_bot/script.txt';
-        var oimlScript = fs.readFileSync(file, 'utf-8');
-
-        var file = 'test/chatbot-api/res/food_bot/user_commands.js';
-        var user_commands = fs.readFileSync(file, 'utf-8');
-
-        var botmodel = {
-            'commands': {
-                'type': 'js',
-                'script': user_commands
-            },
-            'model': {
-                'dictionary': dictionary,
-                'script': oimlScript
-            }
-        };
+        var botmodel = foodBotModel;
 
         it('should create the chatbot without any error', function(done) {
             var chatbot = OpenIntentChatbot();
@@ -272,25 +207,7 @@ describe("Test open intent chatbot", function() {
     });
 
     describe('When right dictionary and js script are provided but bad script', function() {
-        var file = 'test/chatbot-api/res/food_bot/dictionary.json';
-        var dictionary = fs.readFileSync(file, 'utf-8');
-
-        var file = 'test/chatbot-api/res/food_bot/bad_script.txt';
-        var oimlScript = fs.readFileSync(file, 'utf-8');
-
-        var file = 'test/chatbot-api/res/food_bot/user_commands.js';
-        var user_commands = fs.readFileSync(file, 'utf-8');
-
-        var botmodel = {
-            'commands': {
-                'type': 'js',
-                'script': user_commands
-            },
-            'model': {
-                'dictionary': dictionary,
-                'script': oimlScript
-            }
-        };
+        var botmodel = badFoodBotModel;
 
         it('should return the interpreter feedback as error', function(done) {
             var chatbot = OpenIntentChatbot();
@@ -317,7 +234,6 @@ describe("Test open intent chatbot", function() {
     });
 
     describe('When redis session manager is selected', function() {
-
         it('should contain a RedisSessionManager interface', function() {
             var config = {
                 'session': {

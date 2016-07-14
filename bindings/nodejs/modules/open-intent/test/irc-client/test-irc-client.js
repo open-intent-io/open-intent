@@ -43,16 +43,10 @@ var Q = require('q');
 var RestChatbot = require('../../rest-server');
 var fs = require('fs');
 var proxyquire = require('proxyquire');
+var foodBotModel = require('../food-bot-model');
 
 var CHATBOT_PORT = 8080;
 
-var DICTIONARY_FILE = 'test/irc-client/res/dictionary.json';
-var SCRIPT_FILE = 'test/irc-client/res/script.txt';
-var USERCOMMANDS_FILE = 'test/irc-client/res/user_commands.js';
-
-var dictionary = fs.readFileSync(DICTIONARY_FILE, 'utf-8');
-var script = fs.readFileSync(SCRIPT_FILE, 'utf-8');
-var userCommands = fs.readFileSync(USERCOMMANDS_FILE, 'utf-8');
 
 describe('Test the IRC client', function() {
     var chatbot;
@@ -60,16 +54,7 @@ describe('Test the IRC client', function() {
     var talk;
     var uri = 'http://localhost:' + CHATBOT_PORT;
 
-    var botmodel = {
-        'model': {
-            'script': script,
-            'dictionary': dictionary
-        },
-        'commands': {
-            'type': 'js',
-            'script': userCommands
-        }
-    }
+    var botmodel = foodBotModel;
 
     var createAssertEqFunction = function(input, expected) {
         return function(data) {
@@ -129,10 +114,13 @@ describe('Test the IRC client', function() {
             return deferred.promise;
         };
 
-        chatbot = new RestChatbot({
+        RestChatbot({
             port: CHATBOT_PORT,
             model: botmodel
-        });
+        })
+        .then(function(newChatbot) {
+            chatbot = newChatbot;
+        })
     });
 
     afterEach(function() {

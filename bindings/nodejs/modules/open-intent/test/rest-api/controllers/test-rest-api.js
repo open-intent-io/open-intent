@@ -39,20 +39,26 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var should = require('should');
 var request = require('supertest');
-var RestChatbotServer = require('../../../index').RestChatbotServer;
+var RestChatbotServer = require('../../../rest-server');
 var fs = require('fs');
 
-describe('controllers', function() {
+describe('Swagger controllers', function() {
     var server = undefined;
 
-    var file = 'test/rest-api/res/chatbot.json';
-    var jsonModel = fs.readFileSync(file, 'utf-8');
+    var file = 'test/res/food_bot/dictionary.json';
+    var dictionary = fs.readFileSync(file, 'utf-8');
 
-    var file = 'test/rest-api/res/userCommands.js';
+    var file = 'test/res/food_bot/script.txt';
+    var oiml = fs.readFileSync(file, 'utf-8');
+
+    var file = 'test/res/food_bot/user_commands.js';
     var userCommands = fs.readFileSync(file,'utf-8');
 
     before(function() {
-        server = new RestChatbotServer({ 'port': 10010 });
+        RestChatbotServer({ 'port': 10010 })
+        .then(function(chatbot) {
+            server = chatbot;
+        });
     });
 
     after(function() {
@@ -61,22 +67,16 @@ describe('controllers', function() {
 
     describe('chatbot-rest-api', function() {
 
-    var commands = {
-        "type": "js",
-        "script": userCommands
-    };
-
-    var model = {
-        "json": jsonModel
-    }
-
     var botmodel = {
-        'commands': commands,
-        'model': model
+        'commands': {
+            'type': 'js',
+            'script': userCommands
+        },
+        'oiml': oiml,
+        'dictionary': dictionary
     };
 
     describe('Call methods while no model loaded', function() {
-
         it('should return an error when calling getModel', function(done) {
 
         request(server._app)
@@ -172,7 +172,7 @@ describe('controllers', function() {
                 .expect('Content-Type', /json/)
                 .expect(200)
                 .end(function(err, res) {
-                    res.body.should.eql({ 'state': 'init' });
+                    res.body.should.eql({ 'state': '@root' });
                 done();
                 });
             });
@@ -181,7 +181,7 @@ describe('controllers', function() {
 
                 request(server._app)
                 .put('/state/ABC')
-                .send({ 'state': 'wait_order' })
+                .send({ 'state': '@yesno' })
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect(200)
@@ -194,12 +194,12 @@ describe('controllers', function() {
             it('should return a reply when calling talk', function(done) {
                 request(server._app)
                 .post('/talk/ABC')
-                .send({ 'message': 'Je veux un Coca' })
+                .send({ 'message': 'yes' })
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect(200)
                 .end(function(err, res) {
-                    res.body.should.eql({ 'replies': ['Vous-voulez quelque chose d\'autre ?'] });
+                    res.body.should.eql({ 'replies': ['I\'m ordering, it is gonna be 5$.'] });
                 done();
                 });
             });
