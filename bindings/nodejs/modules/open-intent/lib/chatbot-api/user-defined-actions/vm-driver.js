@@ -39,43 +39,42 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var vm = require('vm');
 var Q = require('q');
+var EventEmitter = require('events');
 
-function runUserCommandsInVM(userCommands, actionId, sessionId, intentVariables) {
-    var deferred = Q.defer();
-
-    var context = {
-        'sessionId': sessionId,
-        'intentVariables': intentVariables,
-        'next': deferred.resolve,
-        'userCommands': userCommands,
-        'actionId': actionId,
-        'requireFromString': require('require-from-string')
-    }
-
-    var sandbox = vm.createContext(context);
-    vm.createContext(sandbox);
-    vm.runInContext(" \
-var userCommandsDict = requireFromString(userCommands); \
-if(actionId in userCommandsDict) { \
-    userCommandsDict[actionId](intentVariables, sessionId, next); \
-} else { \
-    next() \
-} \
-", sandbox, { 'timeout': 2000 });
-    return deferred.promise;
-}
-
+var script = "\
+commandEmitter.on('command', function(actionId, intentVariables, sessionId, next) { \
+    if(actionId in userCommands) { \
+        userCommands[actionId](intentVariables, sessionId, next); \
+    } else { \
+        next() \
+    }        \
+});      \
+";
 
 module.exports = function(userCommands) {
 
-    if (!(userCommands !== null && typeof userCommands == 'string')) {
-        throw new Error('Bad user commands (must be a string).');
-    }
+    var _sandbox;
+    var commandEmitter = new EventEmitter();
+    var context = {
+        commandEmitter: commandEmitter
+    };
 
-    this._userCommands = userCommands;
+    if (userCommands !== null && typeof userCommands == 'string') {
+        context.userCommandsInput =  userCommands;
+        context.requireFromString = require('require-from-string');
+        _sandbox = vm.createContext(context);
+        vm.runInContext("var userCommands = requireFromString(userCommandsInput);", _sandbox, {timeout: 2000});
+    }
+    if (userCommands !== null && typeof userCommands == 'object') {
+        context.userCommands = userCommands;
+        _sandbox = vm.createContext(context);
+    }
+    vm.runInContext(script, _sandbox, {timeout: 5000});
 
     this.execute = function(actionId, sessionId, intentVariables) {
-        return runUserCommandsInVM(this._userCommands, actionId, sessionId, intentVariables);
+        var deferred = Q.defer();
+        commandEmitter.emit('command', actionId, intentVariables, sessionId, deferred.resolve);
+        return deferred.promise;
     }
 
     return this;

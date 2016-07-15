@@ -8,7 +8,7 @@ module.exports = function(uri) {
 function IRCClient(uri) {
     var readline = require('readline');
     var RestChatbotClient = require('./rest-client');
-    var stdio = require('./lib/stdio');
+    var stdio = require('./stdio');
 
     var chatbotClient = new RestChatbotClient(uri);
 

@@ -39,7 +39,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var should = require('should');
 var request = require('supertest');
-var RestChatbotServer = require('../../../rest-server');
+var RestChatbotServer = require('../../../lib/rest-server');
 var fs = require('fs');
 
 describe('Swagger controllers', function() {

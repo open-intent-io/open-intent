@@ -5,11 +5,11 @@ open-intent npm module allows you to build chatbot in seconds with your own mode
 # Quick start
 Install open-intent module, create a chatbot project and start it with the following commands
 
-    1. npm install -g open-intent
+    npm install -g open-intent
 
-    2. open-intent create mychatbot
+    open-intent create mychatbot
 
-    3. open-intent start mychatbot
+    open-intent start mychatbot
 
 The command #2 creates a directory called mychatbot/ with a skeleton of nodejs application containing the REST chatbot. The model files you're gonna be editing are located under mychatbot/res/.
 

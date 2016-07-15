@@ -41,7 +41,7 @@ module.exports = {
     'ModelBuilder': require('./lib/chatbot-api/model-builder'),
 
     'createChatbot': require('./lib/chatbot-api/chatbot'),
-    'createRestChatbotServer': require('./rest-server'),
-    'createRestChatbotClient': require('./rest-client'),
-    'createIRCChatbotClient': require('./irc-client')
+    'createRestChatbotServer': require('./lib/rest-server'),
+    'createRestChatbotClient': require('./lib/rest-client'),
+    'createIRCChatbotClient': require('./lib/irc-client')
 }

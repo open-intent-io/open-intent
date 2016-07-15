@@ -42,8 +42,8 @@ var sinon = require('sinon')
 var fs = require('fs');
 var foodBotModel = require('../food-bot-model');
 
-var RestChatbotClient = require('../../rest-client');
-var RestChatbotServer = require('../../rest-server');
+var RestChatbotClient = require('../../lib/rest-client');
+var RestChatbotServer = require('../../lib/rest-server');
 
 var SERVICE_HOST = 'http://127.0.0.1';
 var SERVICE_PORT = 10010;
@@ -55,8 +55,8 @@ describe('Testing the REST Chatbot', function() {
     describe('Interact with the chatbot', function() {
         before(function() {
             RestChatbotServer({
-                'port': SERVICE_PORT,
-                'model': botmodel
+                port: SERVICE_PORT,
+                model: botmodel
             })
             .then(function(chatbot) {
                 server1 = chatbot;

@@ -37,77 +37,84 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var requestify = require("requestify");
-var Q = require('q');
-var serialize = require('./lib/chatbot-api/model-serializer').serialize;
-var deserialize = require('./lib/chatbot-api/model-serializer').deserialize;
 
-var REQUEST_TIMEOUT = 5000;
 
-module.exports = function(uri) {
+var deserialize = require('../../chatbot-api/model-serializer').deserialize;
+var serialize = require('../../chatbot-api/model-serializer').serialize;
 
-    this.talk = function(sessionId, message) {
-        var deferred = Q.defer();
-        var url = uri + '/talk/' + sessionId;
+module.exports = {
+    talk: talk,
+    setstate: setstate,
+    getstate: getstate,
+    setmodel: setmodel,
+    getmodel: getmodel
+};
 
-        requestify.post(url,
-            { 'message': message }, { 
-            'timeout': REQUEST_TIMEOUT,
-            'dataType': 'form-url-encoded'
-        })
-        .then(function(response) {
-            var replies = JSON.parse(response.body).replies;
-            deferred.resolve(replies);
-        })
-        .fail(function(error) {
-            deferred.reject(error);
-        });
 
-        return deferred.promise;
-    }
+function talk(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var sessionId = req.swagger.params.sessionId.value;
+    var message = req.swagger.params.message.value;
 
-    this.setState = function(sessionId, state) {
-        var url = uri + '/state/' + sessionId;
-        return requestify.put(url, {
-            'state': state,
-            'dataType': 'form-url-encoded'
-        }, { 'timeout': REQUEST_TIMEOUT });
-    }
+    chatbot.talk(sessionId, message)
+    .then(function(replies) {
+        res.json({ 'replies': replies });
+    }).fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}
 
-    this.getState = function(sessionId) {
-        var url = uri + '/state/' + sessionId;
-        var deferred = Q.defer();
 
-        requestify.get(url,
-            { 'timeout': REQUEST_TIMEOUT })
-        .then(function(response) {
-            deferred.resolve(JSON.parse(response.body).state);
-        })
-        .fail(function(error) {
-            deferred.reject(error);
-        });
-        return deferred.promise;
-    }
+function setstate(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var sessionId = req.swagger.params.sessionId.value;
+    var state = req.swagger.params.state.value;
 
-    this.setModel = function(botmodel) {
-        var url = uri + '/model';
-        return requestify.put(url, serialize(botmodel),
-            { 'timeout': REQUEST_TIMEOUT });
-    }
+    chatbot.setState(sessionId, state)
+    .then(function(state) {
+        res.json({ 'message': 'OK' });
+    })
+    .fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}
 
-    this.getModel = function() {
-        var url = uri + '/model';
-        var deferred = Q.defer();
+function getstate(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var sessionId = req.swagger.params.sessionId.value;
 
-        requestify.get(url, { 'timeout': REQUEST_TIMEOUT })
-        .then(function(response) {
-            deferred.resolve(deserialize(JSON.parse(response.body).model));
-        })
-        .fail(function(error) {
-            deferred.reject(error);
-        })
-        return deferred.promise;
-    }
+    chatbot.getState(sessionId)
+    .then(function(state) {
+        res.json({ 'state': state });
+    })
+    .fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}
 
-    return this;
+function setmodel(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var botmodel = req.swagger.params.botmodel.value;
+
+    var model = deserialize(botmodel);
+    chatbot.setModel(model)
+    .then(function() {
+        res.json({ 'message': 'OK' });
+    })
+    .fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}
+
+function getmodel(req, res) {
+    var chatbot = req.app.get('chatbot');
+
+    chatbot.getModel()
+    .then(function(model) {
+        var serializedModel = serialize(model);
+        res.json(serializedModel);
+    })
+    .fail(function(err) {
+        res.status(500).send({'message': err});
+    });
 }
