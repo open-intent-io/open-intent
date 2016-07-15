@@ -51,7 +51,7 @@ function _beforeEach(done) {
     var stdinMock = new stream.MockReadableStream();
     var stdoutMock = new stream.MockReadableStream();
 
-    stub['./lib/stdio'] = {
+    stub['./stdio'] = {
         stdin: stdinMock,
         stdout: stdoutMock,
         '@global': true

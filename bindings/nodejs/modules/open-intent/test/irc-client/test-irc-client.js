@@ -40,9 +40,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var expect    = require("chai").expect;
 var stream = require("mock-utf8-stream");
 var Q = require('q');
-var RestChatbot = require('../../rest-server');
 var fs = require('fs');
 var proxyquire = require('proxyquire');
+
+var RestChatbot = require('../../lib/rest-server');
 var foodBotModel = require('../food-bot-model');
 
 var CHATBOT_PORT = 8080;
@@ -92,13 +93,13 @@ describe('Test the IRC client', function() {
         var stdoutMock = new stream.MockReadableStream();
 
         var stub = {
-            './lib/stdio': {
+            './stdio': {
                 stdin: stdinMock,
                 stdout: stdoutMock
             }
         };
 
-        IRCClient = proxyquire('../../irc-client', stub);
+        IRCClient = proxyquire('../../lib/irc-client', stub);
 
         talk = function(input) {
             var deferred = Q.defer();

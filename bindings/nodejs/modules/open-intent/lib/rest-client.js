@@ -37,59 +37,77 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var IRCChatbotClient = require('../../irc-client');
-var RestChatbotServer = require('../../rest-server');
+var requestify = require("requestify");
 var Q = require('q');
+var serialize = require('./chatbot-api/model-serializer').serialize;
+var deserialize = require('./chatbot-api/model-serializer').deserialize;
 
-var fs = require('fs');
-var path = require('path');
+var REQUEST_TIMEOUT = 5000;
 
-function RestChatbot(config) {
-    var deferred = Q.defer();
+module.exports = function(uri) {
 
-    var port = 10010;
-    if(config && 'port' in config) {
-        port = config.port
+    this.talk = function(sessionId, message) {
+        var deferred = Q.defer();
+        var url = uri + '/talk/' + sessionId;
+
+        requestify.post(url,
+            { 'message': message }, { 
+            'timeout': REQUEST_TIMEOUT,
+            'dataType': 'form-url-encoded'
+        })
+        .then(function(response) {
+            var replies = JSON.parse(response.body).replies;
+            deferred.resolve(replies);
+        })
+        .fail(function(error) {
+            deferred.reject(error);
+        });
+
+        return deferred.promise;
     }
 
-    var modelDirectory = process.cwd();
-    if(config && 'model_directory' in config) {
-        modelDirectory = config.model_directory;
+    this.setState = function(sessionId, state) {
+        var url = uri + '/state/' + sessionId;
+        return requestify.put(url, {
+            'state': state,
+            'dataType': 'form-url-encoded'
+        }, { 'timeout': REQUEST_TIMEOUT });
     }
 
-    var DICTIONARY_FILE = path.join(modelDirectory, 'dictionary.json');
-    var SCRIPT_FILE = path.join(modelDirectory, 'script.txt');
-    var USERCOMMANDS_FILE = path.join(modelDirectory, 'user_commands.js');;
+    this.getState = function(sessionId) {
+        var url = uri + '/state/' + sessionId;
+        var deferred = Q.defer();
 
-    var dictionary = fs.readFileSync(DICTIONARY_FILE, 'utf-8');
-    var script = fs.readFileSync(SCRIPT_FILE, 'utf-8');
-    var userCommands = fs.readFileSync(USERCOMMANDS_FILE, 'utf-8');
-
-    var botmodel = {
-        'model': {
-            'script': script,
-            'dictionary': dictionary
-        },
-        'commands': {
-            'type': 'js',
-            'script': userCommands
-        }
+        requestify.get(url,
+            { 'timeout': REQUEST_TIMEOUT })
+        .then(function(response) {
+            deferred.resolve(JSON.parse(response.body).state);
+        })
+        .fail(function(error) {
+            deferred.reject(error);
+        });
+        return deferred.promise;
     }
 
+    this.setModel = function(botmodel) {
+        var url = uri + '/model';
+        return requestify.put(url, serialize(botmodel),
+            { 'timeout': REQUEST_TIMEOUT });
+    }
 
-    var restChatbotService = new RestChatbotServer({
-        'port': port,
-        'model': botmodel
-    }, function() {
-        deferred.resolve(restChatbotService);
-    });
+    this.getModel = function() {
+        var url = uri + '/model';
+        var deferred = Q.defer();
 
-    process.on('SIGINT', function() {
-        console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
-        process.exit(0);
-    });
+        requestify.get(url, { 'timeout': REQUEST_TIMEOUT })
+        .then(function(response) {
+            deferred.resolve(deserialize(JSON.parse(response.body).model));
+        })
+        .fail(function(error) {
+            deferred.reject(error);
+        })
+        return deferred.promise;
+    }
 
-    return deferred.promise;
+    return this;
 }
-
-module.exports = RestChatbot;
