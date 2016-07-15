@@ -11,8 +11,13 @@
     "open-intent": "1.0.2"
   },
   "devDependencies":  {
+    "proxyquire": "^1.7.10",
+    "mock-utf8-stream": "^0.1.1",
+    "should": "^7.1.0",
+    "mocha": "^2.5.3"
   },
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "./node_modules/.bin/mocha --reporter spec"
   }
 }

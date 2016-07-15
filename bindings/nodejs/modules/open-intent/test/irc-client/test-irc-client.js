@@ -65,8 +65,6 @@ describe('Test the IRC client', function() {
     }
 
     var handleScript = function(script, done) {
-        IRCClient(uri);
-
         var promise = talk(script[0]);
         for(var i=2; i < script.length; i += 2) {
             var input = script[i];
@@ -92,14 +90,13 @@ describe('Test the IRC client', function() {
         var stdinMock = new stream.MockReadableStream();
         var stdoutMock = new stream.MockReadableStream();
 
-        var stub = {
-            './stdio': {
-                stdin: stdinMock,
-                stdout: stdoutMock
-            }
+        var stdio = {
+            stdin: stdinMock,
+            stdout: stdoutMock
         };
 
-        IRCClient = proxyquire('../../lib/irc-client', stub);
+        IRCClient = require('../../lib/irc-client');
+        IRCClient(uri, stdio);
 
         talk = function(input) {
             var deferred = Q.defer();
