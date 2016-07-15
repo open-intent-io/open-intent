@@ -6,7 +6,7 @@ var Q = require('q');
 module.exports = RestChatbot;
 
 
-function RestChatbot() {
+function RestChatbot(stdio) {
     var _this = this;
     this._chatbotServer = undefined;
 
@@ -40,7 +40,7 @@ function RestChatbot() {
 
                     if(withIRCClient) {
                         console.log(">>> Ready to talk to the chatbot <<<");
-                        openintent.createIRCChatbotClient('http://localhost:' + port);
+                        openintent.createIRCChatbotClient('http://localhost:' + port, stdio);
                     }
                     deferred.resolve();
                 })

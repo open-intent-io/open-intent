@@ -1,21 +1,53 @@
 
-var proxyquire = require('proxyquire');
 var expect    = require("chai").expect;
 var stream = require("mock-utf8-stream");
 var Q = require('q');
 
-var stub = {};
-var RestChatbot = proxyquire('../rest-chatbot', stub);
-
 var talk = undefined;
 var chatbot = undefined;
 
+module.exports = function(resDirectory) {
+    var RestChatbot = require('../rest-chatbot');
 
-module.exports = {
-    checkScript: handleScript,
+    var _beforeEach = function(done) {
+        var stdinMock = new stream.MockReadableStream();
+        var stdoutMock = new stream.MockReadableStream();
 
-    beforeEach: _beforeEach,
-    afterEach: _afterEach
+        var stdio = {
+            stdin: stdinMock,
+            stdout: stdoutMock,
+        };
+
+        chatbot = RestChatbot(stdio);
+
+        chatbot.start(8080, resDirectory, true)
+        .then(function() {
+            talk = function(input) {
+                var deferred = Q.defer();
+
+                var onData = function(data) {
+                    deferred.resolve(data);
+                    stdoutMock.removeListener('data', onData);
+                };
+
+                stdoutMock.on('data', onData);
+                stdinMock.write(input);
+
+                return deferred.promise;
+            };
+            done();
+        })
+        .fail(function(err) {
+            console.error('Error: ' + err);
+        });
+    };
+
+    return {
+        checkScript: handleScript,
+
+        beforeEach: _beforeEach,
+        afterEach: _afterEach
+    };
 }
 
 function createAssertEqFunction(input, expected) {
@@ -45,40 +77,6 @@ function handleScript(script, done) {
         .fail(function(err) {
             console.error(err);
         });
-}
-
-function _beforeEach(done) {
-    var stdinMock = new stream.MockReadableStream();
-    var stdoutMock = new stream.MockReadableStream();
-
-    stub['./stdio'] = {
-        stdin: stdinMock,
-        stdout: stdoutMock,
-        '@global': true
-    };
-
-    chatbot = new RestChatbot();
-    
-    chatbot.start(8080, 'project-skeletons/rest-chatbot/res', true)
-    .then(function() {
-        talk = function(input) {
-            var deferred = Q.defer();
-
-            var onData = function(data) {
-                deferred.resolve(data);
-                stdoutMock.removeListener('data', onData);
-            };
-
-            stdoutMock.on('data', onData);
-            stdinMock.write(input);
-
-            return deferred.promise;
-        };
-        done();
-    })
-    .fail(function(err) {
-        console.error('Error: ' + err);
-    });
 }
 
 function _afterEach(done) {
