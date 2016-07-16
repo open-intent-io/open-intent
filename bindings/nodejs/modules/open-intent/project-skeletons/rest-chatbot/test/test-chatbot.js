@@ -82,7 +82,7 @@ describe('Test the chatbot with several scripts', function() {
             "Pizza\n",
             "Got it, you want pizza, right?\n",
             "yes\n",
-            "I'm ordering, it is gonna be 5$.\n"
+            "I'm ordering, it is gonna be 8$.\n"
         ];
 
         helpers.checkScript(script, done);
