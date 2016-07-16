@@ -48,8 +48,8 @@ var project = require('../lib/project/project')
 function execute(command, header) {
     var cb = function(err, reply) {
         if (header && !err) {
-            //print(header);
-            //print(Array(header.length + 1).join('='));
+            print(header);
+            print(Array(header.length + 1).join('='));
         }
         if (!reply && !err) { reply = 'done'; }
         printAndExit(err, reply);
