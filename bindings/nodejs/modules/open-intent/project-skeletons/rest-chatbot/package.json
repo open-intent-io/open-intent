@@ -2,7 +2,7 @@
   "name": "open-intent-app",
   "version": "0.0.1",
   "private": true,
-  "description": "New open-intent chatbot project",
+  "description": "Open-intent chatbot project",
   "keywords": [],
   "author": "",
   "license": "",
@@ -11,7 +11,6 @@
     "open-intent": "^1.0.0"
   },
   "devDependencies":  {
-    "proxyquire": "^1.7.10",
     "mock-utf8-stream": "^0.1.1",
     "should": "^7.1.0",
     "mocha": "^2.5.3"
