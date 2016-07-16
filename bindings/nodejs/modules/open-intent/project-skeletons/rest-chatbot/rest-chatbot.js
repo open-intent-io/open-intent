@@ -37,14 +37,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var openintent = require('open-intent');
 var path = require('path');
 var Q = require('q');
 
 module.exports = RestChatbot;
 
-
 function RestChatbot(stdio) {
+    var openintent = require('open-intent');
+
     var _this = this;
     this._chatbotServer = undefined;
 
@@ -52,7 +52,7 @@ function RestChatbot(stdio) {
         if(_this._chatbotServer) {
             _this._chatbotServer.close();
         }
-    }
+    };
 
     this.start = function(port, modelDirectory, withIRCClient) {
         var deferred = Q.defer();
