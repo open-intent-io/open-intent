@@ -16,10 +16,7 @@ The following line will build the docker image
 
     docker build -t chatbot .
 
-The following line will start your chatbot service on port 3000 with the ability to test as a CLI program
+The following line will start your chatbot service on port 8080
 
-    docker run --rm -e SERVICE_PORT=3000 -e DEBUG=true -v $(pwd)/custom_res:/usr/src/res -it -p 3000:3000 chatbot
+    docker run --rm -v /path/to/custom/res:/usr/src/chatbot/res -it -p 8080:8080 chatbot
 
-If you don't need the CLI but only the REST API just remove the DEBUG env variable and the interactive terminal from the above command line 
-
-    docker run --rm -e SERVICE_PORT=3000 -v $(pwd)/custom_res:/usr/src/res -p 3000:3000 chatbot

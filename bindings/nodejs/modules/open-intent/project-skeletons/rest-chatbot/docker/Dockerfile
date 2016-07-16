@@ -9,18 +9,12 @@ RUN apt-get update; apt-get install -y nodejs npm \
         libboost-regex1.58 \
         libboost-log1.58
 
-RUN npm install -g nodemon
+RUN npm install -g open-intent
 
 RUN ln -s /usr/bin/nodejs /usr/bin/node
-
-COPY app.js /usr/src/
-COPY terminal-client.js /usr/src/
-COPY node_modules/ /usr/src/node_modules/
-COPY package.json /usr/src/
-
 
 #position the workspace in an example
 WORKDIR /usr/src
 
 # Lock outgoing packets for security reason
-CMD ["nodemon", "-w", "/usr/src/*", "-w", "/usr/src/res/*", "-e", "js,txt,json", "app.js"]
+CMD ["open-intent", "project", "create", "chatbot"]

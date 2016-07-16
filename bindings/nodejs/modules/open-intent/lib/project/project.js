@@ -68,7 +68,7 @@ function create(name, options, cb) {
 
     console.log(util.format('Chatbot %s created in %s', name, targetDir));
     cloneSkeleton(name, targetDir, function() {
-        var message = util.format('Success! You may start your new app by running: "open-intent start chatbot %s', name);
+        var message = util.format('Success! You may start your new app by running: "open-intent project start %s"', name);
 
         installDependencies(targetDir, message, cb);
     });
@@ -206,22 +206,29 @@ function cloneSkeleton(name, destDir, cb) {
 }
 
 function customizeClonedFiles(name, destDir, cb) {
+    var rmdir = require('rmdir');
 
     // npm renames .gitignore to .npmignore, change it back
     var npmignore = path.resolve(destDir, '.npmignore');
     var gitignore = path.resolve(destDir, '.gitignore');
-    fs.rename(npmignore, gitignore, function(err) {
-        if (err && !fs.existsSync(gitignore)) { return cb(err); }
+    var dockerDir = path.resolve(destDir, 'docker');
 
-        // rewrite package.json
-        var fileName = path.resolve(destDir, 'package.json');
-        fs.readFile(fileName, { encoding: 'utf8' }, function(err, string) {
-            if (err) { return cb(err); }
+    rmdir(dockerDir, function(err) {
+        if(err) { return cb(err); }
 
-            var project = JSON.parse(string);
-            project.name = name;
+        fs.rename(npmignore, gitignore, function(err) {
+            if (err && !fs.existsSync(gitignore)) { return cb(err); }
 
-            fs.writeFile(fileName, JSON.stringify(project, null, '  '), cb);
+            // rewrite package.json
+            var fileName = path.resolve(destDir, 'package.json');
+            fs.readFile(fileName, { encoding: 'utf8' }, function(err, string) {
+                if (err) { return cb(err); }
+
+                var project = JSON.parse(string);
+                project.name = name;
+
+                fs.writeFile(fileName, JSON.stringify(project, null, '  '), cb);
+            });
         });
     });
 }

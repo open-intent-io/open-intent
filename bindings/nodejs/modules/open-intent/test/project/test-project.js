@@ -131,17 +131,20 @@ describe('test project commands', function() {
             });
         });
 
-        it('should create a new connect project', function (done) {
+        it.only('should create a new project', function (done) {
             var name = 'create';
             var projPath = path.resolve(tmpDir, name);
             process.chdir(tmpDir);
-            project.create(name, undefined, function (err) {
+            project.create(name, {}, function (err) {
                 should.not.exist(err);
                 // check a couple of files
                 var packageJson = path.resolve(projPath, 'package.json');
                 fs.existsSync(packageJson).should.be.ok;
                 fs.existsSync(path.resolve(projPath, 'node_modules')).should.not.be.ok;
                 fs.existsSync(path.resolve(projPath, '.gitignore')).should.be.ok;
+                should.throws(function() {
+                    fs.accessSync(path.resolve(projPath, 'docker'));
+                });
 
                 // check spawn `npm install`
                 spawn.command.should.equal('npm');

@@ -32,6 +32,7 @@
     "redis": "^2.6.0-2",
     "requestify": "^0.1.17",
     "require-from-string": "^1.2.0",
+    "rmdir": "^1.2.0",
     "swagger-express-mw": "^0.1.0",
     "swagger-tools": "^0.10.1",
     "tmp": "0.0.28"
