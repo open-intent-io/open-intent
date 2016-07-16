@@ -38,12 +38,22 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var proxyquire = require('proxyquire');
+var oi = require('../../../index');
+oi['@noCallThru'] = true;
+
+var restChatbot = proxyquire('../../../project-skeletons/rest-chatbot/rest-chatbot', {
+    'open-intent': oi
+});
 
 var helpers = function() {
-    return require('../../../project-skeletons/rest-chatbot/test/helpers')('project-skeletons/rest-chatbot/res');
+
+    var h = proxyquire('../../../project-skeletons/rest-chatbot/test/helpers', {
+        '../rest-chatbot': restChatbot
+    });
+
+    return h('project-skeletons/rest-chatbot/res');
 }
 
 proxyquire('../../../project-skeletons/rest-chatbot/test/test-chatbot', {
-    'open-intent': require('../../../index'),
     './helpers': helpers
 });

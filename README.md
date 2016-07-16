@@ -1,4 +1,7 @@
-[![][logo]][website]
+<p align="center">
+  <img src="/doc/img/logo.png" alt="Logo"/>
+</p>
+
 ====================
 [![Build Status](https://travis-ci.org/open-intent-io/open-intent.svg?branch=master)](https://travis-ci.org/open-intent-io/open-intent)
 
@@ -7,6 +10,15 @@ The framework allows you to build and deploy easily your conversational bot in m
 
 # Example
 
+This is as simple as those 3 lines to start prototyping your bot.
+
+    npm install -g open-intent
+    open-intent project create chatbot
+    open-intent project start chatbot
+
+This will create a directory chatbot/ with necessary files so that you can start editing the model which is in res/ directory.
+
+Please follow this [link](/bindings/nodejs/modules/open-intent) for a more detailed documentation
 
 
 # Source
@@ -14,21 +26,19 @@ Our latest source of open-intent can be found on [GitHub]. Fork us!
 
 # Contributing to open-intent
 Follow [contributing](CONTRIBUTING.md) file.
+## Build
 
-# Install
+There are two ways to build the framework. You can do it with CMake or Docker.
 
-The whole project is built with CMake.
-
-To build it, configure with CMake and build.
+### CMake
+To build, configure with CMake and build.
 
     mkdir build-dir/
     cd build-dir/
     cmake -G "Unix Makefiles" ..
     make -j 4
 
-
-You can also use docker to build the project.
-
+### Docker
 To build, just type:
 
     docker build -t open-intent-build .
@@ -65,4 +75,4 @@ open-intent is **licensed** under the **[MIT License]**. The terms of the licens
 
 [MIT License]: https://opensource.org/licenses/MIT
 [GitHub]: https://github.com/open-intent-io/open-intent
-[logo]: https://scontent-lhr3-1.xx.fbcdn.net/v/t1.0-9/13501692_561633667353075_4274869735130433589_n.png?oh=36dbc4724cd3e337bdd198f8198c99df&oe=582452E7
+[logo]: /doc/img/logo.png

@@ -131,7 +131,7 @@ describe('test project commands', function() {
             });
         });
 
-        it.only('should create a new project', function (done) {
+        it('should create a new project', function (done) {
             var name = 'create';
             var projPath = path.resolve(tmpDir, name);
             process.chdir(tmpDir);
