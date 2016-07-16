@@ -198,7 +198,6 @@ function cloneSkeleton(name, destDir, cb) {
         customizeClonedFiles(name, destDir, cb);
     };
 
-    console.log('copying source files from %s', sourceDir);
     fs.copy(sourceDir, destDir, true, function(err) {
         if (err) { return cb(err); }
         done();
@@ -250,7 +249,7 @@ function spawn(command, options, cwd, cb) {
             options,
         { cwd: cwd });
     npm.stdout.on('data', function (data) {
-        console.log(data);
+        console.log(''+data);
     });
     npm.stderr.on('data', function(data) {
         console.log(util.format('%s', data));
