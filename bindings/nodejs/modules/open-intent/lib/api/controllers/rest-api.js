@@ -37,36 +37,82 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var expect    = require("chai").expect;
-var assert    = require("chai").assert;
-var sinon = require('sinon');
+var deserialize = require('../../chatbot-api/model-serializer').deserialize;
+var serialize = require('../../chatbot-api/model-serializer').serialize;
 
-var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/standalone-driver');
+module.exports = {
+    talk: talk,
+    setstate: setstate,
+    getstate: getstate,
+    setmodel: setmodel,
+    getmodel: getmodel
+};
 
 
-describe("Test standalone session manager driver", function() {
+function talk(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var sessionId = req.swagger.params.sessionId.value;
+    var message = req.swagger.params.message.value;
 
-    describe("Test save a context and load it back for 1 sessionId", function() {
-        var context = {
-            'state': 'MyState'
-        }
-
-        it('should save the context successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
-
-            sessionManager.save('MySession', context).then(function() {
-                done();
-            });
-        });
-
-        it('should load the context back successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
-
-            sessionManager.save('MySession', context);
-            sessionManager.load('MySession').then(function(savedContext) {
-                expect(savedContext).to.deep.equal(context);
-                done();
-            });
-        })
+    chatbot.talk(sessionId, message)
+    .then(function(replies) {
+        res.json({ 'replies': replies });
+    }).fail(function(err) {
+        res.status(500).send({'message': err});
     });
-});
+}
+
+
+function setstate(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var sessionId = req.swagger.params.sessionId.value;
+    var state = req.swagger.params.state.value;
+
+    chatbot.setState(sessionId, state)
+    .then(function(state) {
+        res.json({ 'message': 'OK' });
+    })
+    .fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}
+
+function getstate(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var sessionId = req.swagger.params.sessionId.value;
+
+    chatbot.getState(sessionId)
+    .then(function(state) {
+        res.json({ 'state': state });
+    })
+    .fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}
+
+function setmodel(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var botmodel = req.swagger.params.botmodel.value;
+
+    var model = deserialize(botmodel);
+    chatbot.setModel(model)
+    .then(function() {
+        res.json({ 'message': 'OK' });
+    })
+    .fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}
+
+function getmodel(req, res) {
+    var chatbot = req.app.get('chatbot');
+
+    chatbot.getModel()
+    .then(function(model) {
+        var serializedModel = serialize(model);
+        res.json(serializedModel);
+    })
+    .fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}

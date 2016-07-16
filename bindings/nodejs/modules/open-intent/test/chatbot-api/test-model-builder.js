@@ -37,74 +37,61 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var sinon = require('sinon');
+var ModelBuilder = require('../../lib/chatbot-api/model-builder');
+var should = require('should');
+var fs = require('fs');
 
-var RestUserCommandsDriver = require('../../lib/chatbot-api/user-defined-actions/rest-driver');
+describe('Test model builder', function() {
 
-var REST_SERVICE_PORT = process.env.REST_SERVICE_PORT || 23000;
-var serviceUrl = 'http://localhost:' + REST_SERVICE_PORT;
+    var dictionaryFile = 'test/chatbot-api/res/food_bot/dictionary.json';
+    var userCommandsFile = 'test/chatbot-api/res/food_bot/user_commands.js';
+    var scriptFile = 'test/chatbot-api/res/food_bot/script.txt';
 
-
-describe("Test REST user commands driver", function(endOfTestsCallback) {
-    var express = require('express');
-    var app = express();
-
-
-    before(function() {
-        app.post('/command1', function(req, res) {
-            res.setHeader('Content-Type', 'application/json');
-            res.send({'0': 'variable0'});
-        });
-
-        app.post('/MyCommand', function(req, res) {
-            res.setHeader('Content-Type', 'application/json');
-            res.send({'0': 'MyCommandVariable0'});
-        });
-
-        app.listen(REST_SERVICE_PORT);
-    });
-
-    describe("When user command exists for the actionId, the driver executes it", function() {
-        it('should execute the command1', function(done) {
-            var userCommandsDriver = new RestUserCommandsDriver(serviceUrl);
-            userCommandsDriver.execute('command1', 'SESSION', {})
-            .then(function() {
+    it('should build a model from files with js user commands script', function(done) {
+        ModelBuilder()
+            .withDictionaryFromFile(dictionaryFile)
+            .withJsUserCommandsFromFile(userCommandsFile)
+            .withOIMLFromFile(scriptFile)
+            .build(function(err, botmodel) {
+                should.equal(botmodel.oiml(), fs.readFileSync(scriptFile, 'utf-8'));
+                should.equal(botmodel.commands(), fs.readFileSync(userCommandsFile, 'utf-8'));
+                should.equal(botmodel.hasJsCommands(), true);
+                should.equal(botmodel.dictionary(), fs.readFileSync(dictionaryFile, 'utf-8'));
                 done();
             });
-        });
     });
 
-    describe("When user command does not exist for the actionId, the driver does not execute any command", function() {
-        it('should execute the command1', function(done) {
-            var userCommandsDriver = new RestUserCommandsDriver(serviceUrl);
-            userCommandsDriver.execute('command2', 'SESSION', {})
-            .fail( function() {
+    it('should build a model from files with REST user commands script', function(done) {
+        ModelBuilder()
+            .withDictionaryFromFile(dictionaryFile)
+            .withRestUserCommandsFromFile(userCommandsFile)
+            .withOIMLFromFile(scriptFile)
+            .build(function(err, botmodel) {
+                should.equal(botmodel.oiml(), fs.readFileSync(scriptFile, 'utf-8'));
+                should.equal(botmodel.commands(), fs.readFileSync(userCommandsFile, 'utf-8'));
+                should.equal(botmodel.hasRestCommands(), true);
+                should.equal(botmodel.dictionary(), fs.readFileSync(dictionaryFile, 'utf-8'));
                 done();
             });
-        });
     });
 
-    describe("When config contains endpoints the commands must be routed to endpoints", function() {
-        var config = {
-            'endpoints': {
-                'command2': '/MyCommand'
-            }
-        };
-
-        it('should execute the MyCommand', function(done) {
-            var userCommandsDriver = new RestUserCommandsDriver(serviceUrl, config);
-            userCommandsDriver.execute('command2', 'SESSION', {})
-            .then( function() {
+    it('should return an error when dictionary is missing', function(done) {
+        ModelBuilder()
+            .withRestUserCommandsFromFile(userCommandsFile)
+            .withOIMLFromFile(scriptFile)
+            .build(function(err, botmodel) {
+                should.exist(err);
                 done();
             });
-        });
-
-        it('should fail when attempting to call the original if not mapped', function(done) {
-            var userCommandsDriver = new RestUserCommandsDriver(serviceUrl, config);
-            userCommandsDriver.execute('command1', 'SESSION', {})
-            .fail( function() {
-                done();
-            });
-        });
     });
-});
+
+    it('should return an error when OIML is missing', function(done) {
+        ModelBuilder()
+            .withDictionaryFromFile(dictionaryFile)
+            .withRestUserCommandsFromFile(userCommandsFile)
+            .build(function(err, botmodel) {
+                should.exist(err);
+                done();
+            });
+    });
+})

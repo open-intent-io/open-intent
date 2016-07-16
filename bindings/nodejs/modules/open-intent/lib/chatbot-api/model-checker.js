@@ -37,36 +37,24 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var expect    = require("chai").expect;
-var assert    = require("chai").assert;
-var sinon = require('sinon');
+module.exports = checkModel;
 
-var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/standalone-driver');
+function checkModel(model) {
+    if(!model.dictionary()) {
+        return Error('Missing dictionary.');
+    }
 
+    if(typeof model.dictionary() !== 'string') {
+        return Error('Dictionary must be a string.');
+    }
 
-describe("Test standalone session manager driver", function() {
+    if(! model.oiml()) {
+        return Error('Missing OIML script.');
+    }
 
-    describe("Test save a context and load it back for 1 sessionId", function() {
-        var context = {
-            'state': 'MyState'
-        }
+    if(typeof model.oiml() !== 'string') {
+        return Error('OIML script must be a string.');
+    }
 
-        it('should save the context successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
-
-            sessionManager.save('MySession', context).then(function() {
-                done();
-            });
-        });
-
-        it('should load the context back successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
-
-            sessionManager.save('MySession', context);
-            sessionManager.load('MySession').then(function(savedContext) {
-                expect(savedContext).to.deep.equal(context);
-                done();
-            });
-        })
-    });
-});
+    return undefined;
+}

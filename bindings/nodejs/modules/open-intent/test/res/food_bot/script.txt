@@ -17,8 +17,8 @@
 
 {
 @yesno
-    -No
+    -No!
         #notunderstood
-    -Tell me what you want.
+    -Tell me what you want. Pizza, hamburger or salad?
 @get_food_type
 }

@@ -37,36 +37,77 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var expect    = require("chai").expect;
-var assert    = require("chai").assert;
-var sinon = require('sinon');
+var requestify = require("requestify");
+var Q = require('q');
+var serialize = require('./chatbot-api/model-serializer').serialize;
+var deserialize = require('./chatbot-api/model-serializer').deserialize;
 
-var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/standalone-driver');
+var REQUEST_TIMEOUT = 5000;
 
+module.exports = function(uri) {
 
-describe("Test standalone session manager driver", function() {
+    this.talk = function(sessionId, message) {
+        var deferred = Q.defer();
+        var url = uri + '/talk/' + sessionId;
 
-    describe("Test save a context and load it back for 1 sessionId", function() {
-        var context = {
-            'state': 'MyState'
-        }
-
-        it('should save the context successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
-
-            sessionManager.save('MySession', context).then(function() {
-                done();
-            });
+        requestify.post(url,
+            { 'message': message }, { 
+            'timeout': REQUEST_TIMEOUT,
+            'dataType': 'form-url-encoded'
+        })
+        .then(function(response) {
+            var replies = JSON.parse(response.body).replies;
+            deferred.resolve(replies);
+        })
+        .fail(function(error) {
+            deferred.reject(error);
         });
 
-        it('should load the context back successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
+        return deferred.promise;
+    }
 
-            sessionManager.save('MySession', context);
-            sessionManager.load('MySession').then(function(savedContext) {
-                expect(savedContext).to.deep.equal(context);
-                done();
-            });
+    this.setState = function(sessionId, state) {
+        var url = uri + '/state/' + sessionId;
+        return requestify.put(url, {
+            'state': state,
+            'dataType': 'form-url-encoded'
+        }, { 'timeout': REQUEST_TIMEOUT });
+    }
+
+    this.getState = function(sessionId) {
+        var url = uri + '/state/' + sessionId;
+        var deferred = Q.defer();
+
+        requestify.get(url,
+            { 'timeout': REQUEST_TIMEOUT })
+        .then(function(response) {
+            deferred.resolve(JSON.parse(response.body).state);
         })
-    });
-});
+        .fail(function(error) {
+            deferred.reject(error);
+        });
+        return deferred.promise;
+    }
+
+    this.setModel = function(botmodel) {
+        var url = uri + '/model';
+        return requestify.put(url, serialize(botmodel),
+            { 'timeout': REQUEST_TIMEOUT });
+    }
+
+    this.getModel = function() {
+        var url = uri + '/model';
+        var deferred = Q.defer();
+
+        requestify.get(url, { 'timeout': REQUEST_TIMEOUT })
+        .then(function(response) {
+            deferred.resolve(deserialize(JSON.parse(response.body).model));
+        })
+        .fail(function(error) {
+            deferred.reject(error);
+        })
+        return deferred.promise;
+    }
+
+    return this;
+}

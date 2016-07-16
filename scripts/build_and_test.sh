@@ -16,14 +16,5 @@ then
     exit 1
 fi
 
-mkdir -p ${BUILD_DIR}
-cd ${BUILD_DIR}
+./scripts/build.sh
 
-echo "Configuring..."
-cmake -G "Unix Makefiles" .. 
-
-echo "Building..."
-make -j 4
-
-echo "Running tests"
-make run-all-tests

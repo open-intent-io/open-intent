@@ -37,36 +37,66 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var expect    = require("chai").expect;
-var assert    = require("chai").assert;
-var sinon = require('sinon');
+'use strict';
+var OpenIntentChatbot = require('./chatbot-api/chatbot');
+var Q = require('q');
 
-var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/standalone-driver');
+module.exports = function(config, ready) {
+    var deferred = Q.defer();
+    deferred.resolve(new RestChatbotServer(config, ready));
+    return deferred.promise;
+}
 
 
-describe("Test standalone session manager driver", function() {
+function RestChatbotServer(config, ready) {
+    var chatbot = new OpenIntentChatbot();
+    var swaggerConfig = {
+        appRoot: __dirname // required config
+    };
 
-    describe("Test save a context and load it back for 1 sessionId", function() {
-        var context = {
-            'state': 'MyState'
+    process.env.SUPPRESS_NO_CONFIG_WARNING = 'true';
+    var SwaggerExpress = require('swagger-express-mw');
+    var SwaggerUi = require('swagger-tools/middleware/swagger-ui');
+    var express = require('express');
+
+    var _this = this;
+    _this._app = new express();
+    _this._server = undefined;
+    _this._app.set('chatbot', chatbot);
+
+    SwaggerExpress.create(swaggerConfig, function(err, swaggerExpress) {
+        if (err) { throw err; }
+
+        // Add swagger-ui (This must be before swaggerExpress.register)
+        _this._app.use(SwaggerUi(swaggerExpress.runner.swagger));
+
+        // install middleware
+        swaggerExpress.register(_this._app);
+
+        var _port = 10010;
+        if(config && 'port' in config) {
+            _port = config.port;
         }
 
-        it('should save the context successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
+        if(config && 'model' in config) {
+            chatbot.setModel(config.model)
+            .fail(function(err) {
+                console.error('Error:', err);
+            })
+        }
+        _this._server = _this._app.listen(_port, ready);
 
-            sessionManager.save('MySession', context).then(function() {
-                done();
-            });
-        });
-
-        it('should load the context back successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
-
-            sessionManager.save('MySession', context);
-            sessionManager.load('MySession').then(function(savedContext) {
-                expect(savedContext).to.deep.equal(context);
-                done();
-            });
-        })
+        //console.log('To watch the doc, visit http://127.0.0.1:' + port + '/docs');
     });
-});
+
+    _this.close = function() {
+        if(_this._server) {
+            _this._server.close();
+        }
+        else {
+            console.error('Server not set');
+        }
+    }
+
+    return _this;
+}

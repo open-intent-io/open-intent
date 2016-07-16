@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /*
 |---------------------------------------------------------|
 |    ___                   ___       _             _      |
@@ -37,36 +38,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var expect    = require("chai").expect;
-var assert    = require("chai").assert;
-var sinon = require('sinon');
+var app = require('commander');
 
-var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/standalone-driver');
+app
+    .command('project <action>', 'project actions');
 
-
-describe("Test standalone session manager driver", function() {
-
-    describe("Test save a context and load it back for 1 sessionId", function() {
-        var context = {
-            'state': 'MyState'
-        }
-
-        it('should save the context successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
-
-            sessionManager.save('MySession', context).then(function() {
-                done();
-            });
-        });
-
-        it('should load the context back successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
-
-            sessionManager.save('MySession', context);
-            sessionManager.load('MySession').then(function(savedContext) {
-                expect(savedContext).to.deep.equal(context);
-                done();
-            });
-        })
-    });
-});
+app.parse(process.argv);

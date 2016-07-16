@@ -37,36 +37,56 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var expect    = require("chai").expect;
-var assert    = require("chai").assert;
-var sinon = require('sinon');
+var fs = require('fs');
+var checkModel = require('./model-checker');
+var Model = require('./model');
 
-var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/standalone-driver');
+module.exports = ModelBuilder;
 
+function ModelBuilder() {
 
-describe("Test standalone session manager driver", function() {
+    this._model = new Model();
 
-    describe("Test save a context and load it back for 1 sessionId", function() {
-        var context = {
-            'state': 'MyState'
+    this.withDictionaryFromFile = function(filename) {
+        this._model.setDictionary(fs.readFileSync(filename, 'utf-8'));
+        return this;
+    };
+
+    this.withOIMLFromFile = function(filename) {
+        this._model.setOiml(fs.readFileSync(filename, 'utf-8'));
+        return this;
+    };
+
+    this.withJsUserCommandsFromFile = function(filename) {
+        this._model.setCommands('js', fs.readFileSync(filename, 'utf-8'));
+        return this;
+    };
+
+    this.withRestUserCommandsFromFile = function(filename) {
+        this._model.setCommands('REST', fs.readFileSync(filename, 'utf-8'));
+        return this;
+    };
+
+    this.build = function(fn) {
+
+        if(fn) {
+            var err = checkModel(this._model);
+
+            if(err) {
+                fn(err);
+            }
+            else {
+                fn(undefined, this._model);
+            }
         }
 
-        it('should save the context successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
+        if(err) {
+            return undefined;
+        }
+        else {
+            return this._model;
+        }
+    }
 
-            sessionManager.save('MySession', context).then(function() {
-                done();
-            });
-        });
-
-        it('should load the context back successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
-
-            sessionManager.save('MySession', context);
-            sessionManager.load('MySession').then(function(savedContext) {
-                expect(savedContext).to.deep.equal(context);
-                done();
-            });
-        })
-    });
-});
+    return this;
+}

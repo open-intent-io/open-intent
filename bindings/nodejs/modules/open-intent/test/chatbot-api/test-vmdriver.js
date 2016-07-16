@@ -38,10 +38,11 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var expect    = require("chai").expect;
-var assert    = require("chai").assert;
+var should    = require("should");
 var sinon = require('sinon');
+var fs = require('fs');
 
-var VMUserDefinedActionDriver = require('../../chatbot-api/user-defined-actions/vm-driver');
+var VMUserDefinedActionDriver = require('../../lib/chatbot-api/user-defined-actions/vm-driver');
 
 describe("Test VM user commands driver", function() {
 
@@ -82,15 +83,40 @@ describe("Test VM user commands driver", function() {
             });
         });
     });
+    
+    describe("The VM keeps a state between calls", function() {
+        describe('Create VM from module', function() {
+            it('should keep a variable state', function(done) {
+                var userCommands = require('./vm-commands');
 
-    describe("When bad user commands is provided", function() {
-        it('should throw an exception', function() {
-            var userCommands = {};
-            var instantiate = function() {
-                userCommandsDriver = new VMUserDefinedActionDriver(userCommands);
-            }
+                var userCommandsDriver = new VMUserDefinedActionDriver(userCommands);
+                userCommandsDriver.execute('command1', 'SESSION', {})
+                    .then(function(userVariables) {
+                        should.equal(userVariables.state, 5);
+                        return userCommandsDriver.execute('command2', 'SESSION', {});
+                    })
+                    .then(function(userVariables) {
+                        should.equal(userVariables.state, 7);
+                        done();
+                    });
+            });
+        });
 
-            expect(instantiate).to.throw(Error, 'Bad user commands (must be a string).')
+        describe('Create VM from string', function() {
+            it('should keep a variable state', function(done) {
+                var userCommands = fs.readFileSync('./test/chatbot-api/vm-commands.js', 'utf-8');
+
+                var userCommandsDriver = new VMUserDefinedActionDriver(userCommands);
+                userCommandsDriver.execute('command1', 'SESSION', {})
+                    .then(function(userVariables) {
+                        should.equal(userVariables.state, 5);
+                        return userCommandsDriver.execute('command2', 'SESSION', {});
+                    })
+                    .then(function(userVariables) {
+                        should.equal(userVariables.state, 7);
+                        done();
+                    });
+            });
         });
     });
 });

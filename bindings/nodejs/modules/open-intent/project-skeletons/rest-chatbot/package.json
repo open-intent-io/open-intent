@@ -1,0 +1,22 @@
+{
+  "name": "open-intent-app",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Open-intent chatbot project",
+  "keywords": [],
+  "author": "",
+  "license": "",
+  "main": "app.js",
+  "dependencies": {
+    "open-intent": "^1.0.0"
+  },
+  "devDependencies":  {
+    "mock-utf8-stream": "^0.1.1",
+    "should": "^7.1.0",
+    "mocha": "^2.5.3"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "test": "./node_modules/.bin/mocha --reporter spec"
+  }
+}

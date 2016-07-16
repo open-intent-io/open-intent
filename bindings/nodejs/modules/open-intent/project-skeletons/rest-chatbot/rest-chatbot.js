@@ -37,36 +37,58 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var expect    = require("chai").expect;
-var assert    = require("chai").assert;
-var sinon = require('sinon');
+var path = require('path');
+var Q = require('q');
 
-var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/standalone-driver');
+module.exports = RestChatbot;
 
+function RestChatbot(stdio) {
+    var openintent = require('open-intent');
 
-describe("Test standalone session manager driver", function() {
+    var _this = this;
+    this._chatbotServer = undefined;
 
-    describe("Test save a context and load it back for 1 sessionId", function() {
-        var context = {
-            'state': 'MyState'
+    this.stop = function() {
+        if(_this._chatbotServer) {
+            _this._chatbotServer.close();
         }
+    };
 
-        it('should save the context successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
+    this.start = function(port, modelDirectory, withIRCClient) {
+        var deferred = Q.defer();
 
-            sessionManager.save('MySession', context).then(function() {
-                done();
+        openintent.ModelBuilder()
+            .withDictionaryFromFile(path.join(modelDirectory, 'dictionary.json'))
+            .withOIMLFromFile(path.join(modelDirectory, 'script.txt'))
+            .withJsUserCommandsFromFile(path.join(modelDirectory, 'user_commands.js'))
+            .build(function(err, botmodel) {
+                if(err) {
+                    console.log('Error:' + err);
+                    return 1;
+                }
+
+                var config = {
+                    port: port,
+                    model: botmodel
+                }
+
+                openintent.createRestChatbotServer(config)
+                .then(function(chatbot) {
+                    _this._chatbotServer = chatbot;
+
+                    if(withIRCClient) {
+                        console.log(">>> Ready to talk to the chatbot <<<");
+                        openintent.createIRCChatbotClient('http://localhost:' + port, stdio);
+                    }
+                    deferred.resolve();
+                })
+                .fail(function(err) {
+                    deferred.reject(err);
+                });
             });
-        });
 
-        it('should load the context back successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
+        return deferred.promise;
+    }
 
-            sessionManager.save('MySession', context);
-            sessionManager.load('MySession').then(function(savedContext) {
-                expect(savedContext).to.deep.equal(context);
-                done();
-            });
-        })
-    });
-});
+    return this;
+}

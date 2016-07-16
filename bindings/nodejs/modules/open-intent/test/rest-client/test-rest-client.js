@@ -38,47 +38,34 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var expect    = require("chai").expect;
-var assert    = require("chai").assert;
 var sinon = require('sinon')
 var fs = require('fs');
+var foodBotModel = require('../food-bot-model');
 
-var RestChatbotClient = require('../../open-intent').RestChatbotClient;
-var RestChatbotServer = require('../../open-intent').RestChatbotServer;
+var RestChatbotClient = require('../../lib/rest-client');
+var RestChatbotServer = require('../../lib/rest-server');
 
 var SERVICE_HOST = 'http://127.0.0.1';
 var SERVICE_PORT = 10010;
-
+var server1 = undefined;
 
 describe('Testing the REST Chatbot', function() {
-    var DICTIONARY_FILE = 'test/rest-client/res/food_bot/dictionary.json';
-    var SCRIPT_FILE = 'test/rest-client/res/food_bot/script.txt';
-    var USERCOMMANDS_FILE = 'test/rest-client/res/food_bot/user_commands.js';
-
-    var dictionary = fs.readFileSync(DICTIONARY_FILE, 'utf-8');
-    var script = fs.readFileSync(SCRIPT_FILE, 'utf-8');
-    var userCommands = fs.readFileSync(USERCOMMANDS_FILE, 'utf-8');
-
-    var botmodel = {
-        'model': {
-            'script': script,
-            'dictionary': dictionary
-        },
-        'commands': {
-            'type': 'js',
-            'script': userCommands
-        }
-    }
+    var botmodel = foodBotModel;
 
     describe('Interact with the chatbot', function() {
-        var server1 = undefined;
-
         before(function() {
-            server1 = new RestChatbotServer(SERVICE_PORT);
+            RestChatbotServer({
+                port: SERVICE_PORT,
+                model: botmodel
+            })
+            .then(function(chatbot) {
+                server1 = chatbot;
+            });
         });
 
         after(function() {
-            server1._server.close();
-            server1 = undefined;
+            server1.close();
+            delete server1;
         })
 
         it('should handle a static scenario correctly', function(done) {
@@ -108,14 +95,19 @@ describe('Testing the REST Chatbot', function() {
     });
 
     describe('Get model and state on initialized chatbot', function() {
-        var server = undefined;
         before(function() {
-            server = new RestChatbotServer();
+            RestChatbotServer({
+                'port': SERVICE_PORT,
+                'model': botmodel
+            })
+            .then(function(chatbot) {
+                server1 = chatbot;
+            });
         });
 
         after(function() {
-            server._server.close();
-            server = undefined;
+            server1.close();
+            server1 = undefined;
         })
 
         it('should set and return the state correctly when asked', function() {

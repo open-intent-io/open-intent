@@ -42,10 +42,10 @@ var assert    = require("chai").assert;
 var sinon = require('sinon');
 var Q = require('q');
 
-var StandaloneSessionManager = require('../../chatbot-api/session-manager/standalone-driver');
-var VMUserDefinedActionDriver = require('../../chatbot-api/user-defined-actions/vm-driver');
+var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/standalone-driver');
+var VMUserDefinedActionDriver = require('../../lib/chatbot-api/user-defined-actions/vm-driver');
 
-var OpenIntentChatbot = require('../../chatbot-api/chatbot-factory');
+var OpenIntentChatbot = require('../../lib/chatbot-api/chatbot-factory');
 
 var fs = require('fs');
 var file = 'test/chatbot-api/res/chatbot.json';

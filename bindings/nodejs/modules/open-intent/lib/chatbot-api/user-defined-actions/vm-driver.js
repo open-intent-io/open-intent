@@ -37,36 +37,45 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var expect    = require("chai").expect;
-var assert    = require("chai").assert;
-var sinon = require('sinon');
+var vm = require('vm');
+var Q = require('q');
+var EventEmitter = require('events');
 
-var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/standalone-driver');
+var script = "\
+commandEmitter.on('command', function(actionId, intentVariables, sessionId, next) { \
+    if(actionId in userCommands) { \
+        userCommands[actionId](intentVariables, sessionId, next); \
+    } else { \
+        next() \
+    }        \
+});      \
+";
 
+module.exports = function(userCommands) {
 
-describe("Test standalone session manager driver", function() {
+    var _sandbox;
+    var commandEmitter = new EventEmitter();
+    var context = {
+        commandEmitter: commandEmitter
+    };
 
-    describe("Test save a context and load it back for 1 sessionId", function() {
-        var context = {
-            'state': 'MyState'
-        }
+    if (userCommands !== null && typeof userCommands == 'string') {
+        context.userCommandsInput =  userCommands;
+        context.requireFromString = require('require-from-string');
+        _sandbox = vm.createContext(context);
+        vm.runInContext("var userCommands = requireFromString(userCommandsInput);", _sandbox, {timeout: 2000});
+    }
+    if (userCommands !== null && typeof userCommands == 'object') {
+        context.userCommands = userCommands;
+        _sandbox = vm.createContext(context);
+    }
+    vm.runInContext(script, _sandbox, {timeout: 5000});
 
-        it('should save the context successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
+    this.execute = function(actionId, sessionId, intentVariables) {
+        var deferred = Q.defer();
+        commandEmitter.emit('command', actionId, intentVariables, sessionId, deferred.resolve);
+        return deferred.promise;
+    }
 
-            sessionManager.save('MySession', context).then(function() {
-                done();
-            });
-        });
-
-        it('should load the context back successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
-
-            sessionManager.save('MySession', context);
-            sessionManager.load('MySession').then(function(savedContext) {
-                expect(savedContext).to.deep.equal(context);
-                done();
-            });
-        })
-    });
-});
+    return this;
+}

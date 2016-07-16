@@ -37,36 +37,43 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var expect    = require("chai").expect;
-var assert    = require("chai").assert;
-var sinon = require('sinon');
+var SESSION_ID = '12345';
 
-var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/standalone-driver');
+module.exports = function(uri, stdio) {
+    return new IRCClient(uri, stdio);
+}
 
+function IRCClient(uri, stdio) {
+    var readline = require('readline');
+    var RestChatbotClient = require('./rest-client');
 
-describe("Test standalone session manager driver", function() {
+    var chatbotClient = new RestChatbotClient(uri);
 
-    describe("Test save a context and load it back for 1 sessionId", function() {
-        var context = {
-            'state': 'MyState'
+    var rl = readline.createInterface({
+        input: stdio.stdin,
+        output: stdio.stdout,
+        prompt: '> '
+    });
+
+    rl.prompt();
+
+    rl.on('line', function(line) {
+        if(line == 'quit') {
+            process.exit();
         }
 
-        it('should save the context successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
-
-            sessionManager.save('MySession', context).then(function() {
-                done();
-            });
-        });
-
-        it('should load the context back successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
-
-            sessionManager.save('MySession', context);
-            sessionManager.load('MySession').then(function(savedContext) {
-                expect(savedContext).to.deep.equal(context);
-                done();
-            });
+        chatbotClient.talk(SESSION_ID, line)
+        .then(function(replies) {
+            var output = '';
+            for(var i in replies) {
+                output += replies[i] + '\n';
+            }
+            stdio.stdout.write(output);
+            rl.prompt();
         })
+        .fail(function(response) {
+            console.error(JSON.parse(response.body).message);
+            rl.prompt();
+        });
     });
-});
+}

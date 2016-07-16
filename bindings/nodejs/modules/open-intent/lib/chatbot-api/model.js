@@ -37,36 +37,49 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var expect    = require("chai").expect;
-var assert    = require("chai").assert;
-var sinon = require('sinon');
+var objectPath = require("object-path");
 
-var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/standalone-driver');
+module.exports = Model;
 
+function safeGet(object, path) {
+    return objectPath.get(object, path);
+}
 
-describe("Test standalone session manager driver", function() {
+function Model() {
+    this._data = {
+    };
+    
+    this.oiml = function() {
+        return safeGet(this._data, 'oiml');
+    };
+    
+    this.commands = function() {
+        return safeGet(this._data, 'commands.script');
+    };
 
-    describe("Test save a context and load it back for 1 sessionId", function() {
-        var context = {
-            'state': 'MyState'
-        }
+    this.dictionary = function() {
+        return safeGet(this._data, 'dictionary');
+    };
 
-        it('should save the context successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
+    this.hasJsCommands = function() {
+        return safeGet(this._data, 'commands.type') == 'js';
+    };
 
-            sessionManager.save('MySession', context).then(function() {
-                done();
-            });
-        });
+    this.hasRestCommands = function() {
+        return safeGet(this._data, 'commands.type') == 'REST'
+    };
 
-        it('should load the context back successfully', function(done) {
-            var sessionManager = new StandaloneSessionManager();
+    this.setOiml = function(oiml) {
+        this._data.oiml = oiml;
+    }
 
-            sessionManager.save('MySession', context);
-            sessionManager.load('MySession').then(function(savedContext) {
-                expect(savedContext).to.deep.equal(context);
-                done();
-            });
-        })
-    });
-});
+    this.setCommands = function(type, script) {
+        this._data.commands = {};
+        this._data.commands.type = type;
+        this._data.commands.script = script;
+    }
+
+    this.setDictionary = function(dictionary) {
+        this._data.dictionary = dictionary;
+    }
+}

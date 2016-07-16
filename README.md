@@ -1,43 +1,48 @@
-open-intent [![Build Status](https://travis-ci.org/open-intent-io/open-intent.svg?branch=master)](https://travis-ci.org/open-intent-io/open-intent)
+<p align="center">
+  <img src="/doc/img/logo.png" alt="Logo"/>
+</p>
+
 ====================
+[![Build Status](https://travis-ci.org/open-intent-io/open-intent.svg?branch=master)](https://travis-ci.org/open-intent-io/open-intent)
 
-Authors:
-+ Clément Michaud
-+ Sergeï Kireev.
+open-intent is a natural language processing framework with the aim of finding user intents in sentences based on entity matching.
+The framework allows you to build and deploy easily your conversational bot in minutes.
 
-May 21st, 2016
+# Example
 
-Description
----------------------
+This is as simple as those 3 lines to start prototyping your bot.
 
-open-intent is a natural language processing framework with the aim of finding user intents in sentences.
-It is made of several layers able to find a user intent until having a full conversation with a user.
+    npm install -g open-intent
+    open-intent project create chatbot
+    open-intent project start chatbot
+
+This will create a directory chatbot/ with necessary files so that you can start editing the model which is in res/ directory.
+
+Please follow this [link](/bindings/nodejs/modules/open-intent) for a more detailed documentation
 
 
-Install
----------------------
+# Source
+Our latest source of open-intent can be found on [GitHub]. Fork us!
 
-The whole project is built with CMake.
+# Contributing to open-intent
+Follow [contributing](CONTRIBUTING.md) file.
+## Build
 
-To build it, configure with CMake and build.
+There are two ways to build the framework. You can do it with CMake or Docker.
 
-To configure, create a directory, for example build-dir/ at the root of the repo and type:
+### CMake
+To build, configure with CMake and build.
 
+    mkdir build-dir/
+    cd build-dir/
     cmake -G "Unix Makefiles" ..
+    make -j 4
 
-
-To build, type:
-
-    make
-
-
-You can also use docker to build the project.
-
+### Docker
 To build, just type:
 
-    docker build open-intent-build .
-
-    docker run open-intent-build make -j 4
+    docker build -t open-intent-build .
+    docker run open-intent-build build.sh
 
 That's it!
 
@@ -69,3 +74,5 @@ open-intent is **licensed** under the **[MIT License]**. The terms of the licens
 
 
 [MIT License]: https://opensource.org/licenses/MIT
+[GitHub]: https://github.com/open-intent-io/open-intent
+[logo]: /doc/img/logo.png
