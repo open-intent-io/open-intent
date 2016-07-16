@@ -255,9 +255,10 @@ void completeModelFromScenario(
 
   // Retrieve fallback replies on the edges
   previousStateInScenario.reset(NULL);
-  edgeParser.m_interpreterFeedback = InterpreterFeedback();
+  InterpreterFeedback dummyFeedback;
+  EdgeParser fallbackEdgeParser(dictionaryModel, vertexCounter, dummyFeedback);
   FallbackEdgesRetriever fallbackEdgesRetriever(
-      scenario, previousStateInScenario, edgeParser, edgesToInsert);
+      scenario, previousStateInScenario, fallbackEdgeParser, edgesToInsert);
   std::for_each(inquiryToReplies.begin(), inquiryToReplies.end(),
                 fallbackEdgesRetriever);
 
