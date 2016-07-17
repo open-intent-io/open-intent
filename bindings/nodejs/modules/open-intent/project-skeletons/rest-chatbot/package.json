@@ -8,7 +8,8 @@
   "license": "",
   "main": "app.js",
   "dependencies": {
-    "open-intent": "^1.0.0"
+    "open-intent": "^1.0.0",
+    "q": "^1.4.1"
   },
   "devDependencies":  {
     "mock-utf8-stream": "^0.1.1",

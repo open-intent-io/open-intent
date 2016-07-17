@@ -1,6 +1,6 @@
 {
   "name": "open-intent",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "An API for the open-intent chatbots",
   "main": "index.js",
   "bin": {
