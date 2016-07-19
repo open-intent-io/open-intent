@@ -47,6 +47,8 @@ namespace intent
                                            "template_replies.json");
             m_resourceManager.registerFile(ResourceManager::ResourceId::INTERPRETER_MODEL,
                                            "interpreter_model.txt");
+            m_resourceManager.registerFile(ResourceManager::ResourceId::INTERPRETER_MODEL_W_ERRORS,
+                                           "interpreter_model_w_errors.txt");
             m_resourceManager.registerFile(ResourceManager::ResourceId::CHATBOT_MODE_JSON_WITHOUT_INTENT_STORY,
                                            "chatbot_model_without_intent_story.json");
         }
