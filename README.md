@@ -6,29 +6,39 @@
 [![Build Status](https://travis-ci.org/open-intent-io/open-intent.svg?branch=master)](https://travis-ci.org/open-intent-io/open-intent)
 
 open-intent is a natural language processing framework with the aim of finding user intents in sentences based on entity matching.
-The framework allows you to build and deploy easily your conversational bot in minutes.
+The framework allows you to build and deploy very easily your conversational bot in minutes.
 
 # Example
 
 This is as simple as those 3 lines to start prototyping your bot.
 
     npm install -g open-intent
-    open-intent project create chatbot
-    open-intent project start chatbot
+    open-intent project create mychatbot
+    open-intent project start mychatbot
 
-This will create a directory chatbot/ with necessary files so that you can start editing the model which is in res/ directory.
+This will create a JS project in mychatbot/ directory with the necessary files so that you can start editing the model files located in res/ directory.
 
-Please follow this [link](/bindings/nodejs/modules/open-intent) for a more detailed documentation
+Once started, an IRC client is waiting for you to type your first message. Say 'hello' to your newly created bot.
 
+We have created a [tutorial](https://github.com/open-intent-io/open-intent/wiki/Time-bot-tutorial) for you to quickly learn how to create your first bot with open-intent.
+
+# Documentation
+
+The documentation can be found [here](https://github.com/open-intent-io/open-intent/wiki) and will help you learn how to use every feature of the open-intent framework.
 
 # Source
+
 Our latest source of open-intent can be found on [GitHub]. Fork us!
 
+
 # Contributing to open-intent
+
 Follow [contributing](CONTRIBUTING.md) file.
+
 ## Build
 
 There are two ways to build the framework. You can do it with CMake or Docker.
+Note that for the moment the framework has only been tested on Ubuntu 16.04.
 
 ### CMake
 To build, configure with CMake and build.
