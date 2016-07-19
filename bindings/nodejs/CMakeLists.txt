@@ -25,3 +25,10 @@ ADD_CUSTOM_COMMAND(TARGET run-nodejs-tests POST_BUILD
         COMMAND npm test
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/modules/open-intent
 )
+
+ADD_CUSTOM_TARGET(run-nodejs-integration-tests)
+
+ADD_CUSTOM_COMMAND(TARGET run-nodejs-integration-tests POST_BUILD
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/modules/open-intent/test/integration/rest-chatbot/launch.sh
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/modules/open-intent/test/integration/rest-chatbot
+)

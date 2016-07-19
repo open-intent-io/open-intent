@@ -69,8 +69,10 @@ function create(name, options, cb) {
     console.log(util.format('Chatbot %s created in %s', name, targetDir));
     cloneSkeleton(name, targetDir, function() {
         var message = util.format('Success! You may start your new app by running: "open-intent project start %s"', name);
-
-        installDependencies(targetDir, message, cb);
+        
+        if(options.npm) {
+            installDependencies(targetDir, message, cb);
+        }
     });
 }
 

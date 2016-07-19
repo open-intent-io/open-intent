@@ -48,6 +48,7 @@ function IRCClient(uri, stdio) {
     var RestChatbotClient = require('./rest-client');
 
     var chatbotClient = new RestChatbotClient(uri);
+    var lastPromise;
 
     var rl = readline.createInterface({
         input: stdio.stdin,
@@ -58,12 +59,14 @@ function IRCClient(uri, stdio) {
     rl.prompt();
 
     rl.on('line', function(line) {
-        if(line == 'quit') {
-            process.exit();
+        if(line == 'quit' || line == 'exit') {
+            lastPromise.then(function() {
+                process.exit(0);
+            });
         }
 
-        chatbotClient.talk(SESSION_ID, line)
-        .then(function(replies) {
+        var promise = chatbotClient.talk(SESSION_ID, line);
+        promise.then(function(replies) {
             var output = '';
             for(var i in replies) {
                 output += replies[i] + '\n';
@@ -75,5 +78,7 @@ function IRCClient(uri, stdio) {
             console.error(JSON.parse(response.body).message);
             rl.prompt();
         });
+
+        lastPromise = promise;
     });
 }

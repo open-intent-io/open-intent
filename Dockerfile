@@ -11,6 +11,5 @@ VOLUME /src
 
 WORKDIR /src
 RUN ln -s /usr/bin/nodejs /usr/bin/node
-#RUN npm install -g swagger 
 
 
