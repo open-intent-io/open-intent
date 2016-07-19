@@ -407,13 +407,14 @@ public:
 TEST_F(InterpreterIncorrectModelTest, check_interpreter_feedback_when_wrong_model)
 {
     EXPECT_EQ_SIGNED(3, m_interpreterFeedback.size());
+
     EXPECT_EQ(messagesText[ROOT_STATE_MSG], m_interpreterFeedback[0].message);
     EXPECT_EQ("_root", m_interpreterFeedback[0].line.content);
     EXPECT_EQ_SIGNED(1, m_interpreterFeedback[0].line.position);
 
     EXPECT_EQ(messagesText[ANONYMOUS_STATE_CREATION], m_interpreterFeedback[1].message);
-    EXPECT_EQ("_root", m_interpreterFeedback[1].line.content);
-    EXPECT_EQ_SIGNED(1, m_interpreterFeedback[1].line.position);
+    EXPECT_EQ("-Bob!", m_interpreterFeedback[1].line.content);
+    EXPECT_EQ_SIGNED(2, m_interpreterFeedback[1].line.position);
 
     EXPECT_EQ(messagesText[NO_ACTION], m_interpreterFeedback[2].message);
     EXPECT_EQ("_wake", m_interpreterFeedback[2].line.content);
