@@ -22,6 +22,7 @@ SET(RES_FILES
         res/order_beverage_intent.json
         res/queries_model.json
         res/interpreter_model.txt
+        res/interpreter_model_w_errors.txt
         res/chatbot_model_without_intent_story.json)
 
 # Copy ressource files

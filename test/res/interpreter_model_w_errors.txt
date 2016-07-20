@@ -1,0 +1,9 @@
+{
+_root
+    -Bob!
+        _wake
+        *Je n'ai pas compris votre demande
+    -Que puis-je vous offrir ?
+@bye
+}
+

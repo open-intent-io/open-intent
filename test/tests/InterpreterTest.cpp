@@ -375,4 +375,50 @@ TEST_F(InterpreterFeedbackTest, check_no_entity_warning)
     EXPECT_EQ(WARNING, interpreterFeedback[0].level);
 }
 
+class InterpreterIncorrectModelTest : public ::testing::Test
+{
+public:
+    void SetUp()
+    {
+        const intent::test::ResourceManager &resourceManager = intent::test::gTestContext->getResourceManager();
+
+        std::string chatbotModelFileContent = resourceManager.getResource(test::ResourceManager::ResourceId::
+                                                              CHATBOT_MODE_JSON_WITHOUT_INTENT_STORY);
+        std::stringstream ss;
+        ss << chatbotModelFileContent;
+
+        Deserializer deserializer;
+        ChatbotModel chatbotModel;
+        chatbotModel.intentStoryServiceModel.intentServiceModel.dictionaryModel =
+                deserializer.deserialize<DictionaryModel::SharedPtr>(ss);
+
+        //prepare file content
+        std::string fileContent = resourceManager.getResource(test::ResourceManager::ResourceId::
+                                                              INTERPRETER_MODEL_W_ERRORS);
+
+        //finally we build the model
+        chatbotModel = Interpreter::build(
+                fileContent, chatbotModel.intentStoryServiceModel.intentServiceModel.dictionaryModel, m_interpreterFeedback);
+    }
+
+    InterpreterFeedback m_interpreterFeedback;
+};
+
+TEST_F(InterpreterIncorrectModelTest, check_interpreter_feedback_when_wrong_model)
+{
+    EXPECT_EQ_SIGNED(3, m_interpreterFeedback.size());
+
+    EXPECT_EQ(messagesText[ROOT_STATE_MSG], m_interpreterFeedback[0].message);
+    EXPECT_EQ("_root", m_interpreterFeedback[0].line.content);
+    EXPECT_EQ_SIGNED(1, m_interpreterFeedback[0].line.position);
+
+    EXPECT_EQ(messagesText[ANONYMOUS_STATE_CREATION], m_interpreterFeedback[1].message);
+    EXPECT_EQ("-Bob!", m_interpreterFeedback[1].line.content);
+    EXPECT_EQ_SIGNED(2, m_interpreterFeedback[1].line.position);
+
+    EXPECT_EQ(messagesText[NO_ACTION], m_interpreterFeedback[2].message);
+    EXPECT_EQ("_wake", m_interpreterFeedback[2].line.content);
+    EXPECT_EQ_SIGNED(3, m_interpreterFeedback[2].line.position);
+}
+
 }}
