@@ -3,10 +3,14 @@
 </p>
 
 ====================
-[![Build Status](https://travis-ci.org/open-intent-io/open-intent.svg?branch=master)](https://travis-ci.org/open-intent-io/open-intent)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)][MIT License] [![Gitter](https://badges.gitter.im/open-intent-io/open-intent.svg)](https://gitter.im/open-intent-io/open-intent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Build Status](https://travis-ci.org/open-intent-io/open-intent.svg?branch=master)](https://travis-ci.org/open-intent-io/open-intent)
 
 open-intent is a natural language processing framework with the aim of finding user intents in sentences based on entity matching.
 The framework allows you to build and deploy easily your conversational bot in minutes.
+
+*Supported operating systems:*
+
+[![Linux tested](https://img.shields.io/badge/Linux-tested-brightgreen.svg)]() [![Windows not tested](https://img.shields.io/badge/Windows-not%20tested-orange.svg)]() [![OS X not tested](https://img.shields.io/badge/OS%20X-not%20tested-orange.svg)]()
 
 # Example
 
@@ -18,7 +22,7 @@ This is as simple as those 3 lines to start prototyping your bot.
 
 This will create a directory chatbot/ with necessary files so that you can start editing the model which is in res/ directory.
 
-Please follow this [link](/bindings/nodejs/modules/open-intent) for a more detailed documentation
+Please follow this [link](/bindings/nodejs/modules/open-intent) for a more detailed documentation.
 
 
 # Source
