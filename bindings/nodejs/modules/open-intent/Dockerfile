@@ -14,7 +14,3 @@ RUN npm install q
 
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 
-ADD entrypoint.sh /entrypoint.sh
-
-CMD ["/entrypoint.sh"]
-

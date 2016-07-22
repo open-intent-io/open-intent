@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 
+ADD_SUBDIRECTORY(modules)
+
 ADD_CUSTOM_TARGET(nodejs-binding-build ALL
         DEPENDS
             src/main.cpp
@@ -19,16 +21,13 @@ ADD_CUSTOM_COMMAND(TARGET nodejs-binding-build POST_BUILD
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/modules/open-intent
 )
 
-ADD_CUSTOM_TARGET(run-nodejs-tests)
+FIND_PROGRAM( DOCKER_PATH docker )
 
-ADD_CUSTOM_COMMAND(TARGET run-nodejs-tests POST_BUILD
-        COMMAND npm test
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/modules/open-intent
-)
-
-ADD_CUSTOM_TARGET(run-nodejs-integration-tests)
-
-ADD_CUSTOM_COMMAND(TARGET run-nodejs-integration-tests POST_BUILD
-        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/modules/open-intent/test/integration/rest-chatbot/launch.sh
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/modules/open-intent/test/integration/rest-chatbot
-)
+IF(DOCKER_PATH)
+    ADD_CUSTOM_COMMAND(TARGET nodejs-binding-build POST_BUILD
+            COMMAND docker build -t open-intent .
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/modules/open-intent
+    )
+ELSE()
+    MESSAGE(WARNING "Docker has not been found. Please note that you will not be able to execute the integration tests.")
+ENDIF()

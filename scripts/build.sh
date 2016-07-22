@@ -11,5 +11,3 @@ cmake -G "Unix Makefiles" ..
 echo "Building..."
 make -j 4
 
-echo "Running tests"
-make run-all-tests
