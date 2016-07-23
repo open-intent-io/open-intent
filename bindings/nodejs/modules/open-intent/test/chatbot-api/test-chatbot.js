@@ -220,11 +220,6 @@ describe("Test open intent chatbot", function() {
                             "level": 0,
                             "line": 11,
                             "message": "no entity was found for the line"
-                        },
-                        {
-                            "level": 0,
-                            "line": 11,
-                            "message": "no entity was found for the line"
                         }
                     ]
                 });

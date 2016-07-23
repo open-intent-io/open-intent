@@ -30,6 +30,7 @@ namespace intent
                     TEMPLATE_REPLIES_JSON,
                     QUERY_MODE_JSON,
                     INTERPRETER_MODEL,
+                    INTERPRETER_MODEL_W_ERRORS,
                     CHATBOT_MODE_JSON_WITHOUT_INTENT_STORY
                 };
             };
