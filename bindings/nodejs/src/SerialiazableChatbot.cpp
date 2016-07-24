@@ -43,6 +43,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <iostream>
 #include "SerializableChatbot.hpp"
 #include "intent/chatbot/ChatbotFactory.hpp"
+#include "intent/intent_story_service/IntentStoryModelSerializer.hpp"
 #include "intent/utils/Logger.hpp"
 
 using v8::Function;
@@ -58,10 +59,8 @@ using v8::Value;
 
 namespace intentjs
 {
-
     namespace
     {
-
         void parseV8String(Isolate *isolate, const Local <String> &currentStateStr, std::string &currentState)
         {
             v8::String::Utf8Value utf8Value(currentStateStr);
@@ -104,14 +103,13 @@ namespace intentjs
 
         Local <FunctionTemplate> fromJsonModelTemplate = FunctionTemplate::New(isolate, InstantiateFromJsonModel);
         fromJsonModelTemplate->SetClassName(String::NewFromUtf8(isolate, "SerializableChatbot"));
-        fromJsonModelTemplate->InstanceTemplate()->SetInternalFieldCount(4);
+        fromJsonModelTemplate->InstanceTemplate()->SetInternalFieldCount(5);
 
         // Prototype
         NODE_SET_PROTOTYPE_METHOD(fromJsonModelTemplate, "treatMessage", TreatMessage);
         NODE_SET_PROTOTYPE_METHOD(fromJsonModelTemplate, "getInitialState", GetInitialState);
         NODE_SET_PROTOTYPE_METHOD(fromJsonModelTemplate, "getTerminalStates", GetTerminalStates);
-
-        // Prototype
+        NODE_SET_PROTOTYPE_METHOD(fromJsonModelTemplate, "getGraph", GetGraph);
         NODE_SET_PROTOTYPE_METHOD(fromJsonModelTemplate, "prepareReplies", PrepareReplies);
 
         constructorFromJsonModel.Reset(isolate, fromJsonModelTemplate->GetFunction());
@@ -119,14 +117,13 @@ namespace intentjs
 
         Local <FunctionTemplate> fromOIMLTemplate = FunctionTemplate::New(isolate, InstantiateFromOIML);
         fromOIMLTemplate->SetClassName(String::NewFromUtf8(isolate, "SerializableChatbot"));
-        fromOIMLTemplate->InstanceTemplate()->SetInternalFieldCount(4);
+        fromOIMLTemplate->InstanceTemplate()->SetInternalFieldCount(5);
 
         // Prototype
         NODE_SET_PROTOTYPE_METHOD(fromOIMLTemplate, "treatMessage", TreatMessage);
         NODE_SET_PROTOTYPE_METHOD(fromOIMLTemplate, "getInitialState", GetInitialState);
         NODE_SET_PROTOTYPE_METHOD(fromOIMLTemplate, "getTerminalStates", GetTerminalStates);
-
-        // Prototype
+        NODE_SET_PROTOTYPE_METHOD(fromOIMLTemplate, "getGraph", GetGraph);
         NODE_SET_PROTOTYPE_METHOD(fromOIMLTemplate, "prepareReplies", PrepareReplies);
 
         constructorFromOIML.Reset(isolate, fromOIMLTemplate->GetFunction());
@@ -289,6 +286,23 @@ namespace intentjs
         }
 
         args.GetReturnValue().Set(terminalStates);
+    }
+
+    void SerializableChatbot::GetGraph(const FunctionCallbackInfo <Value> &args)
+    {
+        Isolate *isolate = args.GetIsolate();
+        SerializableChatbot *obj = ObjectWrap::Unwrap<SerializableChatbot>(args.Holder());
+
+        Local <Value> modelGraph;
+        if(obj)
+        {
+            intent::IntentStoryModelSerializer serializer;
+            std::stringstream ss;
+            serializer.serialize(ss, obj->m_chatbot->getChatbotModel().intentStoryServiceModel);
+            modelGraph = v8::String::NewFromUtf8(isolate, ss.str().c_str());
+        }
+
+        args.GetReturnValue().Set(modelGraph);
     }
 
     void SerializableChatbot::InstantiateFromJsonModel(const v8::FunctionCallbackInfo <v8::Value> &args)

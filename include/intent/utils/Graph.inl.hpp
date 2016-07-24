@@ -43,10 +43,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
 #include <iostream>
-
-#ifdef GRAPH_DUMP_ENABLED
 #include "boost/graph/graphviz.hpp"
-#endif
 
 namespace intent {
 template <typename VertexInfo, typename EdgeInfo>
@@ -90,12 +87,9 @@ Graph<VertexInfo, EdgeInfo>::nextEdges(
 
 template <typename VertexInfo, typename EdgeInfo>
 template <typename WriterMaker>
-void Graph<VertexInfo, EdgeInfo>::dump(std::ostream& ostream, WriterMaker& wm) {
-#ifdef GRAPH_DUMP_ENABLED
+void Graph<VertexInfo, EdgeInfo>::dump(std::ostream& ostream,
+                                       WriterMaker& wm) const {
   boost::write_graphviz(ostream, m_graph, wm.makeVertexWriter(m_graph),
                         wm.makeEdgeWriter(m_graph));
-#else
-  assert(("Graph dump not enabled", false));
-#endif
 };
 }

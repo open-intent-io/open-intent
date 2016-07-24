@@ -58,6 +58,15 @@ describe("Test open intent chatbot", function() {
             });
         });
 
+        it('should fail when getGraph is called', function(done) {
+            var chatbot = OpenIntentChatbot();
+
+            chatbot.getGraph()
+            .fail(function() {
+                done();
+            });
+        });
+
         it('should fail when setState is called', function(done) {
             var chatbot = OpenIntentChatbot();
             var SESSION_ID = 'abc';
@@ -145,6 +154,18 @@ describe("Test open intent chatbot", function() {
                 return chatbot.getState(SESSION_ID);
             })
             .then(function(state) {
+                done();
+            });
+        });
+
+        it('should succeed on getGraph call', function(done) {
+            var chatbot = OpenIntentChatbot();
+
+            chatbot.setModel(botmodel)
+            .then(function() {
+                return chatbot.getGraph();
+            })
+            .then(function(graph) {
                 done();
             });
         });

@@ -62,7 +62,7 @@ describe('Test the IRC client', function() {
             expect(data).to.equal(expected);
             return talk(input);
         }
-    }
+    };
 
     var handleScript = function(script, done) {
         var promise = talk(script[0]);
@@ -84,7 +84,7 @@ describe('Test the IRC client', function() {
         .fail(function(err) {
             console.error(err);
         });
-    }
+    };
 
     beforeEach(function() {
         var stdinMock = new stream.MockReadableStream();
@@ -125,7 +125,7 @@ describe('Test the IRC client', function() {
         chatbot.close();
         delete chatbot;
         chatbot = undefined;
-   })
+   });
 
     it('should handle a conversation in which the user order a pizza', function(done) {
         var script = [

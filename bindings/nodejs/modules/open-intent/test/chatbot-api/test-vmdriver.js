@@ -45,7 +45,6 @@ var fs = require('fs');
 var VMUserDefinedActionDriver = require('../../lib/chatbot-api/user-defined-actions/vm-driver');
 
 describe("Test VM user commands driver", function() {
-
     describe("When user command exists for the actionId, the driver executes it", function(done) {
         it('should execute the command1', function() {
             var userCommands = {

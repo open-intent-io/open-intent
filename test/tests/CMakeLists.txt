@@ -27,7 +27,7 @@ SET(SOURCE_FILES
         SingleSessionChatbotTest.cpp
         IntentMatcherTest.cpp
         InterpreterTest.cpp
-)
+        IntentStoryModelSerializer.cpp)
 SET(HEADER_FILES
 )
 

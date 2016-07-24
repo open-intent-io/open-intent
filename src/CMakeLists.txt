@@ -31,6 +31,7 @@ SET(SOURCE_FILES
         intent_service/IntentMatcher.cpp
         intent_service/IntentService.cpp
         intent_story_service/IntentStoryService.cpp
+        intent_story_service/IntentStoryModelSerializer.cpp
 )
 
 

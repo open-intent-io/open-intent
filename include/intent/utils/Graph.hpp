@@ -160,7 +160,7 @@ class Graph {
    * serializer.
    */
   template <typename VertexWriterMaker>
-  void dump(std::ostream& ostream, VertexWriterMaker& vertexWriterMaker);
+  void dump(std::ostream& ostream, VertexWriterMaker& vertexWriterMaker) const;
 
  private:
   _Graph m_graph;

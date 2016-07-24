@@ -40,6 +40,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 'use strict';
 var OpenIntentChatbot = require('./chatbot-api/chatbot');
 var Q = require('q');
+var fs = require('fs');
+var path = require('path');
 
 module.exports = function(config, ready) {
     var deferred = Q.defer();
@@ -69,6 +71,21 @@ function RestChatbotServer(config, ready) {
 
         // Add swagger-ui (This must be before swaggerExpress.register)
         _this._app.use(SwaggerUi(swaggerExpress.runner.swagger));
+        _this._app.use('/static', express.static(__dirname + '/rest/public_html'));
+        _this._app.get('/graph', function(req, res) {
+            var chatbot = req.app.get('chatbot');
+            chatbot.getGraph()
+            .then(function(graph) {
+                var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Model</title></head>  ' +
+                '<body><script src="/static/viz.js"></script><script> document.body.innerHTML += Viz(`' + graph + '`); </script> </body> </html>';
+
+                res.type('html');
+                res.send(html);
+            })
+            .fail(function(err) {
+                res.status(500).send({'message': err});
+            });
+        });
 
         // install middleware
         swaggerExpress.register(_this._app);

@@ -188,9 +188,8 @@ void deserializeGraph(const nlohmann::json::object_t& graph,
       const std::string& targetId = edgeTargetIt->second;
 
       IntentStoryModel::EdgeInfo edgeInfo;
-      edgeInfo.intentId = intentName;
+      edgeInfo.intent.intentId = intentName;
       edgeInfo.actionId = actionId;
-      edgeInfo.label = intentAndAction;
 
       IntentStoryModel::StoryGraph::Vertex source;
       IntentStoryModel::StoryGraph::Vertex target;
