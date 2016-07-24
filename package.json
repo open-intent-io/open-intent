@@ -7,7 +7,8 @@
     "open-intent": "bindings/nodejs/bin/open-intent.js"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha --reporter spec --recursive 'bindings/nodejs/test/**/*.js' 'bindings/nodejs/project-skeletons/rest-chatbot/test/**/*.js'"
+    "test": "./node_modules/.bin/mocha --reporter spec --recursive 'bindings/nodejs/test/**/*.js' 'bindings/nodejs/project-skeletons/rest-chatbot/test/**/*.js'",
+    "install": "node-gyp rebuild -j 4"
   },
   "repository": {
     "type": "git",
