@@ -49,7 +49,7 @@ ADD_CUSTOM_TARGET(nodejs-binding-build ALL
 
 ADD_CUSTOM_COMMAND(
         OUTPUT ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
-        COMMAND npm install
+        COMMAND npm install --unsafe-perm
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/build/Release/open-intent.node
         ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
