@@ -39,10 +39,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var ModelBuilder = require('../lib/chatbot-api/model-builder');
 var fs = require('fs');
+var path = require('path');
 
-var dictionaryFile = 'test/res/food_bot/dictionary.json';
-var userCommandsFile = 'test/res/food_bot/user_commands.js';
-var scriptFile = 'test/res/food_bot/bad_script.txt';
+var dictionaryFile = path.resolve(__dirname, 'res/food_bot/dictionary.json');
+var userCommandsFile = path.resolve(__dirname, 'res/food_bot/user_commands.js');
+var scriptFile = path.resolve(__dirname, 'res/food_bot/bad_script.txt');
 
 var botmodel = ModelBuilder()
     .withDictionaryFromFile(dictionaryFile)

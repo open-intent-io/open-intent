@@ -41,6 +41,7 @@ var expect    = require("chai").expect;
 var assert    = require("chai").assert;
 var sinon = require('sinon');
 var Q = require('q');
+var path = require('path');
 
 var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/standalone-driver');
 var VMUserDefinedActionDriver = require('../../lib/chatbot-api/user-defined-actions/vm-driver');
@@ -48,13 +49,13 @@ var VMUserDefinedActionDriver = require('../../lib/chatbot-api/user-defined-acti
 var OpenIntentChatbot = require('../../lib/chatbot-api/chatbot-factory');
 
 var fs = require('fs');
-var file = 'test/chatbot-api/res/chatbot.json';
+var file = path.resolve(__dirname, 'res/chatbot.json');
 var model = fs.readFileSync(file, "utf-8");
 
-var file = 'test/chatbot-api/res/userCommands.js';
+var file = path.resolve(__dirname, 'res/userCommands.js');
 var userCommands = fs.readFileSync(file, "utf-8");
 
-var file = 'test/chatbot-api/res/interpreter_model.txt';
+var file = path.resolve(__dirname, 'res/interpreter_model.txt');
 var interpreterModel = fs.readFileSync(file, "utf-8");
 
 describe("Test Open Intent chatbot factory", function() {
@@ -306,7 +307,7 @@ describe("Test Open Intent chatbot factory", function() {
                 var sessionManager = new StandaloneSessionManager();
                 var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
 
-                var file = 'test/chatbot-api/res/bad_interpreter_model.txt';
+                var file = path.resolve(__dirname, 'res/bad_interpreter_model.txt');
                 var badInterpreterModel = fs.readFileSync(file, "utf-8");
                 var chatbot = undefined
 

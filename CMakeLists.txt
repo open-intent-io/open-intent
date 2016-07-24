@@ -43,6 +43,24 @@ if(DOXYGEN_FOUND)
             "Open file://${CMAKE_CURRENT_BINARY_DIR}/html/index.html")
 endif(DOXYGEN_FOUND)
 
+ADD_CUSTOM_TARGET(nodejs-binding-build ALL
+        DEPENDS ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
+)
+
+ADD_CUSTOM_COMMAND(
+        OUTPUT ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
+        COMMAND npm install
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/build/Release/open-intent.node
+        ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+ADD_CUSTOM_TARGET(run-nodejs-tests ALL
+        DEPENDS nodejs-binding-build
+        COMMAND npm test
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 ADD_CUSTOM_TARGET(run-all-tests
         DEPENDS domotic-test intent-test beerbar-test run-nodejs-tests)
 

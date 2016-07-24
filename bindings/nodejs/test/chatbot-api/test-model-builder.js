@@ -40,12 +40,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var ModelBuilder = require('../../lib/chatbot-api/model-builder');
 var should = require('should');
 var fs = require('fs');
+var path = require('path');
 
 describe('Test model builder', function() {
 
-    var dictionaryFile = 'test/chatbot-api/res/food_bot/dictionary.json';
-    var userCommandsFile = 'test/chatbot-api/res/food_bot/user_commands.js';
-    var scriptFile = 'test/chatbot-api/res/food_bot/script.txt';
+    var dictionaryFile = path.resolve(__dirname, '../res/food_bot/dictionary.json');
+    var userCommandsFile = path.resolve(__dirname, '../res/food_bot/user_commands.js');
+    var scriptFile = path.resolve(__dirname, '../res/food_bot/script.txt');
 
     it('should build a model from files with js user commands script', function(done) {
         ModelBuilder()

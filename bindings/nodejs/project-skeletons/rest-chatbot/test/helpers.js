@@ -41,6 +41,8 @@ var expect    = require("chai").expect;
 var stream = require("mock-utf8-stream");
 var Q = require('q');
 
+var CHATBOT_PORT = 10005;
+
 var talk = undefined;
 var chatbot = undefined;
 
@@ -58,7 +60,7 @@ module.exports = function(resDirectory) {
 
         chatbot = RestChatbot(stdio);
 
-        chatbot.start(8080, resDirectory, true)
+        chatbot.start(CHATBOT_PORT, resDirectory, true)
         .then(function() {
             talk = function(input) {
                 var deferred = Q.defer();

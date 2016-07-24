@@ -46,7 +46,7 @@ var proxyquire = require('proxyquire');
 var RestChatbot = require('../../lib/rest-server');
 var foodBotModel = require('../food-bot-model');
 
-var CHATBOT_PORT = 8080;
+var CHATBOT_PORT = 10005;
 
 
 describe('Test the IRC client', function() {
@@ -86,7 +86,7 @@ describe('Test the IRC client', function() {
         });
     }
 
-    beforeEach(function() {
+    beforeEach(function(done) {
         var stdinMock = new stream.MockReadableStream();
         var stdoutMock = new stream.MockReadableStream();
 
@@ -115,6 +115,8 @@ describe('Test the IRC client', function() {
         RestChatbot({
             port: CHATBOT_PORT,
             model: botmodel
+        }, function() {
+            done();
         })
         .then(function(newChatbot) {
             chatbot = newChatbot;
@@ -127,7 +129,7 @@ describe('Test the IRC client', function() {
         chatbot = undefined;
    })
 
-    it('should handle a conversation in which the user order a pizza', function(done) {
+    it('should handle a conversation in which the user order a hamburger', function(done) {
         var script = [
             "Hello\n", 
             "Would you want to eat a pizza, a hamburger or a salad?\n",

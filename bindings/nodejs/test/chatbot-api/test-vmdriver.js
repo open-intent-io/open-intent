@@ -104,7 +104,8 @@ describe("Test VM user commands driver", function() {
 
         describe('Create VM from string', function() {
             it('should keep a variable state', function(done) {
-                var userCommands = fs.readFileSync('./test/chatbot-api/vm-commands.js', 'utf-8');
+                var path = require('path');
+                var userCommands = fs.readFileSync(path.resolve(__dirname, 'vm-commands.js'), 'utf-8');
 
                 var userCommandsDriver = new VMUserDefinedActionDriver(userCommands);
                 userCommandsDriver.execute('command1', 'SESSION', {})

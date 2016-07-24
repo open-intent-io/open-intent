@@ -37,23 +37,18 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var proxyquire = require('proxyquire');
-var oi = require('../../../index');
-oi['@noCallThru'] = true;
+var ModelBuilder = require('../lib/chatbot-api/model-builder');
+var fs = require('fs');
+var path = require('path');
 
-var restChatbot = proxyquire('../../../project-skeletons/rest-chatbot/rest-chatbot', {
-    'open-intent': oi
-});
+var dictionaryFile = path.resolve(__dirname, 'res/food_bot/dictionary.json');
+var userCommandsFile = path.resolve(__dirname, 'res/food_bot/user_commands.js');
+var scriptFile = path.resolve(__dirname, 'res/food_bot/script.txt');
 
-var helpers = function() {
+var botmodel = ModelBuilder()
+    .withDictionaryFromFile(dictionaryFile)
+    .withJsUserCommandsFromFile(userCommandsFile)
+    .withOIMLFromFile(scriptFile)
+    .build();
 
-    var h = proxyquire('../../../project-skeletons/rest-chatbot/test/helpers', {
-        '../rest-chatbot': restChatbot
-    });
-
-    return h('project-skeletons/rest-chatbot/res');
-}
-
-proxyquire('../../../project-skeletons/rest-chatbot/test/test-chatbot', {
-    './helpers': helpers
-});
+module.exports = botmodel;

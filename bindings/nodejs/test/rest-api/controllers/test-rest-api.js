@@ -41,17 +41,18 @@ var should = require('should');
 var request = require('supertest');
 var RestChatbotServer = require('../../../lib/rest-server');
 var fs = require('fs');
+var path = require('path');
 
 describe('Swagger controllers', function() {
     var server = undefined;
 
-    var file = 'test/res/food_bot/dictionary.json';
+    var file = path.resolve(__dirname, '../../res/food_bot/dictionary.json');
     var dictionary = fs.readFileSync(file, 'utf-8');
 
-    var file = 'test/res/food_bot/script.txt';
+    var file = path.resolve(__dirname, '../../res/food_bot/script.txt');
     var oiml = fs.readFileSync(file, 'utf-8');
 
-    var file = 'test/res/food_bot/user_commands.js';
+    var file = path.resolve(__dirname, '../../res/food_bot/user_commands.js');
     var userCommands = fs.readFileSync(file,'utf-8');
 
     before(function() {
