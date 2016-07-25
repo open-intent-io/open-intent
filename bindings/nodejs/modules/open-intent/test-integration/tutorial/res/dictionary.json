@@ -1,0 +1,18 @@
+{
+  "entities":
+  {
+    "greetings": {
+      "Hello": ["Hi", "Hey"],
+      "What's up": []
+    },
+    "time": {
+      "time": []
+    },
+    "question": {
+      "what": []
+    },
+    "name": {
+      "name": []
+    }
+  }
+}

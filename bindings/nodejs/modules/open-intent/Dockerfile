@@ -9,11 +9,8 @@ RUN apt-get update; apt-get install -y nodejs npm \
         libboost-regex1.58 \
         libboost-log1.58
 
-RUN npm install -g open-intent
+WORKDIR /usr/src
+RUN npm install q
 
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 
-
-WORKDIR /usr/src
-
-RUN open-intent project create chatbot
