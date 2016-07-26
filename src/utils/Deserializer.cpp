@@ -44,6 +44,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <intent/chatbot/ChatbotModel.hpp>
 #include "intent/utils/Deserializer.hpp"
+#include "intent/utils/SingleCharacterDelimiterTokenizer.hpp"
 #include "intent/intent_service/IntentEncoder.hpp"
 #include "json.hpp"
 
@@ -114,7 +115,7 @@ void deserializeIntentSchema(const nlohmann::json::array_t& intentVector,
   for (unsigned int i = 0; i < intentVector.size(); ++i) {
     const std::string& namedEntity = intentVector.at(i);
     std::vector<std::string> entityTokens;
-    Tokenizer::tokenize(namedEntity, ":", entityTokens);
+    SingleCharacterDelimiterTokenizer::tokenize(namedEntity, ":", entityTokens);
 
     std::string entity;
     std::string name;
@@ -178,7 +179,7 @@ void deserializeGraph(const nlohmann::json::object_t& graph,
     for (; edgeTargetIt != edgeTargetItEnd; ++edgeTargetIt) {
       const std::string& intentAndAction = edgeTargetIt->first;
       std::vector<std::string> tokens;
-      Tokenizer::tokenize(intentAndAction, ":", tokens);
+      SingleCharacterDelimiterTokenizer::tokenize(intentAndAction, ":", tokens);
 
       std::string intentName;
       std::string actionId;

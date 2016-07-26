@@ -38,59 +38,26 @@ LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#include "intent/intent_service/IntentService.hpp"
-#include "intent/intent_service/SentenceTokenizer.hpp"
+#ifndef INTENT_SENTENCE_TOKENIZER_HPP
+#define INTENT_SENTENCE_TOKENIZER_HPP
 
-#include "intent/utils/Deserializer.hpp"
-#include "intent/utils/Logger.hpp"
+#include <string>
+#include <vector>
 
-#include <fstream>
+#include "intent/intent_service/DictionaryModel.hpp"
 
 namespace intent {
-IntentService::IntentService(const IntentServiceModel& intentServiceModel)
-    : m_intentServiceModel(intentServiceModel) {}
 
-std::stringstream logResult(IntentService::Result& result) {
-  std::stringstream ss;
-  if (result.found) {
-    ss << "The intent \"" + result.intent.intentId + "\" has been found.";
-  } else {
-    ss << "No intent found.";
-  }
-  return ss;
+class SentenceTokenizer {
+ public:
+  SentenceTokenizer(const DictionaryModel& dictionaryModel);
+
+  void tokenize(const std::string sentence,
+                std::vector<std::string>& tokens) const;
+
+ private:
+  std::vector<std::string> m_regexpList;
+};
 }
 
-IntentMatcher::IntentResult IntentService::resolveIntent(
-    const std::string& input, const DictionaryModel& dictionaryModel,
-    const IntentModel::IntentIndex& intentByIdIndex) const {
-  LOG_INFO() << "Look for intent in \"" + input + "\"";
-
-  intent::Tokenizer::Tokens tokens;
-  SentenceTokenizer sentenceTokenizer(dictionaryModel);
-  sentenceTokenizer.tokenize(input, tokens);
-
-  // Try to match entities
-  intent::EntitiesMatcher entitiesMatcher;
-  EntitiesMatcher::Variables variables =
-      entitiesMatcher.match(tokens, dictionaryModel);
-
-  IntentService::Result result =
-      IntentMatcher::match(dictionaryModel, variables, intentByIdIndex);
-
-  LOG_TRACE() << "Result = " << result;
-  LOG_INFO() << logResult(result);
-
-  return result;
-}
-
-IntentService::Result IntentService::evaluate(const std::string& input) const {
-  return resolveIntent(input, *m_intentServiceModel.dictionaryModel,
-                       m_intentServiceModel.intentModel->intentsByIntentId);
-}
-
-std::ostream& operator<<(std::ostream& os,
-                         const IntentService::Result& result) {
-  return os << "{ found: " << result.found << ", "
-            << "intent: " << result.intent << " }";
-}
-}
+#endif

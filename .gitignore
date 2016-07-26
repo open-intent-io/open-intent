@@ -1,6 +1,7 @@
 
 .idea/
 build-dir/
+node_modules/
 
 *.old
 *.user

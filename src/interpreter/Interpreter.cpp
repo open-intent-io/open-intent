@@ -45,6 +45,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "intent/interpreter/ReplyTemplateInterpreter.hpp"
 
 #include "intent/utils/Logger.hpp"
+#include "intent/utils/SingleCharacterDelimiterTokenizer.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <cassert>
@@ -176,7 +177,7 @@ struct ActionInserter {
 std::vector<ScriptLine> tokenizeInLines(const std::string& input) {
   std::vector<std::string> lines;
   std::vector<char> delimiters = {'\n'};
-  Tokenizer::tokenize(input, delimiters, lines);
+  SingleCharacterDelimiterTokenizer::tokenize(input, delimiters, lines);
   std::vector<ScriptLine> scriptLines;
   for (unsigned int i = 0; i < lines.size(); ++i) {
     scriptLines.push_back({lines[i], i});

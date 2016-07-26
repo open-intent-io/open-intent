@@ -21,6 +21,7 @@ SET(SOURCE_FILES
         utils/Levenshtein.cpp
         utils/Logger.cpp
         utils/RegexMatcher.cpp
+        utils/SingleCharacterDelimiterTokenizer.cpp
         utils/Tokenizer.cpp
         utils/TrigramHelper.cpp
         intent_service/Term.cpp
@@ -30,6 +31,7 @@ SET(SOURCE_FILES
         intent_service/IntentModel.cpp
         intent_service/IntentMatcher.cpp
         intent_service/IntentService.cpp
+        intent_service/SentenceTokenizer.cpp
         intent_story_service/IntentStoryService.cpp
 )
 
@@ -37,7 +39,7 @@ SET(SOURCE_FILES
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 ADD_LIBRARY(${PROJECT_NAME}-static STATIC ${SOURCE_FILES} ${HEADER_FILES})
-ADD_LIBRARY(${PROJECT_NAME}-shared SHARED ${SOURCE_FILES} ${HEADER_FILES})
+ADD_LIBRARY(${PROJECT_NAME}-shared SHARED ${SOURCE_FILES} ${HEADER_FILES} ../include/intent/utils/SingleCharacterDelimiterTokenizer.hpp utils/SingleCharacterDelimiterTokenizer.cpp intent_service/SentenceTokenizer.cpp)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}-static pthread ${Boost_LIBRARIES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}-shared pthread ${Boost_LIBRARIES})
 

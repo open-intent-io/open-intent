@@ -33,64 +33,34 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY,
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#include "intent/intent_service/IntentService.hpp"
-#include "intent/intent_service/SentenceTokenizer.hpp"
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
-#include "intent/utils/Deserializer.hpp"
-#include "intent/utils/Logger.hpp"
+#include "intent/utils/SingleCharacterDelimiterTokenizer.hpp"
 
-#include <fstream>
+using namespace intent;
+using namespace ::testing;
 
-namespace intent {
-IntentService::IntentService(const IntentServiceModel& intentServiceModel)
-    : m_intentServiceModel(intentServiceModel) {}
+TEST(SingleCharacterDelimiterTokenizerTest, split_string_into_tokens_with_space_delimiter)
+{
+    std::string input = "Hello, my name is Bryan and I'm twenty.";
 
-std::stringstream logResult(IntentService::Result& result) {
-  std::stringstream ss;
-  if (result.found) {
-    ss << "The intent \"" + result.intent.intentId + "\" has been found.";
-  } else {
-    ss << "No intent found.";
-  }
-  return ss;
+    SingleCharacterDelimiterTokenizer::Tokens tokens;
+    SingleCharacterDelimiterTokenizer::tokenize(input, " ", tokens);
+
+    EXPECT_THAT(tokens, ElementsAre("Hello,", "my", "name", "is", "Bryan", "and", "I'm", "twenty."));
 }
 
-IntentMatcher::IntentResult IntentService::resolveIntent(
-    const std::string& input, const DictionaryModel& dictionaryModel,
-    const IntentModel::IntentIndex& intentByIdIndex) const {
-  LOG_INFO() << "Look for intent in \"" + input + "\"";
+TEST(SingleCharacterDelimiterTokenizerTest, split_string_into_tokens_with_various_delimiters)
+{
+    std::string input = "Hello, my name is Bryan and I'm twenty.";
 
-  intent::Tokenizer::Tokens tokens;
-  SentenceTokenizer sentenceTokenizer(dictionaryModel);
-  sentenceTokenizer.tokenize(input, tokens);
+    SingleCharacterDelimiterTokenizer::Tokens tokens;
+    SingleCharacterDelimiterTokenizer::tokenize(input, " ,'.", tokens);
 
-  // Try to match entities
-  intent::EntitiesMatcher entitiesMatcher;
-  EntitiesMatcher::Variables variables =
-      entitiesMatcher.match(tokens, dictionaryModel);
-
-  IntentService::Result result =
-      IntentMatcher::match(dictionaryModel, variables, intentByIdIndex);
-
-  LOG_TRACE() << "Result = " << result;
-  LOG_INFO() << logResult(result);
-
-  return result;
-}
-
-IntentService::Result IntentService::evaluate(const std::string& input) const {
-  return resolveIntent(input, *m_intentServiceModel.dictionaryModel,
-                       m_intentServiceModel.intentModel->intentsByIntentId);
-}
-
-std::ostream& operator<<(std::ostream& os,
-                         const IntentService::Result& result) {
-  return os << "{ found: " << result.found << ", "
-            << "intent: " << result.intent << " }";
-}
+    EXPECT_THAT(tokens, ElementsAre("Hello", "my", "name", "is", "Bryan", "and", "I", "m", "twenty"));
 }

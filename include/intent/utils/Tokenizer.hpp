@@ -38,17 +38,14 @@ LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef INTENT_NLP_TOKENIZER_HPP
-#define INTENT_NLP_TOKENIZER_HPP
+#ifndef INTENT_TOKENIZER_HPP
+#define INTENT_TOKENIZER_HPP
 
 #include <string>
 #include <vector>
 
 namespace intent {
 
-/**
- * \brief Tokenizer aims to split an input string into tokens using delimiters
- */
 class Tokenizer {
  public:
   /*
@@ -61,25 +58,14 @@ class Tokenizer {
    */
   typedef std::vector<Token> Tokens;
 
-  /**
-   * \brief Tokenize a sentence.
-   *
-   * \param message       The input string to be tokenized.
-   * \param delimiters    The list of single character delimiters used to split
-   * the input string.
-   * \param tokens        The list of generated tokens.
-   */
-  static void tokenize(const std::string& message,
-                       const std::string& delimiters, Tokens& tokens);
+  Tokenizer(const std::string& m_delimiters,
+            const std::vector<std::string>& regexpList);
 
-  /**
-   * \param message       The input string to be tokenized.
-   * \param delimiters    The list of single character delimiters used to split
-   * the input string.
-   * \param tokens        The list of generated tokens.
-   */
-  static void tokenize(const std::string& message,
-                       const std::vector<char>& delimiters, Tokens& tokens);
+  void tokenize(const std::string& message, Tokens& tokens);
+
+ private:
+  const std::string m_delimiters;
+  const std::vector<std::string> m_regexpList;
 };
 }
 
