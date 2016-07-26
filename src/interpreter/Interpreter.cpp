@@ -92,9 +92,9 @@ std::string extractSentence(const ScriptLine& scriptLine) {
 struct IntentInserter {
   IntentInserter(const DictionaryModel& dictionaryModel,
                  const Scenario& scenario, IntentModel& intentModel)
-      : m_dictionaryModel(dictionaryModel),
-        m_intentModel(intentModel),
-        m_scenario(scenario) {}
+      : m_intentModel(intentModel),
+        m_scenario(scenario),
+        m_dictionaryModel(dictionaryModel) {}
 
   void operator()(const std::pair<int, int> inquiryToReply) {
     std::string inquiry = extractSentence(m_scenario[inquiryToReply.first]);
@@ -113,8 +113,8 @@ struct EdgeParserWrapper {
                     std::unique_ptr<std::string>& previousStateInScenario,
                     EdgeParser& edgeParser)
       : m_scenario(scenario),
-        m_previousStateInScenario(previousStateInScenario),
-        m_edgeParser(edgeParser) {}
+        m_edgeParser(edgeParser),
+        m_previousStateInScenario(previousStateInScenario) {}
 
   EdgeDefinition operator()(const std::pair<int, int> inquiryToReply) {
     return m_edgeParser.parse(m_scenario, inquiryToReply,
@@ -132,8 +132,8 @@ struct FallbackEdgesRetriever {
                          EdgeParser& edgeParser,
                          std::vector<EdgeDefinition>& edgesToInsert)
       : m_scenario(scenario),
-        m_previousStateInScenario(previousStateInScenario),
         m_edgeParser(edgeParser),
+        m_previousStateInScenario(previousStateInScenario),
         m_edgesToInsert(edgesToInsert) {}
 
   void operator()(const std::pair<int, int> inquiryToReply) {
@@ -151,8 +151,8 @@ struct FallbackEdgesRetriever {
 
 struct ActionInserter {
   ActionInserter(ChatbotActionModel& chatbotActionModel, int& repliesCounter)
-      : m_chatbotActionModel(chatbotActionModel),
-        m_repliesCounter(repliesCounter) {}
+      : m_repliesCounter(repliesCounter),
+        m_chatbotActionModel(chatbotActionModel) {}
 
   void operator()(EdgeDefinition& edge) {
     const std::string replyId = DEFAULT_REPLY_ID + "_" + edge.edge.actionId;
