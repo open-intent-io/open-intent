@@ -3,8 +3,6 @@
 #include <unordered_map>
 #include <fstream>
 
-#define GRAPH_DUMP_ENABLED
-
 #include "intent/OpenIntent.hpp"
 
 using namespace intent;
@@ -20,9 +18,8 @@ int main(int argc, char **argv)
 
     std::ofstream output_dot("output.dot");
 
-
-    WriterMaker writerMaker(*chatbotModel.intentStoryServiceModel.intentStoryModel);
-    chatbotModel.intentStoryServiceModel.intentStoryModel->graph.dump(output_dot, writerMaker);
+    intent::IntentStoryModelSerializer serializer;
+    serializer.serialize(output_dot, chatbotModel.intentStoryServiceModel);
 
     std::cout << "Dot file generated!";
     return 0;
