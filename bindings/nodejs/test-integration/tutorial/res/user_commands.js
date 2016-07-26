@@ -37,55 +37,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var SESSION_ID = '12345';
-
-module.exports = function(uri, stdio) {
-    return new IRCClient(uri, stdio);
+function getDateTime() {
+    return new Date().toString().substring(16,24);
 }
 
-function IRCClient(uri, stdio) {
-    var readline = require('readline');
-    var RestChatbotClient = require('./rest-client');
-
-    var chatbotClient = new RestChatbotClient(uri);
-    var lastPromise;
-
-    var rl = readline.createInterface({
-        input: stdio.stdin,
-        output: stdio.stdout,
-        prompt: '> '
-    });
-
-    rl.prompt();
-
-    rl.on('line', function(line) {
-        if(line == 'quit' || line == 'exit') {
-            if(lastPromise) {
-                lastPromise.then(function() {
-                    process.exit(0);
-                }).fail(function() {
-                    process.exit(0);
-                });
-            }
-            else {
-                process.exit(0);
-            }
-        }
-
-        var promise = chatbotClient.talk(SESSION_ID, line);
-        promise.then(function(replies) {
-            var output = '';
-            for(var i in replies) {
-                output += replies[i] + '\n';
-            }
-            stdio.stdout.write(output);
-            rl.prompt();
-        })
-        .fail(function(response) {
-            console.error('Error: ' + JSON.parse(response.body).message);
-            rl.prompt();
-        });
-
-        lastPromise = promise;
-    });
-}
+module.exports = {
+    '#telltime': function(intentVariables, sessionId, next) {
+        var replyVariables = {};
+        replyVariables['0'] = getDateTime();
+        next(replyVariables);
+    }
+};

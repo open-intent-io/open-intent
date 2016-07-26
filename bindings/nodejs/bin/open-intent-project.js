@@ -102,6 +102,7 @@ function printAndExit(err, output, code) {
 app
     .command('create [name]')
     .description('Create a folder containing an open-intent REST chatbot')
+    .option('-n, --no-npm', 'Do not call npm install')
     .action(execute(project.create));
 
 app

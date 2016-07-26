@@ -135,7 +135,7 @@ describe('test project commands', function() {
             var name = 'create';
             var projPath = path.resolve(tmpDir, name);
             process.chdir(tmpDir);
-            project.create(name, {}, function (err) {
+            project.create(name, { 'npm': true }, function (err) {
                 should.not.exist(err);
                 // check a couple of files
                 var packageJson = path.resolve(projPath, 'package.json');
@@ -172,7 +172,7 @@ describe('test project commands', function() {
         before(function (done) {
             projPath = path.resolve(tmpDir, name);
             process.chdir(tmpDir);
-            project.create(name, {framework: 'connect'}, done);
+            project.create(name, { npm: true }, done);
         });
 
         it('should pass debug options', function (done) {

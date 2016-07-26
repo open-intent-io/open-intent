@@ -47,6 +47,18 @@ ADD_CUSTOM_TARGET(nodejs-binding-build ALL
         DEPENDS ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
 )
 
+FIND_PROGRAM( DOCKER_PATH docker )
+
+IF(DOCKER_PATH)
+    ADD_CUSTOM_COMMAND(TARGET nodejs-binding-build POST_BUILD
+            COMMAND docker build -t open-intent .
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bindings/nodejs
+            )
+ELSE()
+    MESSAGE(WARNING "Docker has not been found. Please note that you will not be able to execute the integration tests.")
+ENDIF()
+
+
 ADD_CUSTOM_COMMAND(
         OUTPUT ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
         COMMAND npm install --unsafe-perm

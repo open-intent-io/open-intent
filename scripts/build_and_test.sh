@@ -17,4 +17,5 @@ then
 fi
 
 ./scripts/build.sh
+./scripts/run_tests.sh
 
