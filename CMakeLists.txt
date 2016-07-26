@@ -43,50 +43,28 @@ if(DOXYGEN_FOUND)
             "Open file://${CMAKE_CURRENT_BINARY_DIR}/html/index.html")
 endif(DOXYGEN_FOUND)
 
-ADD_CUSTOM_TARGET(nodejs-binding-build ALL
-        DEPENDS ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
-)
-
-FIND_PROGRAM( DOCKER_PATH docker )
-
-IF(DOCKER_PATH)
-    ADD_CUSTOM_COMMAND(TARGET nodejs-binding-build POST_BUILD
-            COMMAND docker build -t open-intent .
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bindings/nodejs
-            )
-ELSE()
-    MESSAGE(WARNING "Docker has not been found. Please note that you will not be able to execute the integration tests.")
-ENDIF()
-
-
-ADD_CUSTOM_COMMAND(
-        OUTPUT ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
-        COMMAND npm install --unsafe-perm
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/build/Release/open-intent.node
-        ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-ADD_CUSTOM_TARGET(run-nodejs-tests ALL
-        DEPENDS nodejs-binding-build
-        COMMAND npm test
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
 ADD_CUSTOM_TARGET(run-all-tests
-        DEPENDS domotic-test intent-test beerbar-test run-nodejs-tests)
+        DEPENDS run-unit-tests run-integration-tests
+)
 
-ADD_CUSTOM_COMMAND(TARGET run-all-tests POST_BUILD
+ADD_CUSTOM_TARGET(run-unit-tests
+        DEPENDS run-open-intent-js-test
+)
+
+ADD_CUSTOM_TARGET(run-integration-tests
+        DEPENDS run-open-intent-js-integration-test)
+
+ADD_CUSTOM_COMMAND(TARGET run-integration-tests POST_BUILD
         COMMAND ${CMAKE_BINARY_DIR}/examples/Domotic/test/domotic-test
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/examples/Domotic/test
 )
 
-ADD_CUSTOM_COMMAND(TARGET run-all-tests POST_BUILD
+ADD_CUSTOM_COMMAND(TARGET run-integration-tests POST_BUILD
         COMMAND ${CMAKE_BINARY_DIR}/examples/BeerBar/test/beerbar-test
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/examples/BeerBar/test
-        )
+)
 
-ADD_CUSTOM_COMMAND(TARGET run-all-tests POST_BUILD
+ADD_CUSTOM_COMMAND(TARGET run-unit-tests POST_BUILD
         COMMAND ${CMAKE_BINARY_DIR}/test/tests/intent-test
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/tests/
 )
