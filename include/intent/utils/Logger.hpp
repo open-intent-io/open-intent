@@ -41,9 +41,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef INTENT_LOGGER_HPP
 #define INTENT_LOGGER_HPP
 
-#define LOG_ENABLED true
-
-#ifdef LOG_ENABLED
+#include <iostream>
 
 #define BOOST_LOG_DYN_LINK
 
@@ -76,6 +74,15 @@ class Logger {
   static void initialize(SeverityLevel::type severityLevel);
 
   /**
+   * @brief Return the severity type for string. Return FATAL if nothing is
+   * matching.
+   * @param severity The string to convert into severity level
+   * @return the severity level
+   */
+  static SeverityLevel::type severityLevelFromString(
+      const std::string& severity);
+
+  /**
    * @brief Get the static instance of the logger
    * \return The logger instance
    */
@@ -83,7 +90,11 @@ class Logger {
     static Logger* logger = NULL;
     if (logger == NULL) {
       logger = new Logger();
-      initialize(SeverityLevel::FATAL);
+      SeverityLevel::type initialLevel = SeverityLevel::FATAL;
+      if (const char* env_p = std::getenv("LOG_LEVEL")) {
+        initialLevel = Logger::severityLevelFromString(env_p);
+      }
+      initialize(initialLevel);
     }
     return *logger;
   }
@@ -190,17 +201,9 @@ class Logger {
 }
 }
 
-#define LOG_TRACE() \
-  if (LOG_ENABLED) intent::log::Logger::getInstance().trace()
-#define LOG_DEBUG() \
-  if (LOG_ENABLED) intent::log::Logger::getInstance().debug()
-#define LOG_INFO() \
-  if (LOG_ENABLED) intent::log::Logger::getInstance().info()
-#define LOG_WARNING() \
-  if (LOG_ENABLED) intent::log::Logger::getInstance().warning()
-#define LOG_ERROR() \
-  if (LOG_ENABLED) intent::log::Logger::getInstance().error()
-#define LOG_FATAL() \
-  if (LOG_ENABLED) intent::log::Logger::getInstance().fatal()
-
-#endif
+#define LOG_TRACE() intent::log::Logger::getInstance().trace()
+#define LOG_DEBUG() intent::log::Logger::getInstance().debug()
+#define LOG_INFO() intent::log::Logger::getInstance().info()
+#define LOG_WARNING() intent::log::Logger::getInstance().warning()
+#define LOG_ERROR() intent::log::Logger::getInstance().error()
+#define LOG_FATAL() intent::log::Logger::getInstance().fatal()

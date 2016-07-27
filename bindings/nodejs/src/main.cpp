@@ -62,8 +62,6 @@ void CreateSerializableChatbotFromOIML(const FunctionCallbackInfo<Value>& args)
 }
 
 void InitAll(Local<Object> exports) {
-    //intent::log::Logger::initialize(intent::log::Logger::SeverityLevel::TRACE);
-
     intentjs::SerializableChatbot::Init(exports->GetIsolate());
     NODE_SET_METHOD(exports, "createSerializableChatbotFromJsonModel", CreateSerializableChatbotFromJsonModel);
     NODE_SET_METHOD(exports, "createSerializableChatbotFromOIML", CreateSerializableChatbotFromOIML);
