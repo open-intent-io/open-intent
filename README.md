@@ -3,6 +3,7 @@
 </p>
 
 ====================
+
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)][MIT License] [![Gitter](https://badges.gitter.im/open-intent-io/open-intent.svg)](https://gitter.im/open-intent-io/open-intent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Build Status](https://travis-ci.org/open-intent-io/open-intent.svg?branch=master)](https://travis-ci.org/open-intent-io/open-intent)
 
 open-intent is a natural language processing framework with the aim of finding user intents in sentences based on entity matching.
@@ -56,7 +57,7 @@ To build, configure with CMake and build.
 To build, just type:
 
     docker build -t open-intent-build .
-    docker run open-intent-build build.sh
+    docker run open-intent-build build_and_test.sh
 
 That's it!
 
