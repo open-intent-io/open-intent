@@ -42,6 +42,36 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace intent {
 namespace log {
+
+Logger::SeverityLevel::type Logger::severityLevelFromString(
+    const std::string &severity) {
+  if (severity == "TRACE") {
+    return Logger::SeverityLevel::TRACE;
+  }
+
+  if (severity == "DEBUG") {
+    return Logger::SeverityLevel::DEBUG;
+  }
+
+  if (severity == "INFO") {
+    return Logger::SeverityLevel::INFO;
+  }
+
+  if (severity == "WARNING") {
+    return Logger::SeverityLevel::WARNING;
+  }
+
+  if (severity == "ERROR") {
+    return Logger::SeverityLevel::ERROR;
+  }
+
+  if (severity == "FATAL") {
+    return Logger::SeverityLevel::FATAL;
+  }
+
+  return Logger::SeverityLevel::FATAL;
+}
+
 void Logger::initialize(SeverityLevel::type severityLevel) {
   boost::log::trivial::severity_level boostSeverityLevel =
       boost::log::trivial::error;
