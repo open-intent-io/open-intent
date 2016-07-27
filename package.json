@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha --reporter spec --recursive 'bindings/nodejs/test/**/*.js' 'bindings/nodejs/project-skeletons/rest-chatbot/test/**/*.js'",
-    "install": "node-gyp rebuild -j 4"
+    "install": "rm -rf node_modules/.bin/touch && node-gyp rebuild -j 4"
   },
   "repository": {
     "type": "git",
@@ -21,11 +21,14 @@
     "entity"
   ],
   "dependencies": {
+    "bindings": "1.2.x",
     "body-parser": "^1.15.1",
     "commander": "^2.9.0",
     "express": "^4.12.3",
     "fs-extra": "^0.30.0",
     "lodash": "^4.13.1",
+    "nan": "2.3.x",
+    "nodemon": "^1.10.0",
     "object-path": "^0.11.1",
     "q": "^1.4.1",
     "readline": "^1.3.0",
@@ -35,10 +38,7 @@
     "rmdir": "^1.2.0",
     "swagger-express-mw": "^0.1.0",
     "swagger-tools": "^0.10.1",
-    "tmp": "0.0.28",
-
-    "bindings": "1.2.x",
-    "nan": "2.3.x"
+    "tmp": "0.0.28"
   },
   "devDependencies": {
     "proxyquire": "^1.7.10",

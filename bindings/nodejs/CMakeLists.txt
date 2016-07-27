@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.2)
 
 ADD_CUSTOM_TARGET(open-intent-js ALL
+        COMMAND npm install
         SOURCES ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
 FIND_PROGRAM( DOCKER_PATH docker )
