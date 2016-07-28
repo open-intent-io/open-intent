@@ -38,50 +38,114 @@ LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//
-// Created by clement on 03/05/16.
-//
-
 #include "intent/utils/Tokenizer.hpp"
 #include "intent/utils/RegexMatcher.hpp"
+#include "intent/utils/SingleCharacterDelimiterTokenizer.hpp"
 
+#include "boost/regex/regex_traits.hpp"
+#include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
 namespace intent {
-void Tokenizer::tokenize(const std::string& input,
-                         const std::string& delimiters, Tokens& tokens) {
-  std::string sentence = RegexMatcher::padAroundRegexMarkersInSentence(input);
 
-  boost::split(tokens, sentence, boost::is_any_of(delimiters));
+Tokenizer::Tokenizer(const std::string& delimiters,
+                     const std::vector<std::string>& regexpList)
+    : m_delimiters(delimiters), m_regexpList(regexpList) {}
 
-  // Remove empty characters
-  Tokens::iterator itEnd = std::remove(tokens.begin(), tokens.end(), "");
-  tokens.erase(itEnd, tokens.end());
+struct Split {
+  std::string part;
+  bool tokenizable;
+};
+typedef std::vector<Split> Splits;
+bool operator==(const Split& s1, const Split& s2) {
+  return s1.part == s2.part && s1.tokenizable == s2.tokenizable;
 }
 
-namespace {
+class IndexClassesPred {
+  const Split& m_split;
+  Splits& nextSplits;
+  std::string::const_iterator m_begin;
+  std::string::const_iterator m_end;
 
-struct is_any_of_chars {
-  is_any_of_chars(const std::vector<char>& delimiters)
-      : m_delimiters(delimiters) {}
+ public:
+  IndexClassesPred(const Split& a, Splits& nextSplits)
+      : m_split(a), nextSplits(nextSplits) {}
+  bool operator()(
+      const boost::match_results<std::string::const_iterator>& what) {
+    Split s1, s2, s3;
+    std::string::const_iterator begin = m_split.part.begin();
+    std::string::const_iterator end = m_split.part.end();
 
-  bool operator()(const char& c) const {
-    return std::find_if(m_delimiters.begin(), m_delimiters.end(),
-                        [&c](const char& delimiter) {
-                          return c == delimiter;
-                        }) != m_delimiters.end();
+    if (what[0].first != begin) {
+      s1.part = std::string(begin, what[0].first);
+      s1.tokenizable = true;
+      nextSplits.push_back(s1);
+    }
+
+    s2.part = std::string(what[0].first, what[0].second);
+    s2.tokenizable = false;
+    nextSplits.push_back(s2);
+
+    if (what[0].second != end) {
+      s3.part = std::string(what[0].second, end);
+      s3.tokenizable = true;
+      nextSplits.push_back(s3);
+    }
+    return true;
+  }
+};
+
+void Tokenizer::tokenize(const std::string& message, Tokens& tokens) {
+  Splits splits, nextSplits;
+  Split split;
+  split.part = message;
+  split.tokenizable = true;
+  nextSplits.push_back(split);
+
+  while (splits != nextSplits) {
+    bool splitted = false;
+    splits = nextSplits;
+    nextSplits.clear();
+
+    Splits::const_iterator it = splits.begin();
+    Splits::const_iterator itEnd = splits.end();
+    for (; it != itEnd; ++it) {
+      bool found_matching = false;
+      const Split& split = *it;
+
+      if (split.tokenizable && !m_regexpList.empty()) {
+        for (const std::string& regexStr : m_regexpList) {
+          boost::regex expression(regexStr);
+          splitted = boost::regex_grep(IndexClassesPred(split, nextSplits),
+                                       split.part, expression);
+          found_matching |= splitted;
+
+          if (splitted) {
+            break;
+          }
+        }
+        if (!found_matching) {
+          nextSplits.push_back(split);
+        }
+      } else {
+        nextSplits.push_back(split);
+      }
+    }
   }
 
-  const std::vector<char>& m_delimiters;
-};
-}
+  Splits::const_iterator it = splits.begin();
+  Splits::const_iterator itEnd = splits.end();
+  for (; it != itEnd; ++it) {
+    const Split& split = *it;
 
-void Tokenizer::tokenize(const std::string& input,
-                         const std::vector<char>& delimiters, Tokens& tokens) {
-  boost::split(tokens, input, is_any_of_chars(delimiters));
-
-  // Remove empty characters
-  Tokens::iterator itEnd = std::remove(tokens.begin(), tokens.end(), "");
-  tokens.erase(itEnd, tokens.end());
+    if (split.tokenizable) {
+      std::vector<std::string> partTokens;
+      SingleCharacterDelimiterTokenizer::tokenize(split.part, m_delimiters,
+                                                  partTokens);
+      tokens.insert(tokens.end(), partTokens.begin(), partTokens.end());
+    } else {
+      tokens.push_back(split.part);
+    }
+  }
 }
 }

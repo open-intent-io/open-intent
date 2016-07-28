@@ -45,6 +45,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "intent/intent_service/DictionaryModel.hpp"
 #include "intent/intent_service/TermIndex.hpp"
 #include "intent/utils/Levenshtein.hpp"
+#include "intent/utils/SingleCharacterDelimiterTokenizer.hpp"
 #include "intent/utils/Tokenizer.hpp"
 #include "intent/utils/TrigramHelper.hpp"
 #include <unordered_map>
@@ -154,7 +155,7 @@ struct ZipWithBuffer {
     std::vector<std::string>::const_iterator bufferEnd = m_buffer.end();
 
     std::vector<std::string> tokens;
-    Tokenizer::tokenize(alias, " ", tokens);
+    SingleCharacterDelimiterTokenizer::tokenize(alias, " ", tokens);
 
     std::vector<std::string>::const_iterator tokenIt = tokens.begin();
     for (; tokenIt != tokens.end() && bufferIt != m_buffer.end();
@@ -278,7 +279,7 @@ Term TermIndex::findTerm(const std::string& token,
       term = aliasesToTerm[bestAlias.first];
 
       std::vector<std::string> tokens;
-      Tokenizer::tokenize(bestAlias.first, " ", tokens);
+      SingleCharacterDelimiterTokenizer::tokenize(bestAlias.first, " ", tokens);
       tokensPopped = (int)tokens.size();
       assert(tokensPopped > 0);
     }
