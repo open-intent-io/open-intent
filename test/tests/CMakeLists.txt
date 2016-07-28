@@ -21,8 +21,9 @@ SET(SOURCE_FILES
         IntentServiceTest.cpp
         IntentStoryServiceTest.cpp
         MultiSessionChatbotTest.cpp
-        TokenizerTest.cpp
+        SingleCharacterDelimiterTokenizerTest.cpp
         TermIndexTest.cpp
+        TokenizerTest.cpp
         TrigramUtilsTest.cpp
         SingleSessionChatbotTest.cpp
         IntentMatcherTest.cpp

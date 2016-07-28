@@ -38,59 +38,46 @@ LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#include "intent/intent_service/IntentService.hpp"
-#include "intent/intent_service/SentenceTokenizer.hpp"
+#ifndef INTENT_SINGLECHARACTERDELIMITERTOKENIZER_HPP
+#define INTENT_SINGLECHARACTERDELIMITERTOKENIZER_HPP
 
-#include "intent/utils/Deserializer.hpp"
-#include "intent/utils/Logger.hpp"
-
-#include <fstream>
+#include <string>
+#include <vector>
 
 namespace intent {
-IntentService::IntentService(const IntentServiceModel& intentServiceModel)
-    : m_intentServiceModel(intentServiceModel) {}
 
-std::stringstream logResult(IntentService::Result& result) {
-  std::stringstream ss;
-  if (result.found) {
-    ss << "The intent \"" + result.intent.intentId + "\" has been found.";
-  } else {
-    ss << "No intent found.";
-  }
-  return ss;
+class SingleCharacterDelimiterTokenizer {
+ public:
+  /*
+   * \brief A string token.
+   */
+  typedef std::string Token;
+
+  /**
+   * \brief A list of Tokens.
+   */
+  typedef std::vector<Token> Tokens;
+
+  /**
+   * \brief Tokenize a sentence.
+   *
+   * \param message       The input string to be tokenized.
+   * \param delimiters    The list of single character delimiters used to split
+   * the input string.
+   * \param tokens        The list of generated tokens.
+   */
+  static void tokenize(const std::string& message,
+                       const std::string& delimiters, Tokens& tokens);
+
+  /**
+   * \param message       The input string to be tokenized.
+   * \param delimiters    The list of single character delimiters used to split
+   * the input string.
+   * \param tokens        The list of generated tokens.
+   */
+  static void tokenize(const std::string& message,
+                       const std::vector<char>& delimiters, Tokens& tokens);
+};
 }
 
-IntentMatcher::IntentResult IntentService::resolveIntent(
-    const std::string& input, const DictionaryModel& dictionaryModel,
-    const IntentModel::IntentIndex& intentByIdIndex) const {
-  LOG_INFO() << "Look for intent in \"" + input + "\"";
-
-  intent::Tokenizer::Tokens tokens;
-  SentenceTokenizer sentenceTokenizer(dictionaryModel);
-  sentenceTokenizer.tokenize(input, tokens);
-
-  // Try to match entities
-  intent::EntitiesMatcher entitiesMatcher;
-  EntitiesMatcher::Variables variables =
-      entitiesMatcher.match(tokens, dictionaryModel);
-
-  IntentService::Result result =
-      IntentMatcher::match(dictionaryModel, variables, intentByIdIndex);
-
-  LOG_TRACE() << "Result = " << result;
-  LOG_INFO() << logResult(result);
-
-  return result;
-}
-
-IntentService::Result IntentService::evaluate(const std::string& input) const {
-  return resolveIntent(input, *m_intentServiceModel.dictionaryModel,
-                       m_intentServiceModel.intentModel->intentsByIntentId);
-}
-
-std::ostream& operator<<(std::ostream& os,
-                         const IntentService::Result& result) {
-  return os << "{ found: " << result.found << ", "
-            << "intent: " << result.intent << " }";
-}
-}
+#endif

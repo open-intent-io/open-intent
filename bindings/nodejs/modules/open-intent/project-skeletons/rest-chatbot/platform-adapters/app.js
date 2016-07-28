@@ -33,64 +33,54 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY,
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#include "intent/intent_service/IntentService.hpp"
-#include "intent/intent_service/SentenceTokenizer.hpp"
+'use strict';
 
-#include "intent/utils/Deserializer.hpp"
-#include "intent/utils/Logger.hpp"
+const 
+  crypto = require('crypto'),
+  request = require('request'),
+  express = require('express'),
+  fs = require('fs'),
+  ChatbotClient = require('open-intent/lib/rest-client')
 
-#include <fstream>
+var app = express();
+var chatbot_client = new ChatbotClient("http://localhost:8080");
 
-namespace intent {
-IntentService::IntentService(const IntentServiceModel& intentServiceModel)
-    : m_intentServiceModel(intentServiceModel) {}
+app.set('port', process.env.PORT || 5000);
+app.use(express.static('public'));
 
-std::stringstream logResult(IntentService::Result& result) {
-  std::stringstream ss;
-  if (result.found) {
-    ss << "The intent \"" + result.intent.intentId + "\" has been found.";
-  } else {
-    ss << "No intent found.";
-  }
-  return ss;
+var baseUrl = require("./config/general").baseUrl;
+
+var platforms = {};
+platforms['kik'] = require("./controllers/kik");
+platforms['messenger'] = require("./controllers/messenger");
+platforms['skype'] = require("./controllers/skype");
+platforms['slack'] = require("./controllers/slack");
+platforms['telegram'] = require("./controllers/telegram");
+
+var selection = require("./config/selection")
+
+function deployPlatform(platformName, platform, isSelected) {  
+   var message = platformName;
+   var webhook = baseUrl;
+   webhook += platformName === 'kik' ? '/incoming' : '/'+platformName+'/chat';
+   if (selection[platformName]) {
+     console.log("setting up "+platformName);
+     if (platformName !== 'telegram' &&  platformName !== 'slack')
+        console.log("the webhook is : "+webhook);  
+     platform.attach(chatbot_client, app);   
+   } else {
+   }
 }
 
-IntentMatcher::IntentResult IntentService::resolveIntent(
-    const std::string& input, const DictionaryModel& dictionaryModel,
-    const IntentModel::IntentIndex& intentByIdIndex) const {
-  LOG_INFO() << "Look for intent in \"" + input + "\"";
-
-  intent::Tokenizer::Tokens tokens;
-  SentenceTokenizer sentenceTokenizer(dictionaryModel);
-  sentenceTokenizer.tokenize(input, tokens);
-
-  // Try to match entities
-  intent::EntitiesMatcher entitiesMatcher;
-  EntitiesMatcher::Variables variables =
-      entitiesMatcher.match(tokens, dictionaryModel);
-
-  IntentService::Result result =
-      IntentMatcher::match(dictionaryModel, variables, intentByIdIndex);
-
-  LOG_TRACE() << "Result = " << result;
-  LOG_INFO() << logResult(result);
-
-  return result;
+for (var platformName in platforms) {
+    if (platforms.hasOwnProperty(platformName)) {
+      deployPlatform(platformName, platforms[platformName], app);  
+    }
 }
 
-IntentService::Result IntentService::evaluate(const std::string& input) const {
-  return resolveIntent(input, *m_intentServiceModel.dictionaryModel,
-                       m_intentServiceModel.intentModel->intentsByIntentId);
-}
-
-std::ostream& operator<<(std::ostream& os,
-                         const IntentService::Result& result) {
-  return os << "{ found: " << result.found << ", "
-            << "intent: " << result.intent << " }";
-}
-}
+console.log("Server listening at "+app.get('port'));
+app.listen(app.get('port')); 

@@ -17,6 +17,7 @@
                 "src/utils/Levenshtein.cpp",
                 "src/utils/Logger.cpp",
                 "src/utils/RegexMatcher.cpp",
+                "src/utils/SingleCharacterDelimiterTokenizer.cpp",
                 "src/utils/Tokenizer.cpp",
                 "src/utils/TrigramHelper.cpp",
                 "src/intent_service/Term.cpp",
@@ -26,6 +27,7 @@
                 "src/intent_service/IntentModel.cpp",
                 "src/intent_service/IntentMatcher.cpp",
                 "src/intent_service/IntentService.cpp",
+                "src/intent_service/SentenceTokenizer.cpp",
                 "src/intent_story_service/IntentStoryService.cpp"
              ],
             'include_dirs': [
