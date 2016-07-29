@@ -212,7 +212,6 @@ namespace intentjs
      * @brief SerializableChatbot::PrepareReplies
      * @param args : Context, IntentVariables, UserVariables, replyCallback
      */
-
     void SerializableChatbot::PrepareReplies(const FunctionCallbackInfo <Value> &args)
     {
         Isolate *isolate = args.GetIsolate();
