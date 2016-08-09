@@ -38,65 +38,36 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 'use strict';
-var OpenIntentChatbot = require('./chatbot-api/chatbot');
-var Q = require('q');
-
-module.exports = function(config, ready) {
-    var deferred = Q.defer();
-    deferred.resolve(new RestChatbotServer(config, ready));
-    return deferred.promise;
-}
 
 
-function RestChatbotServer(config, ready) {
-    var chatbot = new OpenIntentChatbot();
-    var swaggerConfig = {
-        appRoot: __dirname // required config
-    };
+let Bot  = require('@kikinteractive/kik');
+var kikConfig = require('../config/kik/default.json');
 
-    process.env.SUPPRESS_NO_CONFIG_WARNING = 'true';
-    var SwaggerExpress = require('swagger-express-mw');
-    var SwaggerUi = require('swagger-tools/middleware/swagger-ui');
-    var express = require('express');
+// Configure the bot API endpoint, details for your bot
+let bot = new Bot(kikConfig);
 
-    var _this = this;
-    _this._app = new express();
-    _this._server = undefined;
-    _this._app.set('chatbot', chatbot);
+bot.updateBotConfiguration();
 
-    SwaggerExpress.create(swaggerConfig, function(err, swaggerExpress) {
-        if (err) { throw err; }
+var replyHandler = function(message, reply) {
+    message.reply(reply);
+};
 
-        // Add swagger-ui (This must be before swaggerExpress.register)
-        _this._app.use(SwaggerUi(swaggerExpress.runner.swagger));
+var messageHandler = function(chatbotClient, message) {
+   chatbotClient.talk(message.from, message.body).then(function(replies) {
+        var reply = '';
+        if (replies.length)
+            reply = replies[0];
+        else
+            reply = "An error occured";
+        replyHandler(message, reply);
+   });     
+};
 
-        // install middleware
-        swaggerExpress.register(_this._app);
-
-        var _port = 10010;
-        if(config && 'port' in config) {
-            _port = config.port;
-        }
-
-        if(config && 'model' in config) {
-            chatbot.setModel(config.model)
-            .fail(function(err) {
-                console.error('Error:', err);
-            })
-        }
-        _this._server = _this._app.listen(_port, ready);
-
-        //console.log('To watch the doc, visit http://127.0.0.1:' + port + '/docs');
+//Weird and all but I guess this route is enforced by the lib
+module.exports.attach = function (chatbotClient, app) {
+    bot.onTextMessage((message) => {
+        messageHandler(chatbotClient, message);
     });
 
-    _this.close = function() {
-        if(_this._server) {
-            _this._server.close();
-        }
-        else {
-            console.error('Server not set');
-        }
-    }
-
-    return _this;
-}
+    app.post('/incoming', bot.incoming());
+};

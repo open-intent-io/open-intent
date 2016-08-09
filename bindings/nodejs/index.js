@@ -38,10 +38,5 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 module.exports = {
-    'ModelBuilder': require('./lib/chatbot-api/model-builder'),
-
-    'createChatbot': require('./lib/chatbot-api/chatbot'),
-    'createRestChatbotServer': require('./lib/rest-server'),
-    'createRestChatbotClient': require('./lib/rest-client'),
-    'createIRCChatbotClient': require('./lib/irc-client')
+    'Chatbot': require('./lib/chatbot')
 }

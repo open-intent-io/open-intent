@@ -42,9 +42,9 @@ var should    = require("should");
 var sinon = require('sinon');
 var fs = require('fs');
 
-var VMUserDefinedActionDriver = require('../../lib/chatbot-api/user-defined-actions/vm-driver');
+var SimpleUserCommands = require('../../lib/chatbot-api/user-defined-actions/simple-driver');
 
-describe("Test VM user commands driver", function() {
+describe("Test simple user commands driver", function() {
 
     describe("When user command exists for the actionId, the driver executes it", function(done) {
         it('should execute the command1', function() {
@@ -55,9 +55,9 @@ describe("Test VM user commands driver", function() {
                 'command2': function(intentVariables, sessionId, next) {
                     next();
                 }
-            }
+            };
 
-            var userCommandsDriver = new VMUserDefinedActionDriver(JSON.stringify(userCommands));
+            var userCommandsDriver = new SimpleUserCommands(userCommands);
             userCommandsDriver.execute('command1', 'SESSION', {})
             .then(function() {
                 done();
@@ -76,7 +76,7 @@ describe("Test VM user commands driver", function() {
                 }
             }
 
-            var userCommandsDriver = new VMUserDefinedActionDriver(JSON.stringify(userCommands));
+            var userCommandsDriver = new SimpleUserCommands(userCommands);
             userCommandsDriver.execute('unknown_command', 'SESSION', {})
             .then(function() {
                 done();
@@ -85,38 +85,20 @@ describe("Test VM user commands driver", function() {
     });
     
     describe("The VM keeps a state between calls", function() {
-        describe('Create VM from module', function() {
+        describe('Create user commands from module', function() {
             it('should keep a variable state', function(done) {
-                var userCommands = require('./vm-commands');
+                var userCommands = require('./user-commands');
 
-                var userCommandsDriver = new VMUserDefinedActionDriver(userCommands);
+                var userCommandsDriver = new SimpleUserCommands(userCommands);
                 userCommandsDriver.execute('command1', 'SESSION', {})
-                    .then(function(userVariables) {
-                        should.equal(userVariables.state, 5);
-                        return userCommandsDriver.execute('command2', 'SESSION', {});
-                    })
-                    .then(function(userVariables) {
-                        should.equal(userVariables.state, 7);
-                        done();
-                    });
-            });
-        });
-
-        describe('Create VM from string', function() {
-            it('should keep a variable state', function(done) {
-                var path = require('path');
-                var userCommands = fs.readFileSync(path.resolve(__dirname, 'vm-commands.js'), 'utf-8');
-
-                var userCommandsDriver = new VMUserDefinedActionDriver(userCommands);
-                userCommandsDriver.execute('command1', 'SESSION', {})
-                    .then(function(userVariables) {
-                        should.equal(userVariables.state, 5);
-                        return userCommandsDriver.execute('command2', 'SESSION', {});
-                    })
-                    .then(function(userVariables) {
-                        should.equal(userVariables.state, 7);
-                        done();
-                    });
+                .then(function(userVariables) {
+                    should.equal(userVariables.state, 5);
+                    return userCommandsDriver.execute('command2', 'SESSION', {});
+                })
+                .then(function(userVariables) {
+                    should.equal(userVariables.state, 7);
+                    done();
+                });
             });
         });
     });

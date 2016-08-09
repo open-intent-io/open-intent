@@ -41,28 +41,22 @@ var expect    = require("chai").expect;
 var stream = require("mock-utf8-stream");
 var Q = require('q');
 var fs = require('fs');
-var proxyquire = require('proxyquire');
 
-var RestChatbot = require('../../lib/rest-server');
+var IrcClient = require('../../lib/middleware/irc');
+var createChatbot = require('../../lib/chatbot');
+
 var foodBotModel = require('../food-bot-model');
 
-var CHATBOT_PORT = 10005;
-
-
 describe('Test the IRC client', function() {
-    var chatbot;
-    var IRCClient;
-    var talk;
-    var uri = 'http://localhost:' + CHATBOT_PORT;
-
     var botmodel = foodBotModel;
+    var talk;
 
     var createAssertEqFunction = function(input, expected) {
         return function(data) {
             expect(data).to.equal(expected);
             return talk(input);
         }
-    }
+    };
 
     var handleScript = function(script, done) {
         var promise = talk(script[0]);
@@ -84,7 +78,7 @@ describe('Test the IRC client', function() {
         .fail(function(err) {
             console.error(err);
         });
-    }
+    };
 
     beforeEach(function(done) {
         var stdinMock = new stream.MockReadableStream();
@@ -94,9 +88,6 @@ describe('Test the IRC client', function() {
             stdin: stdinMock,
             stdout: stdoutMock
         };
-
-        IRCClient = require('../../lib/irc-client');
-        IRCClient(uri, stdio);
 
         talk = function(input) {
             var deferred = Q.defer();
@@ -112,22 +103,12 @@ describe('Test the IRC client', function() {
             return deferred.promise;
         };
 
-        RestChatbot({
-            port: CHATBOT_PORT,
-            model: botmodel
-        }, function() {
-            done();
-        })
+        createChatbot(botmodel)
         .then(function(newChatbot) {
-            chatbot = newChatbot;
-        })
+            newChatbot.use(IrcClient(stdio));
+            done();
+        });
     });
-
-    afterEach(function() {
-        chatbot.close();
-        delete chatbot;
-        chatbot = undefined;
-   })
 
     it('should handle a conversation in which the user order a hamburger', function(done) {
         var script = [

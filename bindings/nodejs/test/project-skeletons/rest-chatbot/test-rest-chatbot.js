@@ -42,19 +42,19 @@ var oi = require('../../../index');
 var path = require('path');
 oi['@noCallThru'] = true;
 
-var restChatbot = proxyquire(path.resolve(__dirname, '../../../project-skeletons/rest-chatbot/rest-chatbot'), {
+var restChatbot = proxyquire(path.resolve(__dirname, '../../../project-skeletons/chatbot/chatbot'), {
     'open-intent': oi
 });
 
 var helpers = function() {
 
-    var h = proxyquire('../../../project-skeletons/rest-chatbot/test/helpers', {
+    var h = proxyquire('../../../project-skeletons/chatbot/test/helpers', {
         '../rest-chatbot': restChatbot
     });
 
-    return h(path.resolve(__dirname, '../../../project-skeletons/rest-chatbot/res'));
+    return h(path.resolve(__dirname, '../../../project-skeletons/chatbot/res'));
 }
 
-proxyquire('../../../project-skeletons/rest-chatbot/test/test-chatbot', {
+proxyquire('../../../project-skeletons/chatbot/test/test-chatbot', {
     './helpers': helpers
 });

@@ -45,11 +45,10 @@ var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/st
 
 
 describe("Test standalone session manager driver", function() {
-
     describe("Test save a context and load it back for 1 sessionId", function() {
         var context = {
             'state': 'MyState'
-        }
+        };
 
         it('should save the context successfully', function(done) {
             var sessionManager = new StandaloneSessionManager();

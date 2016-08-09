@@ -37,15 +37,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var deserialize = require('../../chatbot-api/model-serializer').deserialize;
-var serialize = require('../../chatbot-api/model-serializer').serialize;
-
 module.exports = {
     talk: talk,
     setstate: setstate,
-    getstate: getstate,
-    setmodel: setmodel,
-    getmodel: getmodel
+    getstate: getstate
 };
 
 
@@ -84,33 +79,6 @@ function getstate(req, res) {
     chatbot.getState(sessionId)
     .then(function(state) {
         res.json({ 'state': state });
-    })
-    .fail(function(err) {
-        res.status(500).send({'message': err});
-    });
-}
-
-function setmodel(req, res) {
-    var chatbot = req.app.get('chatbot');
-    var botmodel = req.swagger.params.botmodel.value;
-
-    var model = deserialize(botmodel);
-    chatbot.setModel(model)
-    .then(function() {
-        res.json({ 'message': 'OK' });
-    })
-    .fail(function(err) {
-        res.status(500).send({'message': err});
-    });
-}
-
-function getmodel(req, res) {
-    var chatbot = req.app.get('chatbot');
-
-    chatbot.getModel()
-    .then(function(model) {
-        var serializedModel = serialize(model);
-        res.json(serializedModel);
     })
     .fail(function(err) {
         res.status(500).send({'message': err});

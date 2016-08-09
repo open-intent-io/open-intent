@@ -224,16 +224,16 @@ module.exports.attach = function(chatbotClient, app) {
 
     if (data.object == 'page') {
         data.entry.forEach(function(pageEntry) {
-        var pageID = pageEntry.id;
-        var timeOfEvent = pageEntry.time;
+            var pageID = pageEntry.id;
+            var timeOfEvent = pageEntry.time;
 
-        pageEntry.messaging.forEach(function(messagingEvent) {
-            if (messagingEvent.message) {
-                receivedMessage(chatbotClient, messagingEvent);
-            } else {
-                console.log("Webhook received unknown messagingEvent: ", messagingEvent);
-            }
-        });
+            pageEntry.messaging.forEach(function(messagingEvent) {
+                if (messagingEvent.message) {
+                    receivedMessage(chatbotClient, messagingEvent);
+                } else {
+                    console.log("Webhook received unknown messagingEvent: ", messagingEvent);
+                }
+            });
         });
 
         res.sendStatus(200);
@@ -243,4 +243,4 @@ module.exports.attach = function(chatbotClient, app) {
         res.sendStatus(404);
     }
     });
-}
+};

@@ -37,49 +37,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var requestify = require("requestify");
-var Q = require('q');
+var RestChatbot = require('./chatbot');
+var path = require('path');
 
-function sendRESTRequest(url, endpointByActionId, actionId, sessionId, intentVariables) {
-    var deferred = Q.defer();
-    var URI = url;
+var modelDirectory = path.join(__dirname, 'res');
+var SERVICE_PORT = 8080;
+var withIRCClient = true;
 
-    if(endpointByActionId) {
-        if(actionId in endpointByActionId) {
-            URI += endpointByActionId[actionId];
-        }
-    }
-    else {
-        URI += '/' + actionId;
-    }
-
-    requestify.post(URI, {
-            sessionId: sessionId,
-            intentVariables: intentVariables,
-    }, { 'timeout': 3000 })
-    .then(function(response) {
-        var userDefinedVariables = JSON.parse(response.body);
-        deferred.resolve(userDefinedVariables);
-    })
-    .fail(function() {
-        deferred.reject()
-    })
-
-    return deferred.promise;
+var stdio = {
+    stdin: process.stdin,
+    stdout: process.stdout
 }
 
-
-module.exports = function(serviceUrl, config) {
-    this._serviceUrl = serviceUrl;
-    this._endpointByActionId = undefined;
-
-    if(config && 'endpoints' in config) {
-        this._endpointByActionId = config['endpoints'];
-    }
-
-    this.execute = function(actionId, sessionId, intentVariables) {
-        return sendRESTRequest(this._serviceUrl, this._endpointByActionId, actionId, sessionId, intentVariables);
-    }
-
-    return this;
-}
+RestChatbot(stdio).start(SERVICE_PORT, modelDirectory, withIRCClient);
