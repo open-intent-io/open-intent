@@ -40,7 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var expect    = require("chai").expect;
 var fs = require('fs');
 var foodBotModel = require('../food-bot-model');
-var Swagger = require('../../lib/middleware/swagger');
+var Rest = require('../../lib/middleware/rest');
 var createChatbot = require('../../lib/chatbot');
 var ChatbotClient = require('../../lib/chatbot-client');
 
@@ -50,22 +50,25 @@ var server1 = undefined;
 
 describe('Testing the chatbot client of REST API', function() {
     var botmodel = foodBotModel;
-    var chatbot;
+    var chatbot = undefined;
+    var middleware = undefined;
 
     describe('Interact with the chatbot', function() {
         before(function(done) {
+            middleware = Rest(SERVICE_PORT);
             createChatbot(botmodel)
             .then(function(newChatbot) {
                 chatbot = newChatbot;
-                chatbot.use(Swagger(SERVICE_PORT));
+                chatbot.use(middleware);
                 done();
             });
         });
 
         after(function() {
+            middleware.detach();
         });
 
-        it.only('should handle a static scenario correctly', function(done) {
+        it('should handle a static scenario correctly', function(done) {
             client = new ChatbotClient(SERVICE_HOST + ':' + SERVICE_PORT);
             var SESSION_ID = 'ABC';
 
@@ -88,21 +91,20 @@ describe('Testing the chatbot client of REST API', function() {
         });
     });
 
-    describe('Get model and state on initialized chatbot', function() {
-        before(function() {
-            RestChatbotServer({
-                'port': SERVICE_PORT,
-                'model': botmodel
-            })
-            .then(function(chatbot) {
-                server1 = chatbot;
+    describe('Get state on initialized chatbot', function() {
+        before(function(done) {
+            middleware = Rest(SERVICE_PORT);
+            createChatbot(botmodel)
+            .then(function(newChatbot) {
+                chatbot = newChatbot;
+                chatbot.use(middleware);
+                done();
             });
         });
 
         after(function() {
-            server1.close();
-            server1 = undefined;
-        })
+            middleware.detach();
+        });
 
         it('should set and return the state correctly when asked', function() {
             client = ChatbotClient(SERVICE_HOST + ':' + SERVICE_PORT);

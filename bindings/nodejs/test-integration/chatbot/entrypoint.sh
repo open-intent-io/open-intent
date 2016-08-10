@@ -10,8 +10,7 @@ echo "Create the chatbot project"
 cd chatbot/
 npm link open-intent
 
-expected_output=">>> Ready to talk to the chatbot <<<
-> Would you want to eat a pizza, a hamburger or a salad?
+expected_output="> Would you want to eat a pizza, a hamburger or a salad?
 > Got it, you want salad, right?
 > I'm ordering, it is gonna be 5$.
 > "

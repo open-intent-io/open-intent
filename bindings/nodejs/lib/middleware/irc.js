@@ -1,41 +1,47 @@
 
+module.exports = function(stdio) {
+    return new MiddlewareInterface(stdio);
+};
+
+
 var readline = require('readline');
+var seqqueue = require('seq-queue');
 
 var SESSION_ID='ABC';
 
-function startIRCClient(chatbot, rl, stdout) {
-    var lastPromise;
-
-    rl.prompt();
-    rl.on('line', function(line) {
-        if(line == 'quit' || line == 'exit') {
-            if(lastPromise) {
-                lastPromise.then(function() {
-                    process.exit(0);
-                }).fail(function() {
-                    process.exit(0);
-                });
-            }
-            else {
-                process.exit(0);
-            }
-        }
-
-        var promise = chatbot.talk(SESSION_ID, line);
-        promise.then(function(replies) {
+function buildTalkTask(chatbot, rl, stdout, message) {
+    return function(task) {
+        chatbot.talk(SESSION_ID, message)
+        .then(function(replies) {
             var output = '';
             for(var i in replies) {
                 output += replies[i] + '\n';
             }
             stdout.write(output);
             rl.prompt();
+            task.done();
         })
         .fail(function(response) {
             console.error('Error: ' + JSON.parse(response.body).message);
             rl.prompt();
+            task.done();
         });
+    };
+}
 
-        lastPromise = promise;
+function exitCallback() {
+    process.exit(0);
+}
+
+function startIRCClient(chatbot, rl, stdout) {
+    var queue = seqqueue.createQueue();
+
+    rl.prompt();
+    rl.on('line', function(line) {
+        if(line == 'quit' || line == 'exit') {
+            queue.push(exitCallback);
+        }
+        queue.push(buildTalkTask(chatbot, rl, stdout, line));
     });
 }
 
@@ -57,14 +63,9 @@ function MiddlewareInterface(stdio) {
             output: stdio.stdout,
             prompt: '> '
         });
-
         startIRCClient(chatbot, _this._readline, stdio.stdout);
     };
 
     this.detach = function() {
     };
 }
-
-module.exports = function(stdio) {
-    return new MiddlewareInterface(stdio);
-};

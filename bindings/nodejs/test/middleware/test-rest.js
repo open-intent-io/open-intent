@@ -42,73 +42,77 @@ var request = require('supertest');
 var fs = require('fs');
 var path = require('path');
 
-describe.skip('Swagger controllers', function() {
-    var server = undefined;
+var createChatbot = require('../../lib/chatbot');
+var Rest = require('../../lib/middleware/rest');
 
-    var file = path.resolve(__dirname, '../../res/food_bot/dictionary.json');
+var REST_PORT = 10010;
+
+describe('Test REST middleware', function() {
+    var RestMiddleware = undefined;
+
+    var file = path.resolve(__dirname, '../res/food_bot/dictionary.json');
     var dictionary = JSON.parse(fs.readFileSync(file, 'utf-8'));
 
-    var file = path.resolve(__dirname, '../../res/food_bot/script.txt');
+    var file = path.resolve(__dirname, '../res/food_bot/script.txt');
     var oiml = fs.readFileSync(file, 'utf-8');
 
-    var userCommands = require(path.resolve(__dirname, '../../res/food_bot/user_commands.js'));
+    var userCommands = require(path.resolve(__dirname, '../res/food_bot/user_commands.js'));
 
-    before(function() {
-        RestChatbotServer({ 'port': 10010 })
+    before(function(done) {
+        var botmodel = {
+            dictionary: dictionary,
+            oiml: oiml,
+            user_commands: userCommands
+        };
+
+        createChatbot(botmodel)
         .then(function(chatbot) {
-            server = chatbot;
+            RestMiddleware = Rest(REST_PORT);
+            chatbot.use(RestMiddleware);
+            done();
         });
     });
 
     after(function() {
-        server._server.close();
+        RestMiddleware.detach();
     });
 
-    describe('chatbot-rest-api', function() {
-
-        var botmodel = {
-            'user_commands': userCommands,
-            'oiml': oiml,
-            'dictionary': dictionary
-        };
-
-        it('should return the state when calling getSate', function(done) {
-            request(server._app)
-            .get('/state/ABC')
-            .set('Accept', 'application/json')
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end(function(err, res) {
-                res.body.should.eql({ 'state': '@root' });
-            done();
-            });
+    it('should return the state when calling getSate', function(done) {
+        request(RestMiddleware._server)
+        .get('/state/ABC')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(function(err, res) {
+            res.body.should.eql({ 'state': '@root' });
+        done();
         });
+    });
 
-        it('should return ok status code when calling setSate', function(done) {
-
-            request(server._app)
-            .put('/state/ABC')
-            .send({ 'state': '@yesno' })
-            .set('Accept', 'application/json')
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end(function(err, res) {
-                res.body.should.eql({ 'message': 'OK' });
+    it('should return ok status code when calling setSate', function(done) {
+        request(RestMiddleware._app )
+        .put('/state/ABC')
+        .type('json')
+        .send({ 'state': '@yesno' })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(function(err, res) {
+            res.body.should.eql({ 'message': 'OK' });
             done();
-            });
         });
+    });
 
-        it('should return a reply when calling talk', function(done) {
-            request(server._app)
-            .post('/talk/ABC')
-            .send({ 'message': 'yes' })
-            .set('Accept', 'application/json')
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end(function(err, res) {
-                res.body.should.eql({ 'replies': ['I\'m ordering, it is gonna be 5$.'] });
-            done();
-            });
+    it('should return a reply when calling talk', function(done) {
+        request(RestMiddleware._server)
+        .post('/talk/ABC')
+        .send({ 'message': 'yes' })
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(function(err, res) {
+            res.body.should.eql({ 'replies': ['I\'m ordering, it is gonna be 5$.'] });
+        done();
         });
     });
 });

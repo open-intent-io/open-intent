@@ -37,16 +37,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var RestChatbot = require('./chatbot');
-var path = require('path');
 
-var modelDirectory = path.join(__dirname, 'res');
-var SERVICE_PORT = 8080;
-var withIRCClient = true;
+var chatbot =  require('./chatbot');
 
-var stdio = {
-    stdin: process.stdin,
-    stdout: process.stdout
-}
-
-RestChatbot(stdio).start(SERVICE_PORT, modelDirectory, withIRCClient);
+chatbot();

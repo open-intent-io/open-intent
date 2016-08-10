@@ -41,13 +41,11 @@ var expect    = require("chai").expect;
 var stream = require("mock-utf8-stream");
 var Q = require('q');
 
-var CHATBOT_PORT = 10005;
-
 var talk = undefined;
 var chatbot = undefined;
 
 module.exports = function(resDirectory) {
-    var RestChatbot = require('../chatbot');
+    var chatbot = require('../chatbot');
 
     var _beforeEach = function(done) {
         var stdinMock = new stream.MockReadableStream();
@@ -58,10 +56,7 @@ module.exports = function(resDirectory) {
             stdout: stdoutMock,
         };
 
-        chatbot = RestChatbot(stdio);
-
-        chatbot.start(CHATBOT_PORT, resDirectory, true)
-        .then(function() {
+        chatbot(stdio, function(error) {
             talk = function(input) {
                 var deferred = Q.defer();
 
@@ -76,9 +71,6 @@ module.exports = function(resDirectory) {
                 return deferred.promise;
             };
             done();
-        })
-        .fail(function(err) {
-            console.error('Error: ' + err);
         });
     };
 
@@ -88,7 +80,7 @@ module.exports = function(resDirectory) {
         beforeEach: _beforeEach,
         afterEach: _afterEach
     };
-}
+};
 
 function createAssertEqFunction(input, expected) {
     return function(data) {

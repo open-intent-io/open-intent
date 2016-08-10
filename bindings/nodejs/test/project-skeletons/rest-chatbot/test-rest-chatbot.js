@@ -42,14 +42,13 @@ var oi = require('../../../index');
 var path = require('path');
 oi['@noCallThru'] = true;
 
-var restChatbot = proxyquire(path.resolve(__dirname, '../../../project-skeletons/chatbot/chatbot'), {
+var chatbot = proxyquire(path.resolve(__dirname, '../../../project-skeletons/chatbot/chatbot'), {
     'open-intent': oi
 });
 
 var helpers = function() {
-
     var h = proxyquire('../../../project-skeletons/chatbot/test/helpers', {
-        '../rest-chatbot': restChatbot
+        '../chatbot': chatbot
     });
 
     return h(path.resolve(__dirname, '../../../project-skeletons/chatbot/res'));
