@@ -37,18 +37,68 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-function MiddlewareInterface() {
+const
+    crypto = require('crypto'),
+    request = require('request'),
+    express = require('express'),
+    fs = require('fs'),
+    path = require('path');
+
+function deployPlatform(chatbot, platformName, platform, config, app) {
+    var selection = config.selection;
+
+    if (selection[platformName]) {
+        platform.attach(chatbot, config[platformName], app);
+    }
+}
+
+function MiddlewareInterface(config) {
+
+    this._platforms = {};
+    this._app = undefined;
+    this._server = undefined;
+
+    if(config.selection.kik)
+        this._platforms['kik'] = require(path.resolve(__dirname, "platforms/controllers/kik"));
+
+    if(config.selection.messenger)
+        this._platforms['messenger'] = require(path.resolve(__dirname, "platforms/controllers/messenger"));
+
+    if(config.selection.skype)
+        this._platforms['skype'] = require(path.resolve(__dirname, "platforms/controllers/skype"));
+
+    if(config.selection.slack)
+        this._platforms['slack'] = require(path.resolve(__dirname, "platforms/controllers/slack"));
+
+    if(config.selection.telegram)
+        this._platforms['telegram'] = require(path.resolve(__dirname, "platforms/controllers/telegram"));
 
     this.attach = function(chatbot) {
+        var app = express();
 
+        app.set('port', (config.general.port) ? config.general.port : 5000);
+        app.use(express.static('public'));
+
+        var platforms = this._platforms;
+
+        for (var platformName in platforms) {
+            if (platforms.hasOwnProperty(platformName)) {
+                deployPlatform(chatbot, platformName, platforms[platformName], config, app);
+            }
+        }
+
+        this._server = app.listen(app.get('port'));
+        this._app = app;
     };
 
     this.detach = function() {
-
+        if(this._server) {
+            this._server.close();
+        }
     };
-};
+}
 
 
-module.exports = function() {
-    return new MiddlewareInterface();
+module.exports = function(config) {
+    return new MiddlewareInterface(config);
 };

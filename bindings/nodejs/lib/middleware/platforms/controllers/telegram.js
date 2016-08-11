@@ -37,39 +37,22 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-'use strict';
+var TelegramBot = require('node-telegram-bot-api');
 
-const skype = require('skype-sdk');
-const skypeconfig = require('../config/skype/default.json')
+module.exports.attach = function (chatbot, telegramConfig) {
+    var token = telegramConfig.API_TOKEN;
 
-const skypeBotId = process.env.SKYPE_BOT_ID || skypeconfig.BOT_ID;
-const skypeAppId = process.env.SKYPE_APP_ID || skypeconfig.APP_ID;
-const skypeAppSecret = process.env.SKYPE_APP_SECRET || skypeconfig.APP_SECRET;
-const restify = require("restify");
+    var tlbot = new TelegramBot(token, {
+        polling: true
+    });
 
-var server = restify.createServer();
-const botService = new skype.BotService({
-    messaging: {
-        botId: skypeBotId,
-        serverUrl : "https://apis.skype.com",
-        requestTimeout : 15000,
-        appId: skypeAppId,
-        appSecret: skypeAppSecret
-    }
-});
-
-botService.on('contactAdded', (bot, data) => {
-    bot.reply(`Hello ${data.fromDisplayName}!`, true);
-});
-
-module.exports.attach = function(chatbotClient, app) {
-
-    botService.on('personalMessage', (bot, data) => {
-        chatbotClient.talk(data.from, data.content).then(function(replies) {
+    // Any kind of message
+    tlbot.on('message', function (msg) {
+        var senderId = msg.from.id;
+        var content = msg.text;
+        chatbot.talk(senderId, content).then(function(replies) {
             var reply = replies.length ? replies[0] : "An error occured";
-            bot.reply(reply, true)
+            bot.sendMessage(senderId, reply);
         });
-    }); 
-
-    app.post('/skype/chat', skype.messagingHandler(botService));
+    });
 }

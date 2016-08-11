@@ -37,22 +37,37 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var RtmClient = require('@slack/client').RtmClient;
-var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
-var slackConfig = require('../config/slack/default.json');
+'use strict';
 
-var token = process.env.SLACK_API_TOKEN || slackConfig.API_TOKEN;
+const skype = require('skype-sdk');
 
-module.exports.attach = function (chatbotClient) {
-    var rtm = new RtmClient(token, { logLevel: 'warning' });
-    rtm.start();
+module.exports.attach = function(chatbotClient, skypeconfig, app) {
 
-    rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
-        var channel = message.channel;
-        var content = message.text;
-        chatbotClient.talk(channel, content).then(function(replies) {
-            var reply = replies.length ? replies[0] : "An error occured";
-            rtm.sendMessage(reply, channel);
-        });
+    const skypeBotId = process.env.SKYPE_BOT_ID || skypeconfig.BOT_ID;
+    const skypeAppId = process.env.SKYPE_APP_ID || skypeconfig.APP_ID;
+    const skypeAppSecret = process.env.SKYPE_APP_SECRET || skypeconfig.APP_SECRET;
+    
+    const botService = new skype.BotService({
+        messaging: {
+            botId: skypeBotId,
+            serverUrl : "https://apis.skype.com",
+            requestTimeout : 15000,
+            appId: skypeAppId,
+            appSecret: skypeAppSecret
+        }
     });
+
+    botService.on('contactAdded', (bot, data) => {
+        bot.reply(`Hello ${data.fromDisplayName}!`, true);
+    });
+
+
+    botService.on('personalMessage', (bot, data) => {
+        chatbotClient.talk(data.from, data.content).then(function(replies) {
+            var reply = replies.length ? replies[0] : "An error occured";
+            bot.reply(reply, true)
+        });
+    }); 
+
+    app.post('/skype/chat', skype.messagingHandler(botService));
 }

@@ -37,22 +37,22 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var TelegramBot = require('node-telegram-bot-api');
-var telegramConfig = require('../config/telegram/default.json')
+var RtmClient = require('@slack/client').RtmClient;
+var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 
-var token = telegramConfig.API_TOKEN;
-// Setup polling way
+module.exports.attach = function (chatbotClient, slackConfig) {
+    
+    var token = process.env.SLACK_API_TOKEN || slackConfig.API_TOKEN;
 
-module.exports.attach = function () {
-    var tlbot = new TelegramBot(token, {polling: true});
+    var rtm = new RtmClient(token, { logLevel: 'warning' });
+    rtm.start();
 
-    // Any kind of message
-    tlbot.on('message', function (msg) {
-        var senderId = msg.from.id;
-        var content = msg.text;
-        chatbot_client.talk(senderId, content).then(function(replies) {
+    rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
+        var channel = message.channel;
+        var content = message.text;
+        chatbotClient.talk(channel, content).then(function(replies) {
             var reply = replies.length ? replies[0] : "An error occured";
-            bot.sendMessage(senderId, reply);
+            rtm.sendMessage(reply, channel);
         });
     });
 }

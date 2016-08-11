@@ -112,7 +112,7 @@ describe('Test REST middleware', function() {
         .expect(200)
         .end(function(err, res) {
             res.body.should.eql({ 'replies': ['I\'m ordering, it is gonna be 5$.'] });
-        done();
+            done();
         });
     });
 });
