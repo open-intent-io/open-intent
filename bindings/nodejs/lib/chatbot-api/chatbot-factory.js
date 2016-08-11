@@ -120,11 +120,15 @@ function getStateInternal(chatbot, sessionManager, sessionId) {
 
 var getInitialStateInternal = function(chatbot) {
     return chatbot.getInitialState();
-}
+};
 
 var getTerminalStatesInternal = function(chatbot) {
     return chatbot.getTerminalStates();
-}
+};
+
+var getGraphInternal = function(chatbot) {
+    return chatbot.getGraph(chatbot);
+};
 
 function OpenIntentChatbot(serializableChatbot, sessionManagerDriver, userCommandsDriver) {
 
@@ -142,6 +146,7 @@ function OpenIntentChatbot(serializableChatbot, sessionManagerDriver, userComman
     this.getState = (sessionId) => getStateInternal(_this._serializableChatbot, _this._sessionManager, sessionId);
     this.getInitialState = () => getInitialStateInternal(_this._serializableChatbot);
     this.getTerminalStates = () => getTerminalStatesInternal(_this._serializableChatbot);
+    this.getGraph = () => getGraphInternal(_this._serializableChatbot);
 }
 
 

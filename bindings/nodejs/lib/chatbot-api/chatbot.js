@@ -86,7 +86,7 @@ function ChatbotInterface(config) {
         }
 
         return deferred.promise;
-    }
+    };
 
     this.getModel = function() {
         var deferred = Q.defer();
@@ -97,7 +97,7 @@ function ChatbotInterface(config) {
             deferred.reject(NO_CHATBOT_ERROR_MESSAGE);
         }
         return deferred.promise;
-    }
+    };
 
     this.talk = function(sessionId, message) {
         var deferred = Q.defer();
@@ -123,10 +123,10 @@ function ChatbotInterface(config) {
             })
             .fail(function(err) {
                 deferred.reject(err);
-            })
+            });
 
         return deferred.promise;
-    }
+    };
 
     this.setState = function(sessionId, state) {
         var deferred = Q.defer();
@@ -155,7 +155,7 @@ function ChatbotInterface(config) {
             });
 
         return deferred.promise;
-    }
+    };
 
     this.getState = function(sessionId) {
         var deferred = Q.defer();
@@ -171,16 +171,29 @@ function ChatbotInterface(config) {
         }
 
         this._chatbot.getState(sessionId)
-            .then(function(state) {
-                deferred.resolve(state);
-            })
-            .fail(function(err) {
-                deferred.reject(err);
-            });
+        .then(function(state) {
+            deferred.resolve(state);
+        })
+        .fail(function(err) {
+            deferred.reject(err);
+        });
 
         return deferred.promise;
-    }
+    };
 
+    this.getGraph = function() {
+        var deferred = Q.defer();
+
+        if(!this._chatbot) {
+            deferred.reject(NO_CHATBOT_ERROR_MESSAGE);
+            return deferred.promise;
+        }
+
+        var graph = this._chatbot.getGraph();
+        deferred.resolve(graph);
+
+        return deferred.promise;
+    };
 
     if(config && 'session' in config) {
         var sessionEntry = config['session'];

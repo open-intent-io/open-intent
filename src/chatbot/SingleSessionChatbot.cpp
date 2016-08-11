@@ -49,8 +49,8 @@ SingleSessionChatbot::SingleSessionChatbot(
     Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler)
     : Chatbot(chatbotModel),
       m_userDefinedActionHandler(userDefinedActionHandler) {
-  m_context.currentStateId =
-      m_intentStoryService.getIntentStoryModel().rootStateId;
+  m_context.currentStateId = m_intentStoryService.getIntentStoryServiceModel()
+                                 .intentStoryModel->rootStateId;
 }
 
 std::vector<std::string> SingleSessionChatbot::treatMessage(

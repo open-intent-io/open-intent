@@ -3,8 +3,9 @@
     {
         "target_name": "open-intent",
             "sources": [
-                "bindings/nodejs/src/main.cpp",
-                "bindings/nodejs/src/SerialiazableChatbot.cpp",
+                "src/bindings/nodejs/main.cpp",
+                "src/bindings/nodejs/SerialiazableChatbot.cpp",
+
                 "src/chatbot/Chatbot.cpp",
                 "src/chatbot/ChatbotFactory.cpp",
                 "src/chatbot/SingleSessionChatbot.cpp",
@@ -28,10 +29,11 @@
                 "src/intent_service/IntentMatcher.cpp",
                 "src/intent_service/IntentService.cpp",
                 "src/intent_service/SentenceTokenizer.cpp",
+                "src/intent_story_service/IntentStoryModelSerializer.cpp",
                 "src/intent_story_service/IntentStoryService.cpp"
              ],
             'include_dirs': [
-                'include', 'bindings/nodejs/include', 'thirdparty/json/src'
+                'include', 'thirdparty/json/src'
             ],
             "cflags": [
                 "-std=c++11",

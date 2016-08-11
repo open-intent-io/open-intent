@@ -55,7 +55,7 @@ namespace intent {
 IntentStoryService::IntentStoryService(
     const IntentStoryServiceModel& intentStoryServiceModel)
     : IntentService(intentStoryServiceModel.intentServiceModel),
-      m_intentStoryModel(*intentStoryServiceModel.intentStoryModel) {}
+      m_intentStoryModel(intentStoryServiceModel.intentStoryModel) {}
 
 typedef std::unordered_map<IntentModel::IndexType,
                            IntentStoryModel::StoryGraph::Edge>
@@ -68,7 +68,7 @@ void buildIntentsIndex(
     EdgeByIntentIdIndex& edgeByIntentIdIndex,
     boost::optional<IntentStoryModel::StoryGraph::Edge>& anyIntentEdge) {
   for (const IntentStoryModel::StoryGraph::Edge& e : edges) {
-    const IntentModel::IndexType& intentId = e.getInfo().intentId;
+    const IntentModel::IndexType& intentId = e.getInfo().intent.intentId;
 
     IntentModel::IntentIndex::const_iterator it =
         intentModel.intentsByIntentId.find(intentId);
@@ -88,11 +88,11 @@ IntentStoryService::Result IntentStoryService::evaluate(
 
   IntentStoryService::Result intentStoryResult;
   IntentStoryModel::VertexByStateIdIndex::const_iterator vIt =
-      m_intentStoryModel.vertexByStateId.find(stateId);
+      m_intentStoryModel->vertexByStateId.find(stateId);
 
-  if (vIt != m_intentStoryModel.vertexByStateId.end()) {
+  if (vIt != m_intentStoryModel->vertexByStateId.end()) {
     IntentStoryModel::StoryGraph::Edges neighboorEdges =
-        m_intentStoryModel.graph.nextEdges(vIt->second);
+        m_intentStoryModel->graph.nextEdges(vIt->second);
 
     IntentModel::IntentIndex intentByIdIndex;
     EdgeByIntentIdIndex edgeByIntentIdIndex;

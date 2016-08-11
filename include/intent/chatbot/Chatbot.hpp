@@ -161,6 +161,14 @@ class Chatbot {
    */
   std::unordered_set<std::string> getTerminalStates() const;
 
+  inline ChatbotModel getChatbotModel() const {
+    ChatbotModel chatbotModel;
+    chatbotModel.chatbotActionModel = m_chatbotActionModel;
+    chatbotModel.intentStoryServiceModel =
+        m_intentStoryService.getIntentStoryServiceModel();
+    return chatbotModel;
+  }
+
  protected:
   /** The chatbot action model */
   ChatbotActionModel::SharedPtr m_chatbotActionModel;

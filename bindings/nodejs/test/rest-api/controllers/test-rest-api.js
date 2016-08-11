@@ -55,10 +55,11 @@ describe('Swagger controllers', function() {
     var file = path.resolve(__dirname, '../../res/food_bot/user_commands.js');
     var userCommands = fs.readFileSync(file,'utf-8');
 
-    before(function() {
+    before(function(done) {
         RestChatbotServer({ 'port': 10010 })
         .then(function(chatbot) {
             server = chatbot;
+            done();
         });
     });
 
@@ -79,29 +80,40 @@ describe('Swagger controllers', function() {
 
     describe('Call methods while no model loaded', function() {
         it('should return an error when calling getModel', function(done) {
+            request(server._app)
+                .get('/model')
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect(500)
+                .end(function(err, res) {
+                    res.body.should.eql({ 'message': 'No model loaded in the chatbot' });
+                    done();
+                });
+        });
 
-        request(server._app)
-            .get('/model')
-            .set('Accept', 'application/json')
-            .expect('Content-Type', /json/)
-            .expect(500)
-            .end(function(err, res) {
-                res.body.should.eql({ 'message': 'No model loaded in the chatbot' });
-                done();
-            });
+        it('should return an error when calling getGraph', function(done) {
+            request(server._app)
+                .get('/graph')
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect(500)
+                .end(function(err, res) {
+                    res.body.should.eql({ 'message': 'No model loaded in the chatbot' });
+                    done();
+                });
         });
 
         it('should return an error when calling getSate', function(done) {
 
-        request(server._app)
-            .get('/state/ABC')
-            .set('Accept', 'application/json')
-            .expect('Content-Type', /json/)
-            .expect(500)
-            .end(function(err, res) {
-                res.body.should.eql({ 'message': 'No model loaded in the chatbot' });
-                done();
-            });
+            request(server._app)
+                .get('/state/ABC')
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect(500)
+                .end(function(err, res) {
+                    res.body.should.eql({ 'message': 'No model loaded in the chatbot' });
+                    done();
+                });
         });
 
         it('should return an error when calling setSate', function(done) {
@@ -150,37 +162,67 @@ describe('Swagger controllers', function() {
         });
 
         describe('When a model has been provided', function() {
+            var chatbot_server;
+            before(function(done) {
+                RestChatbotServer({ 'port': 10015 })
+                .then(function(chatbot) {
+                    chatbot_server = chatbot;
+
+                    request(chatbot_server._app)
+                    .put('/model')
+                    .set('Accept', 'application/json')
+                    .send(botmodel)
+                    .end(function(err, res) {
+                        done();
+                    });
+                });
+            });
+
+            after(function() {
+                chatbot_server._server.close();
+            })
+
             // The model has been set for the next tests
 
             it('should return the model when calling getModel', function(done) {
 
-                request(server._app)
+                request(chatbot_server._app)
                 .get('/model')
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect(200)
                 .end(function(err, res) {
                     res.body.should.eql(botmodel);
-                done();
+                    done();
                 });
             });
 
             it('should return the state when calling getSate', function(done) {
-
-                request(server._app)
+                request(chatbot_server._app)
                 .get('/state/ABC')
                 .set('Accept', 'application/json')
                 .expect('Content-Type', /json/)
                 .expect(200)
                 .end(function(err, res) {
                     res.body.should.eql({ 'state': '@root' });
-                done();
+                    done();
+                });
+            });
+
+            it('should return the graph when calling getGraph', function(done) {
+                request(chatbot_server._app)
+                .get('/graph')
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end(function(err, res) {
+                    done();
                 });
             });
 
             it('should return ok status code when calling setSate', function(done) {
 
-                request(server._app)
+                request(chatbot_server._app)
                 .put('/state/ABC')
                 .send({ 'state': '@yesno' })
                 .set('Accept', 'application/json')
@@ -188,12 +230,12 @@ describe('Swagger controllers', function() {
                 .expect(200)
                 .end(function(err, res) {
                     res.body.should.eql({ 'message': 'OK' });
-                done();
+                    done();
                 });
             });
 
             it('should return a reply when calling talk', function(done) {
-                request(server._app)
+                request(chatbot_server._app)
                 .post('/talk/ABC')
                 .send({ 'message': 'yes' })
                 .set('Accept', 'application/json')

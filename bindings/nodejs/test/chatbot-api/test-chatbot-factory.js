@@ -59,7 +59,6 @@ var file = path.resolve(__dirname, 'res/interpreter_model.txt');
 var interpreterModel = fs.readFileSync(file, "utf-8");
 
 describe("Test Open Intent chatbot factory", function() {
-
     describe("Get the chatbot state initially", function() {
         it("should return the initial state of the chatbot", function(done) {
             var sessionManager = new StandaloneSessionManager();
@@ -86,7 +85,6 @@ describe("Test Open Intent chatbot factory", function() {
             var chatbot = OpenIntentChatbot.fromJsonModel(model, sessionManager, userDefinedActionDriver);
             var sessionId = 'SESSION_ID';
             var STATE = 'abc';
-            var getStateCallback = sinon.spy();
 
             chatbot.setState(sessionId, STATE)
             .then(function() {
@@ -140,10 +138,9 @@ describe("Test Open Intent chatbot factory", function() {
                 done();
             });
         });
-    })
+    });
 
     describe("Test interactions with several sessions", function() {
-
         it("should handle 2 conversations", function(done) {
             var sessionManager = new StandaloneSessionManager();
             var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
@@ -181,7 +178,6 @@ describe("Test Open Intent chatbot factory", function() {
     });
 
     describe("The chatbot returns the right initial state", function() {
-
         it('should return the initial state', function() {
             var sessionManager = new StandaloneSessionManager();
             var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
@@ -288,17 +284,28 @@ describe("Test Open Intent chatbot factory", function() {
                 var SESSION_ID = 'abc';
 
                 chatbot.talk(SESSION_ID, 'Bob')
-                    .then(function(replies) {
-                        expect(replies).to.deep.equal(['Que puis-je vous offrir ?']);
-                        return chatbot.talk(SESSION_ID, 'Je veux un coca et une Kro');
-                    })
-                    .then(function(replies) {
-                        expect(replies).to.deep.equal(['Vous-voulez quelque chose d\'autre ?']);
-                        done();
-                    })
-                    .fail(function(err) {
-                        console.log(err);
-                    });
+                .then(function(replies) {
+                    expect(replies).to.deep.equal(['Que puis-je vous offrir ?']);
+                    return chatbot.talk(SESSION_ID, 'Je veux un coca et une Kro');
+                })
+                .then(function(replies) {
+                    expect(replies).to.deep.equal(['Vous-voulez quelque chose d\'autre ?']);
+                    done();
+                })
+                .fail(function(err) {
+                    console.log(err);
+                });
+            });
+
+            it('should return the graph correctly', function(done) {
+                var sessionManager = new StandaloneSessionManager();
+                var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
+                var chatbot = OpenIntentChatbot.fromOIML(model, interpreterModel, sessionManager,
+                    userDefinedActionDriver);
+
+                var graph = chatbot.getGraph();
+                expect(graph).to.equal('digraph G {\n0[label=<@root>];\n1[label=<@wait_order>];\n2[label=<@wait_another_order>];\n3[label=<@bye>, peripheries=2, color=".7 .3 1.0"];\n0->1 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0004</td></tr><tr><td>intent_desc</td><td>Bob!</td></tr><tr><td>entities</td><td>[@waiter]</td></tr><tr><td>action</td><td>#wake</td></tr><tr><td>reply</td><td>Que puis-je vous offrir ?</td></tr></table> >];\n0->0 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>_</td></tr><tr><td>intent_desc</td><td>Bob!</td></tr><tr><td>entities</td><td></td></tr><tr><td>action</td><td>@root*</td></tr><tr><td>reply</td><td>Je n\'ai pas compris votre demande</td></tr></table> >];\n1->2 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>00030000</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro</td></tr><tr><td>entities</td><td>[@beverage, @number]</td></tr><tr><td>action</td><td>#append_order1</td></tr><tr><td>reply</td><td>Vous-voulez quelque chose d\'autre ?</td></tr></table> >];\n1->1 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>_</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro</td></tr><tr><td>entities</td><td></td></tr><tr><td>action</td><td>@wait_order*</td></tr><tr><td>reply</td><td>Soyez le plus précis possible</td></tr></table> >];\n1->2 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0003000000030000</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro et un coca</td></tr><tr><td>entities</td><td>[@beverage, @number]</td></tr><tr><td>action</td><td>#append_order2</td></tr><tr><td>reply</td><td>Vous-voulez quelque chose d\'autre ?</td></tr></table> >];\n1->3 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0002</td></tr><tr><td>intent_desc</td><td>Rien</td></tr><tr><td>entities</td><td>[@nothing]</td></tr><tr><td>action</td><td>#bye</td></tr><tr><td>reply</td><td>Au revoir et à bientôt.</td></tr></table> >];\n2->2 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0003000000030000</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro et un coca</td></tr><tr><td>entities</td><td>[@beverage, @number]</td></tr><tr><td>action</td><td>#append_order2</td></tr><tr><td>reply</td><td>Vous-voulez quelque chose d\'autre ?</td></tr></table> >];\n2->2 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>00030000</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro</td></tr><tr><td>entities</td><td>[@beverage, @number]</td></tr><tr><td>action</td><td>#append_order1</td></tr><tr><td>reply</td><td>Vous-voulez quelque chose d\'autre ?</td></tr></table> >];\n2->3 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0002</td></tr><tr><td>intent_desc</td><td>Rien</td></tr><tr><td>entities</td><td>[@nothing]</td></tr><tr><td>action</td><td>#grab_it</td></tr><tr><td>reply</td><td>Veuillez récupérer vos consommations au bar. Vous devrez payer _.</td></tr></table> >];\n}\n');
+                done();
             });
         });
 

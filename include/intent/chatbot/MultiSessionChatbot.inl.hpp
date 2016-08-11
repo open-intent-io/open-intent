@@ -74,7 +74,8 @@ void MultiSessionChatbot<SessionIdType>::addSession(
     const SessionIdType& sessionId) {
   Chatbot::Context sessionContext;
   sessionContext.currentStateId =
-      m_intentStoryService.getIntentStoryModel().rootStateId;
+      m_intentStoryService.getIntentStoryServiceModel()
+          .intentStoryModel->rootStateId;
   m_sessionIndex.insert(std::make_pair(sessionId, sessionContext));
 }
 

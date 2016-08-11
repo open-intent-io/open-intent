@@ -55,6 +55,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include "intent/intent_story_service/IntentStoryService.hpp"
 #include "intent/intent_story_service/IntentStoryServiceModel.hpp"
+#include "intent/intent_story_service/IntentStoryModelSerializer.hpp"
 
 /*
  * Chatbot module
