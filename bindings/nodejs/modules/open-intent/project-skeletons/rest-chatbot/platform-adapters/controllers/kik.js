@@ -33,64 +33,41 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY,
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#include "intent/intent_service/IntentService.hpp"
-#include "intent/intent_service/SentenceTokenizer.hpp"
+'use strict';
 
-#include "intent/utils/Deserializer.hpp"
-#include "intent/utils/Logger.hpp"
 
-#include <fstream>
+let Bot  = require('@kikinteractive/kik');
+var kikConfig = require('../config/kik/default.json');
 
-namespace intent {
-IntentService::IntentService(const IntentServiceModel& intentServiceModel)
-    : m_intentServiceModel(intentServiceModel) {}
+// Configure the bot API endpoint, details for your bot
+let bot = new Bot(kikConfig);
 
-std::stringstream logResult(IntentService::Result& result) {
-  std::stringstream ss;
-  if (result.found) {
-    ss << "The intent \"" + result.intent.intentId + "\" has been found.";
-  } else {
-    ss << "No intent found.";
-  }
-  return ss;
+bot.updateBotConfiguration();
+
+var replyHandler = function(message, reply) {
+    message.reply(reply);
 }
 
-IntentMatcher::IntentResult IntentService::resolveIntent(
-    const std::string& input, const DictionaryModel& dictionaryModel,
-    const IntentModel::IntentIndex& intentByIdIndex) const {
-  LOG_INFO() << "Look for intent in \"" + input + "\"";
-
-  intent::Tokenizer::Tokens tokens;
-  SentenceTokenizer sentenceTokenizer(dictionaryModel);
-  sentenceTokenizer.tokenize(input, tokens);
-
-  // Try to match entities
-  intent::EntitiesMatcher entitiesMatcher;
-  EntitiesMatcher::Variables variables =
-      entitiesMatcher.match(tokens, dictionaryModel);
-
-  IntentService::Result result =
-      IntentMatcher::match(dictionaryModel, variables, intentByIdIndex);
-
-  LOG_TRACE() << "Result = " << result;
-  LOG_INFO() << logResult(result);
-
-  return result;
+var messageHandler = function(chatbotClient, message) {
+   chatbotClient.talk(message.from, message.body).then(function(replies) {
+        var reply = '';
+        if (replies.length)
+            reply = replies[0];
+        else
+            reply = "An error occured";
+        replyHandler(message, reply);
+   });     
 }
 
-IntentService::Result IntentService::evaluate(const std::string& input) const {
-  return resolveIntent(input, *m_intentServiceModel.dictionaryModel,
-                       m_intentServiceModel.intentModel->intentsByIntentId);
-}
+//Weird and all but I guess this route is enforced by the lib
+module.exports.attach = function (chatbotClient, app) {
+    bot.onTextMessage((message) => {
+        messageHandler(chatbotClient, message);
+    });
 
-std::ostream& operator<<(std::ostream& os,
-                         const IntentService::Result& result) {
-  return os << "{ found: " << result.found << ", "
-            << "intent: " << result.intent << " }";
-}
+    app.post('/incoming', bot.incoming());
 }

@@ -76,7 +76,7 @@ class IntentService {
 
  protected:
   IntentMatcher::IntentResult resolveIntent(
-      const std::string input, const DictionaryModel& dictionaryModel,
+      const std::string& input, const DictionaryModel& dictionaryModel,
       const IntentModel::IntentIndex& intentByIdIndex) const;
 
   IntentServiceModel m_intentServiceModel;

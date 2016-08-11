@@ -7,6 +7,8 @@ RUN apt-get update && \
         cmake g++ git \
         doxygen node-gyp nodejs npm clang-format-3.7
 
+RUN apt-get install -y libltdl7
+
 VOLUME /src
 WORKDIR /src
 

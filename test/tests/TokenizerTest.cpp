@@ -37,34 +37,56 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//
-// Created by clement on 04/05/16.
-//
-
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
 #include "intent/utils/Tokenizer.hpp"
 
-using namespace intent;
 using namespace ::testing;
 
-TEST(TokenizerTest, split_string_into_tokens_with_space_delimiter)
+namespace intent
 {
-    std::string input = "Hello, my name is Bryan and I'm twenty.";
+    namespace test
+    {
+        TEST(TokenizerTest, split_string_into_tokens_taking_regexp_with_dots_into_account)
+        {
+            std::vector<std::string> tokens;
+            std::string input = "Hello, my phone number is 06.78.66.55.44.";
+            std::vector<std::string> regexpList;
+            regexpList.push_back("([0-9]{2}.){4}[0-9]{2}");
+            Tokenizer tokenizer(",. ", regexpList);
 
-    Tokenizer::Tokens tokens;
-    Tokenizer::tokenize(input, " ", tokens);
+            tokenizer.tokenize(input, tokens);
 
-    EXPECT_THAT(tokens, ElementsAre("Hello,", "my", "name", "is", "Bryan", "and", "I'm", "twenty."));
-}
+            EXPECT_THAT(tokens, ElementsAre("Hello", "my", "phone", "number", "is", "06.78.66.55.44"));
+        }
 
-TEST(TokenizerTest, split_string_into_tokens_with_various_delimiters)
-{
-    std::string input = "Hello, my name is Bryan and I'm twenty.";
+        TEST(TokenizerTest, split_string_into_tokens_taking_regexp_with_spaces_into_account)
+        {
+            std::vector<std::string> tokens;
+            std::string input = "Hello, my phone number is 06 78 66 55 44.";
+            std::vector<std::string> regexpList;
+            regexpList.push_back("([0-9]{2}\\s){4}[0-9]{2}");
+            Tokenizer tokenizer(",. ", regexpList);
 
-    Tokenizer::Tokens tokens;
-    Tokenizer::tokenize(input, " ,'.", tokens);
+            tokenizer.tokenize(input, tokens);
 
-    EXPECT_THAT(tokens, ElementsAre("Hello", "my", "name", "is", "Bryan", "and", "I", "m", "twenty"));
+            EXPECT_THAT(tokens, ElementsAre("Hello", "my", "phone", "number", "is", "06 78 66 55 44"));
+        }
+
+        TEST(TokenizerTest, split_string_into_tokens_taking_several_regexp_into_account)
+        {
+            std::vector<std::string> tokens;
+            std::string input = "Hello, phone number 06 78 66 55 44 and email john.doe@gmail.com, yeah.";
+            std::vector<std::string> regexpList;
+            regexpList.push_back("[.a-z0-9]+@[a-z0-9-]+\\.[a-z]+");
+            regexpList.push_back("([0-9]{2}\\s){4}[0-9]{2}");
+            Tokenizer tokenizer(",. ", regexpList);
+
+            tokenizer.tokenize(input, tokens);
+
+            EXPECT_THAT(tokens, ElementsAre("Hello", "phone", "number", "06 78 66 55 44", "and",
+                                            "email", "john.doe@gmail.com", "yeah"));
+        }
+    }
 }

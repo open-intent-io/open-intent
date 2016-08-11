@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.2)
 
+
 FIND_PROGRAM( DOCKER_PATH docker )
 
 IF(DOCKER_PATH)

@@ -33,64 +33,43 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY,
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#include "intent/intent_service/IntentService.hpp"
-#include "intent/intent_service/SentenceTokenizer.hpp"
+'use strict';
 
-#include "intent/utils/Deserializer.hpp"
-#include "intent/utils/Logger.hpp"
+const skype = require('skype-sdk');
+const skypeconfig = require('../config/skype/default.json')
 
-#include <fstream>
+const skypeBotId = process.env.SKYPE_BOT_ID || skypeconfig.BOT_ID;
+const skypeAppId = process.env.SKYPE_APP_ID || skypeconfig.APP_ID;
+const skypeAppSecret = process.env.SKYPE_APP_SECRET || skypeconfig.APP_SECRET;
+const restify = require("restify");
 
-namespace intent {
-IntentService::IntentService(const IntentServiceModel& intentServiceModel)
-    : m_intentServiceModel(intentServiceModel) {}
+var server = restify.createServer();
+const botService = new skype.BotService({
+    messaging: {
+        botId: skypeBotId,
+        serverUrl : "https://apis.skype.com",
+        requestTimeout : 15000,
+        appId: skypeAppId,
+        appSecret: skypeAppSecret
+    }
+});
 
-std::stringstream logResult(IntentService::Result& result) {
-  std::stringstream ss;
-  if (result.found) {
-    ss << "The intent \"" + result.intent.intentId + "\" has been found.";
-  } else {
-    ss << "No intent found.";
-  }
-  return ss;
-}
+botService.on('contactAdded', (bot, data) => {
+    bot.reply(`Hello ${data.fromDisplayName}!`, true);
+});
 
-IntentMatcher::IntentResult IntentService::resolveIntent(
-    const std::string& input, const DictionaryModel& dictionaryModel,
-    const IntentModel::IntentIndex& intentByIdIndex) const {
-  LOG_INFO() << "Look for intent in \"" + input + "\"";
+module.exports.attach = function(chatbotClient, app) {
 
-  intent::Tokenizer::Tokens tokens;
-  SentenceTokenizer sentenceTokenizer(dictionaryModel);
-  sentenceTokenizer.tokenize(input, tokens);
+    botService.on('personalMessage', (bot, data) => {
+        chatbotClient.talk(data.from, data.content).then(function(replies) {
+            var reply = replies.length ? replies[0] : "An error occured";
+            bot.reply(reply, true)
+        });
+    }); 
 
-  // Try to match entities
-  intent::EntitiesMatcher entitiesMatcher;
-  EntitiesMatcher::Variables variables =
-      entitiesMatcher.match(tokens, dictionaryModel);
-
-  IntentService::Result result =
-      IntentMatcher::match(dictionaryModel, variables, intentByIdIndex);
-
-  LOG_TRACE() << "Result = " << result;
-  LOG_INFO() << logResult(result);
-
-  return result;
-}
-
-IntentService::Result IntentService::evaluate(const std::string& input) const {
-  return resolveIntent(input, *m_intentServiceModel.dictionaryModel,
-                       m_intentServiceModel.intentModel->intentsByIntentId);
-}
-
-std::ostream& operator<<(std::ostream& os,
-                         const IntentService::Result& result) {
-  return os << "{ found: " << result.found << ", "
-            << "intent: " << result.intent << " }";
-}
+    app.post('/skype/chat', skype.messagingHandler(botService));
 }

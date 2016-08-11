@@ -11,8 +11,6 @@
 
 int main(int argc, char **argv)
 {
-    intent::log::Logger::initialize(intent::log::Logger::SeverityLevel::FATAL);
-
     ::testing::InitGoogleTest(&argc, argv);
 
     // Adding environment that loads resource files

@@ -19,6 +19,7 @@ SET(COMMON_SOURCE_FILES
         utils/Levenshtein.cpp
         utils/Logger.cpp
         utils/RegexMatcher.cpp
+        utils/SingleCharacterDelimiterTokenizer.cpp
         utils/Tokenizer.cpp
         utils/TrigramHelper.cpp
         intent_service/Term.cpp
@@ -28,6 +29,7 @@ SET(COMMON_SOURCE_FILES
         intent_service/IntentModel.cpp
         intent_service/IntentMatcher.cpp
         intent_service/IntentService.cpp
+        intent_service/SentenceTokenizer.cpp
         intent_story_service/IntentStoryService.cpp
         intent_story_service/IntentStoryModelSerializer.cpp
 )

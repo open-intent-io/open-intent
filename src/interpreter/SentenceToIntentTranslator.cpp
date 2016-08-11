@@ -43,6 +43,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "intent/intent_service/EntitiesMatcher.hpp"
 #include "intent/intent_service/IntentEncoder.hpp"
 #include "intent/intent_service/IntentModel.hpp"
+#include "intent/intent_service/SentenceTokenizer.hpp"
 
 #include "intent/utils/Logger.hpp"
 #include "intent/utils/Tokenizer.hpp"
@@ -110,7 +111,8 @@ std::pair<IndexType, Intent> SentenceToIntentTranslator::translate(
   IntentModel::Intent intent;
 
   std::vector<std::string> tokens;
-  Tokenizer::tokenize(sentence, ".,:;!?' ", tokens);
+  SentenceTokenizer sentenceTokenizer(dictionaryModel);
+  sentenceTokenizer.tokenize(sentence, tokens);
   std::vector<int> entities =
       extractEntities(EntitiesMatcher::match(tokens, dictionaryModel));
   intent.entities = entities;
