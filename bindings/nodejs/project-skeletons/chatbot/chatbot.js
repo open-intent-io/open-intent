@@ -1,13 +1,11 @@
 
 var path = require('path');
 var fs = require('fs');
+var openintent = require('open-intent');
 
-module.exports = function(stdio, fn) {
+module.exports = function(middlewares, fn) {
 
     var modelDirectory = path.join(__dirname, 'res');
-    var REST_PORT = 8080;
-
-    var openintent = require('open-intent');
 
     var dictionaryFilepath = path.join(modelDirectory, 'dictionary.json');
     var oimlFilepath = path.join(modelDirectory, 'script.txt');
@@ -21,9 +19,9 @@ module.exports = function(stdio, fn) {
 
     openintent.createChatbot(botmodel)
     .then(function(chatbot) {
-        chatbot.use(openintent.middleware.irc(stdio));
-        chatbot.use(openintent.middleware.rest(REST_PORT));
-        //chatbot.use(openintent.middleware.platforms());
+        for(var i=0; i<middlewares.length; ++i) {
+            chatbot.use(middlewares[i]);
+        }
         fn();
     })
     .fail(function(err) {

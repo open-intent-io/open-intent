@@ -8,13 +8,14 @@ include/
 bindings/nodejs/src 
 bindings/nodejs/include
 bindings/nodejs/examples
-bindings/nodejs/modules
+bindings/nodejs/lib
+bindings/nodejs/test
 test/tests
 test/mock
 "
 
 no_pattern="node_modules
-project-skeletons/rest-chatbot/res/"
+project-skeletons/chatbot/res/"
 
 license=`cat ${license_file}`
 header="/*

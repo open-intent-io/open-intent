@@ -39,5 +39,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 var chatbot =  require('./chatbot');
+var openintent = require('open-intent');
 
-chatbot();
+var REST_PORT = 8080;
+
+var middlewares = [];
+
+middlewares.push(openintent.middleware.irc());
+middlewares.push(openintent.middleware.rest(REST_PORT));
+//middlewares.push(openintent.middleware.platforms());
+
+chatbot(middlewares);

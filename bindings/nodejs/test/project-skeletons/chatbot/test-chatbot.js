@@ -46,14 +46,12 @@ var chatbot = proxyquire(path.resolve(__dirname, '../../../project-skeletons/cha
     'open-intent': oi
 });
 
-var helpers = function() {
-    var h = proxyquire('../../../project-skeletons/chatbot/test/helpers', {
-        '../chatbot': chatbot
-    });
 
-    return h(path.resolve(__dirname, '../../../project-skeletons/chatbot/res'));
-}
+var h = proxyquire('../../../project-skeletons/chatbot/test/helpers', {
+    '../chatbot': chatbot,
+    'open-intent': oi
+});
 
 proxyquire('../../../project-skeletons/chatbot/test/test-chatbot', {
-    './helpers': helpers
+    './helpers': h
 });
