@@ -6,7 +6,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
 
 find_package(Boost COMPONENTS system filesystem regex log REQUIRED)
 
-SET(SOURCE_FILES
+SET(COMMON_SOURCE_FILES
         chatbot/Chatbot.cpp
         chatbot/ChatbotFactory.cpp
         chatbot/SingleSessionChatbot.cpp
@@ -31,12 +31,17 @@ SET(SOURCE_FILES
         intent_service/IntentService.cpp
         intent_service/SentenceTokenizer.cpp
         intent_story_service/IntentStoryService.cpp
+        intent_story_service/IntentStoryModelSerializer.cpp
 )
 
+SET(NODEJS_SOURCE_FILES
+        bindings/nodejs/main.cpp
+        bindings/nodejs/SerialiazableChatbot.cpp
+)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-ADD_LIBRARY(${PROJECT_NAME}-static STATIC ${SOURCE_FILES} ${HEADER_FILES})
+ADD_LIBRARY(${PROJECT_NAME}-static STATIC ${COMMON_SOURCE_FILES} ${HEADER_FILES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}-static pthread ${Boost_LIBRARIES})
 
 if(GCOV_ENABLED AND CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -47,3 +52,18 @@ if(GCOV_ENABLED AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     SET(GCOV_LIBRARIES_OPTIONAL "gcov")
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}-static ${GCOV_LIBRARIES_OPTIONAL})
 ENDIF()
+
+
+ADD_CUSTOM_TARGET(open-intent-js
+        DEPENDS ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
+)
+
+ADD_CUSTOM_COMMAND(
+        OUTPUT ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
+        DEPENDS ${COMMON_SOURCE_FILES} ${NODEJS_SOURCE_FILES} ${CMAKE_SOURCE_DIR}/binding.gyp
+        COMMAND npm install --unsafe-perm
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/build/Release/open-intent.node
+        ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+

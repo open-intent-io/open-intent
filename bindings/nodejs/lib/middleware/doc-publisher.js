@@ -37,88 +37,54 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var expect    = require("chai").expect;
-var stream = require("mock-utf8-stream");
-var Q = require('q');
-
-var talk = undefined;
-var chatbot = undefined;
-
-module.exports = function(resDirectory) {
-    var chatbot = require('../chatbot');
-    var openintent = require('open-intent');
-
-    var _beforeEach = function(done) {
-        var stdinMock = new stream.MockReadableStream();
-        var stdoutMock = new stream.MockReadableStream();
-
-        var stdio = {
-            stdin: stdinMock,
-            stdout: stdoutMock
-        };
-
-        var middlewares = [];
-
-        middlewares.push(openintent.middleware.Irc(stdio));
-
-        chatbot(middlewares, function(error) {
-            talk = function(input) {
-                var deferred = Q.defer();
-
-                var onData = function(data) {
-                    deferred.resolve(data);
-                    stdoutMock.removeListener('data', onData);
-                };
-
-                stdoutMock.on('data', onData);
-                stdinMock.write(input);
-
-                return deferred.promise;
-            };
-            done();
-        });
-    };
-
-    return {
-        checkScript: handleScript,
-
-        beforeEach: _beforeEach,
-        afterEach: _afterEach
-    };
+module.exports = function(port) {
+    return new MiddlewareInterface(port);
 };
 
-function createAssertEqFunction(input, expected) {
-    return function(data) {
-        expect(data).to.equal(expected);
-        return talk(input);
-    }
-}
+var express = require('express');
+var bodyParser = require('body-parser');
+var fs = require('fs');
+var path = require('path');
 
-function handleScript(script, done) {
-    var promise = talk(script[0]);
-    for(var i=2; i < script.length; i += 2) {
-        var input = script[i];
-        var expectedOutput = script[i - 1];
 
-        promise = promise
-            .then(createAssertEqFunction(input, expectedOutput))
-            .fail(function(err) {
-                console.error(err);
-            });
-    }
+function publishIntentStory(app) {
+    app.get('/intent-story', function(req, res) {
+        var chatbot = req.app.get('chatbot');
+        var templateFilepath = path.resolve(__dirname, 'templates/intent-story.html');
+        var template = fs.readFileSync(templateFilepath, 'utf-8');
 
-    promise.then(function(data) {
-            expect(data).to.equal(script[script.length-1]);
-            done();
+        chatbot.getGraph()
+        .then(function(graph) {
+            template = template.replace(/\$\{GRAPH\}/, graph);
+
+            res.type('html');
+            res.send(template);
         })
         .fail(function(err) {
-            console.error(err);
+            res.status(500).send({'message': err});
         });
+    });
 }
 
-function _afterEach(done) {
-    if(chatbot) {
-        delete chatbot;
-    }
-    done();
+function MiddlewareInterface(port) {
+    var _this = this;
+    this._app = express();
+    this._server = undefined;
+
+    this.attach = function(chatbot) {
+        _this._app.use(bodyParser.json()); // support json encoded bodies
+        _this._app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+        _this._app.set('chatbot', chatbot);
+
+        publishIntentStory(_this._app);
+
+        var _port = (port) ? port : 8080;
+        _this._server = _this._app.listen(_port);
+    };
+
+    this.detach = function() {
+        if(_this._server) {
+            _this._server.close();
+        }
+    };
 }

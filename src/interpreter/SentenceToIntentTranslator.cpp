@@ -126,6 +126,8 @@ std::pair<IndexType, Intent> SentenceToIntentTranslator::translate(
                     logEntities(entities, dictionaryModel) + "].";
 
   std::string intentId = IntentEncoder::encode(entities);
+  intent.intentId = intentId;
+  intent.example = sentence;
   return std::pair<std::string, IntentModel::Intent>(intentId, intent);
 }
 }

@@ -38,76 +38,19 @@ LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef INTENT_INTENTSTORYMODEL_HPP
-#define INTENT_INTENTSTORYMODEL_HPP
+#ifndef INTENT_INTENT_STORY_MODEL_SERIALIZER_HPP
+#define INTENT_INTENT_STORY_MODEL_SERIALIZER_HPP
 
-#include "intent/intent_service/IntentModel.hpp"
-
-#include "intent/utils/Graph.hpp"
-
-#include <unordered_set>
-#include <memory>
+#include <string>
+#include <ostream>
+#include "intent/intent_story_service/IntentStoryServiceModel.hpp"
 
 namespace intent {
-/**
- * \brief A data model for intent story. It represents a graph with states and
- * user intents on the edges.
- */
-class IntentStoryModel {
+class IntentStoryModelSerializer {
  public:
-  typedef IntentModel::IndexType IndexType;
-  typedef IntentModel::Intent Intent;
-
-  /**
-   * \brief The information stored in the edges of the graph.
-   */
-  struct EdgeInfo {
-    IntentStoryModel::Intent intent;
-    std::string actionId;
-    std::string reply;
-  };
-
-  /**
-   * \brief The information stored in the vertices of the graph.
-   */
-  struct VertexInfo {
-    std::string stateId;
-  };
-
-  /**
-   * \brief Returns whether a state is terminal.
-   * \return Return true if the state is terminal, return false otherwise.
-   */
-  bool isStateIdTerminal(const std::string& stateId) const {
-    return terminalStateIds.find(stateId) != terminalStateIds.end();
-  }
-
-  typedef Graph<VertexInfo, EdgeInfo> StoryGraph;
-  typedef std::map<IndexType, StoryGraph::Vertex> VertexByStateIdIndex;
-  typedef std::unordered_set<IndexType> StateIdSet;
-  typedef std::shared_ptr<IntentStoryModel> SharedPtr;
-
-  /**
-   * \brief The root state ID.
-   */
-  IndexType rootStateId;
-
-  /**
-   * \brief List of terminal states that leads the service to restart from the
-   * root state.
-   */
-  StateIdSet terminalStateIds;
-
-  /**
-   * \brief Index of the vertices by state ID
-   */
-  VertexByStateIdIndex vertexByStateId;
-
-  /**
-   * \brief The directed graph.
-   */
-  StoryGraph graph;
+  void serialize(std::ostream& stream,
+                 const IntentStoryServiceModel& intentStoryServiceModel) const;
 };
 }
 
-#endif  // INTENT_INTENTSTORYMODEL_HPP
+#endif

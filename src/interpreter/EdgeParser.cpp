@@ -132,7 +132,8 @@ void completeEdgeInfo(const Scenario& scenario,
   // identify the intent to complete intentModel and edge
   std::pair<IndexType, Intent> intent =
       SentenceToIntentTranslator::translate(inquiry, context.dictionaryModel);
-  edge.edge.intentId = intent.first;
+  edge.edge.intent = intent.second;
+  edge.edge.reply = extractSentence(scenario[inquiryToReply.second]);
 
   if (intent.first.empty()) {
     interpreterFeedback.push_back(
@@ -179,7 +180,8 @@ std::unique_ptr<EdgeDefinition> EdgeParser::parseFallback(
         extractSentence(scenario[potentialFallbackReplyIdIndex]);
     fallbackEdge->target = fallbackEdge->source;
     fallbackEdge->edge.actionId = fallbackEdge->source.stateId + "*";
-    fallbackEdge->edge.intentId = ANY_INTENT_TOKEN;
+    fallbackEdge->edge.intent.intentId = ANY_INTENT_TOKEN;
+    fallbackEdge->edge.reply = fallbackEdge->replyTemplate;
   }
   return fallbackEdge;
 }

@@ -41,6 +41,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "intent/utils/Tokenizer.hpp"
 #include "intent/utils/RegexMatcher.hpp"
 #include "intent/utils/SingleCharacterDelimiterTokenizer.hpp"
+#include "intent/utils/Logger.hpp"
 
 #include "boost/regex/regex_traits.hpp"
 #include <boost/regex.hpp>
@@ -95,7 +96,8 @@ class IndexClassesPred {
   }
 };
 
-void Tokenizer::tokenize(const std::string& message, Tokens& tokens) {
+Splits splitRegexp(const std::string& message,
+                   const std::vector<std::string>& regexpList) {
   Splits splits, nextSplits;
   Split split;
   split.part = message;
@@ -113,8 +115,8 @@ void Tokenizer::tokenize(const std::string& message, Tokens& tokens) {
       bool found_matching = false;
       const Split& split = *it;
 
-      if (split.tokenizable && !m_regexpList.empty()) {
-        for (const std::string& regexStr : m_regexpList) {
+      if (split.tokenizable && !regexpList.empty()) {
+        for (const std::string& regexStr : regexpList) {
           boost::regex expression(regexStr);
           splitted = boost::regex_grep(IndexClassesPred(split, nextSplits),
                                        split.part, expression);
@@ -133,6 +135,12 @@ void Tokenizer::tokenize(const std::string& message, Tokens& tokens) {
     }
   }
 
+  return splits;
+}
+
+void tokenizeSplitsWithSingleCharacterDelimiter(const Splits& splits,
+                                                const std::string& delimiters,
+                                                Tokenizer::Tokens& tokens) {
   Splits::const_iterator it = splits.begin();
   Splits::const_iterator itEnd = splits.end();
   for (; it != itEnd; ++it) {
@@ -140,12 +148,36 @@ void Tokenizer::tokenize(const std::string& message, Tokens& tokens) {
 
     if (split.tokenizable) {
       std::vector<std::string> partTokens;
-      SingleCharacterDelimiterTokenizer::tokenize(split.part, m_delimiters,
+      SingleCharacterDelimiterTokenizer::tokenize(split.part, delimiters,
                                                   partTokens);
       tokens.insert(tokens.end(), partTokens.begin(), partTokens.end());
     } else {
       tokens.push_back(split.part);
     }
   }
+}
+
+template <typename T>
+std::string join(const std::vector<T>& v) {
+  std::stringstream ss;
+  for (size_t i = 0; i < v.size(); ++i) {
+    if (i != 0) ss << ",";
+    ss << v[i];
+  }
+  return ss.str();
+}
+
+std::string logTokenization(const std::string& message,
+                            const Tokenizer::Tokens& tokens) {
+  std::stringstream ss;
+  ss << "Tokenization of \"" << message << "\" gives \"" << join(tokens)
+     << "\"";
+  return ss.str();
+}
+
+void Tokenizer::tokenize(const std::string& message, Tokens& tokens) {
+  Splits splits = splitRegexp(message, m_regexpList);
+  tokenizeSplitsWithSingleCharacterDelimiter(splits, m_delimiters, tokens);
+  LOG_TRACE() << logTokenization(message, tokens);
 }
 }

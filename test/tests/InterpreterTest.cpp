@@ -119,7 +119,7 @@ TEST_F(InterpreterTest, check_that_an_edge_is_parsed)
     EXPECT_EQ("@root", edge.source.stateId);
     EXPECT_EQ("@end", edge.target.stateId);
     EXPECT_EQ("#action", edge.edge.actionId);
-    EXPECT_EQ(IntentEncoder::encode({1,0}), edge.edge.intentId);
+    EXPECT_EQ(IntentEncoder::encode({1,0}), edge.edge.intent.intentId);
 }
 
 TEST_F(InterpreterTest, check_that_an_edge_is_parsed_wout_annot)
@@ -137,7 +137,7 @@ TEST_F(InterpreterTest, check_that_an_edge_is_parsed_wout_annot)
     EXPECT_EQ("@anonymous_state0", edge.source.stateId);
     EXPECT_EQ("@anonymous_state1", edge.target.stateId);
     EXPECT_EQ("", edge.edge.actionId);
-    EXPECT_EQ(IntentEncoder::encode({1,0}), edge.edge.intentId);
+    EXPECT_EQ(IntentEncoder::encode({1,0}), edge.edge.intent.intentId);
 }
 
 
@@ -154,7 +154,7 @@ TEST_F(InterpreterTest, check_that_an_inquiry_is_parsed_with_regexp)
     EdgeParser edgeParser(m_dictionaryModel, vertexCount, interpreterFeedback);
 
     EdgeDefinition edge = edgeParser.parse(lines, inquiryToReply, previousState);
-    EXPECT_EQ(IntentEncoder::encode({0xFFFD,1,0,0xFFFC,0xFFFA}), edge.edge.intentId);
+    EXPECT_EQ(IntentEncoder::encode({0xFFFD,1,0,0xFFFC,0xFFFA}), edge.edge.intent.intentId);
 }
 
 TEST_F(InterpreterTest, check_that_successive_edges_are_parsed)
@@ -180,7 +180,7 @@ TEST_F(InterpreterTest, check_that_successive_edges_are_parsed)
     EXPECT_EQ("@root", edge1.source.stateId);
     EXPECT_EQ("@intermediary", edge1.target.stateId);
     EXPECT_EQ("#action", edge1.edge.actionId);
-    EXPECT_EQ(IntentEncoder::encode({1,0}), edge1.edge.intentId);
+    EXPECT_EQ(IntentEncoder::encode({1,0}), edge1.edge.intent.intentId);
 
     const std::pair<int,int> inquiryToReply2(5, 7);
 
@@ -188,7 +188,7 @@ TEST_F(InterpreterTest, check_that_successive_edges_are_parsed)
     EXPECT_EQ("@intermediary", edge2.source.stateId);
     EXPECT_EQ("@end", edge2.target.stateId);
     EXPECT_EQ("#other_action", edge2.edge.actionId);
-    EXPECT_EQ(IntentEncoder::encode({1,0,1,0}), edge2.edge.intentId);
+    EXPECT_EQ(IntentEncoder::encode({1,0,1,0}), edge2.edge.intent.intentId);
 }
 
 TEST_F(InterpreterTest, check_that_response_template_is_adapted)

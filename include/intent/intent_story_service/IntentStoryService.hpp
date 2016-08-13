@@ -94,12 +94,15 @@ class IntentStoryService : protected IntentService {
    */
   Result evaluate(const std::string& stateId, const std::string& message) const;
 
-  inline const IntentStoryModel& getIntentStoryModel() const {
-    return m_intentStoryModel;
+  inline IntentStoryServiceModel getIntentStoryServiceModel() const {
+    IntentStoryServiceModel intentStoryServiceModel;
+    intentStoryServiceModel.intentServiceModel = getIntentServiceModel();
+    intentStoryServiceModel.intentStoryModel = m_intentStoryModel;
+    return intentStoryServiceModel;
   }
 
  private:
-  IntentStoryModel m_intentStoryModel;
+  IntentStoryModel::SharedPtr m_intentStoryModel;
 };
 
 std::ostream& operator<<(std::ostream& os,

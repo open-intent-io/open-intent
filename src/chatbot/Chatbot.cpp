@@ -160,11 +160,11 @@ bool Chatbot::treatMessage(const std::string& msg, Context& context,
     buildParams(intentVariables, result.intent);
 
     LOG_DEBUG() << "Next state is \"" + result.nextStateId + "\".";
-    if (m_intentStoryService.getIntentStoryModel().isStateIdTerminal(
-            result.nextStateId)) {
+    if (m_intentStoryService.getIntentStoryServiceModel()
+            .intentStoryModel->isStateIdTerminal(result.nextStateId)) {
       LOG_DEBUG() << "Next state (" + result.nextStateId + ") is terminal.";
-      context.currentStateId =
-          m_intentStoryService.getIntentStoryModel().rootStateId;
+      context.currentStateId = m_intentStoryService.getIntentStoryServiceModel()
+                                   .intentStoryModel->rootStateId;
     } else {
       context.currentStateId = result.nextStateId;
     }
@@ -178,10 +178,12 @@ bool Chatbot::treatMessage(const std::string& msg, Context& context,
 }
 
 std::string Chatbot::getInitialState() const {
-  return m_intentStoryService.getIntentStoryModel().rootStateId;
+  return m_intentStoryService.getIntentStoryServiceModel()
+      .intentStoryModel->rootStateId;
 }
 
 std::unordered_set<std::string> Chatbot::getTerminalStates() const {
-  return m_intentStoryService.getIntentStoryModel().terminalStateIds;
+  return m_intentStoryService.getIntentStoryServiceModel()
+      .intentStoryModel->terminalStateIds;
 }
 }

@@ -5,6 +5,8 @@ build/
 
 node_modules/
 
+node_modules/
+
 *.old
 *.user
 

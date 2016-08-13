@@ -70,6 +70,10 @@ class IntentService {
    */
   Result evaluate(const std::string& input) const;
 
+  const IntentServiceModel& getIntentServiceModel() const {
+    return m_intentServiceModel;
+  }
+
  protected:
   IntentMatcher::IntentResult resolveIntent(
       const std::string& input, const DictionaryModel& dictionaryModel,

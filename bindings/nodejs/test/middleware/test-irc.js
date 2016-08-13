@@ -109,7 +109,7 @@ describe('Test the IRC client', function() {
             done();
         });
     });
-
+    
     it('should handle a conversation in which the user order a hamburger', function(done) {
         var script = [
             "Hello\n", 

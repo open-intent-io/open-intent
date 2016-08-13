@@ -37,7 +37,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var expect    = require("chai").expect;
 var should    = require("should");
 var sinon = require('sinon');
 var fs = require('fs');
@@ -74,7 +73,7 @@ describe("Test simple user commands driver", function() {
                 'command2': function(intentVariables, sessionId, next) {
                     next();
                 }
-            }
+            };
 
             var userCommandsDriver = new SimpleUserCommands(userCommands);
             userCommandsDriver.execute('unknown_command', 'SESSION', {})
@@ -84,7 +83,7 @@ describe("Test simple user commands driver", function() {
         });
     });
     
-    describe("The VM keeps a state between calls", function() {
+    describe("The driver keeps a state between calls", function() {
         describe('Create user commands from module', function() {
             it('should keep a variable state', function(done) {
                 var userCommands = require('./user-commands');

@@ -37,88 +37,55 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var expect    = require("chai").expect;
-var stream = require("mock-utf8-stream");
-var Q = require('q');
+var should = require('should');
+var request = require('supertest');
+var fs = require('fs');
+var path = require('path');
 
-var talk = undefined;
-var chatbot = undefined;
+var createChatbot = require('../../lib/chatbot');
+var DocPublisher = require('../../lib/middleware/doc-publisher');
 
-module.exports = function(resDirectory) {
-    var chatbot = require('../chatbot');
-    var openintent = require('open-intent');
+var REST_PORT = 10010;
 
-    var _beforeEach = function(done) {
-        var stdinMock = new stream.MockReadableStream();
-        var stdoutMock = new stream.MockReadableStream();
+describe('Test docu publisher middleware', function() {
+    var Middleware = undefined;
 
-        var stdio = {
-            stdin: stdinMock,
-            stdout: stdoutMock
+    var file = path.resolve(__dirname, '../res/food_bot/dictionary.json');
+    var dictionary = JSON.parse(fs.readFileSync(file, 'utf-8'));
+
+    var file = path.resolve(__dirname, '../res/food_bot/script.txt');
+    var oiml = fs.readFileSync(file, 'utf-8');
+
+    var userCommands = require(path.resolve(__dirname, '../res/food_bot/user_commands.js'));
+
+    before(function(done) {
+        var botmodel = {
+            dictionary: dictionary,
+            oiml: oiml,
+            user_commands: userCommands
         };
 
-        var middlewares = [];
-
-        middlewares.push(openintent.middleware.Irc(stdio));
-
-        chatbot(middlewares, function(error) {
-            talk = function(input) {
-                var deferred = Q.defer();
-
-                var onData = function(data) {
-                    deferred.resolve(data);
-                    stdoutMock.removeListener('data', onData);
-                };
-
-                stdoutMock.on('data', onData);
-                stdinMock.write(input);
-
-                return deferred.promise;
-            };
+        createChatbot(botmodel)
+        .then(function(chatbot) {
+            Middleware = DocPublisher(REST_PORT);
+            chatbot.use(Middleware);
             done();
         });
-    };
+    });
 
-    return {
-        checkScript: handleScript,
+    after(function() {
+        Middleware.detach();
+    });
 
-        beforeEach: _beforeEach,
-        afterEach: _afterEach
-    };
-};
-
-function createAssertEqFunction(input, expected) {
-    return function(data) {
-        expect(data).to.equal(expected);
-        return talk(input);
-    }
-}
-
-function handleScript(script, done) {
-    var promise = talk(script[0]);
-    for(var i=2; i < script.length; i += 2) {
-        var input = script[i];
-        var expectedOutput = script[i - 1];
-
-        promise = promise
-            .then(createAssertEqFunction(input, expectedOutput))
-            .fail(function(err) {
-                console.error(err);
-            });
-    }
-
-    promise.then(function(data) {
-            expect(data).to.equal(script[script.length-1]);
+    it.only('should return the intent story graph in an HTML page', function(done) {
+        request(Middleware._server)
+        .get('/intent-story')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', 'text/html')
+        .expect(200)
+        .end(function(err, res) {
+            res.text.should.eql(fs.readFileSync(path.resolve(__dirname, 'test-doc-publisher.expected.html'), 'utf-8'));
             done();
-        })
-        .fail(function(err) {
-            console.error(err);
         });
-}
-
-function _afterEach(done) {
-    if(chatbot) {
-        delete chatbot;
-    }
-    done();
-}
+    });
+});

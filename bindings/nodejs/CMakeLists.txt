@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
 
-ADD_CUSTOM_TARGET(open-intent-js ALL
-        COMMAND npm install
-        SOURCES ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
 
 FIND_PROGRAM( DOCKER_PATH docker )
 
@@ -21,15 +16,6 @@ IF(DOCKER_PATH)
 ELSE()
     MESSAGE(WARNING "Docker has not been found. Please note that you will not be able to execute the integration tests.")
 ENDIF()
-
-
-ADD_CUSTOM_COMMAND(
-        OUTPUT ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
-        COMMAND npm install --unsafe-perm
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/build/Release/open-intent.node
-        ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
 
 ADD_CUSTOM_TARGET(run-open-intent-js-test
         DEPENDS open-intent-js

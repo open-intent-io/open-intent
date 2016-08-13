@@ -129,6 +129,25 @@ function ChatbotInterface(chatbot, sessionManagerDriver) {
         return deferred.promise;
     };
 
+    this.getGraph = function() {
+        var deferred = Q.defer();
+
+        if(!this._chatbot) {
+            deferred.reject(NO_CHATBOT_ERROR_MESSAGE);
+            return deferred.promise;
+        }
+
+        try {
+            var graph = this._chatbot.getGraph();
+            deferred.resolve(graph);
+        }
+        catch(err) {
+            deferred.reject();
+        }
+
+        return deferred.promise;
+    };
+
     return this;
 }
 
