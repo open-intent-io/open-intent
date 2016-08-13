@@ -43,9 +43,6 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var compression = require('compression');
 
-var messenger = require('./messenger');
-
-
 // declare Facebook tokens
 var fb_verify_token;
 var fb_page_token;
@@ -61,7 +58,7 @@ function Client(sender) {
 
     this.send = function(message) {
         sendMessage(this.sessionId, message);
-    }
+    };
 
     return this;
 }
@@ -93,7 +90,7 @@ function receiveMessage(req, res, next) {
 function sendMessage(sender, text) {
     messageData = {
         text:text
-    }
+    };
 
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',

@@ -183,9 +183,8 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
             var method = elements[0];
             var signatureHash = elements[1];
 
-            var expectedHash = crypto.createHmac(method, FACEBOOK_APP_SECRET)
-                .update(buf)
-                .digest('hex');
+            console.log('Request signature', signature);
+            var expectedHash = crypto.createHmac(method, FACEBOOK_APP_SECRET).update(buf).digest('hex');
 
             if (signatureHash != expectedHash) {
                 throw new Error("Couldn't validate the request signature. Expected=" + expectedHash);
@@ -202,12 +201,6 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
         next();
     }
 
-
-
-
-
-
-
     /*
      * Use your own validation token. Check that the token used in the Webhook
      * setup is the same token used here.
@@ -217,7 +210,6 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
 
     app.get('/messenger/chat', attachContentTypeHeader, messengerJsonParser, function(req, res) {
         console.log("headers : "+JSON.stringify(req.headers));
-        console.log("header : "+JSON.stringify(req.header));
         if (req.query['hub.mode'] === 'subscribe' &&
             req.query['hub.verify_token'] === FACEBOOK_VALIDATION_TOKEN) {
             console.log("Validating webhook");
@@ -243,9 +235,6 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
 
         if (data.object == 'page') {
             data.entry.forEach(function(pageEntry) {
-                var pageID = pageEntry.id;
-                var timeOfEvent = pageEntry.time;
-
                 pageEntry.messaging.forEach(function(messagingEvent) {
                     if (messagingEvent.message) {
                         receivedMessage(chatbotClient, messagingEvent);

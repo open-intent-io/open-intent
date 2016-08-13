@@ -6,7 +6,7 @@
     <body>
         <script src="/static/viz.js"></script>
         <script>
-            document.body.innerHTML += Viz("digraph G {
+            document.body.innerHTML += Viz(`digraph G {
 0[label=<@root>];
 1[label=<@get_food_type>];
 2[label=<@yesno>];
@@ -17,7 +17,7 @@
 2->3 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0003</td></tr><tr><td>intent_desc</td><td>Yes!</td></tr><tr><td>entities</td><td>[yes]</td></tr><tr><td>action</td><td>#confirm</td></tr><tr><td>reply</td><td>I'm ordering, it is gonna be _$.</td></tr></table> >];
 2->1 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0002</td></tr><tr><td>intent_desc</td><td>No!</td></tr><tr><td>entities</td><td>[no]</td></tr><tr><td>action</td><td>#notunderstood</td></tr><tr><td>reply</td><td>Tell me what you want. Pizza, hamburger or salad?</td></tr></table> >];
 }
-");
+`);
         </script>
     </body>
 </html>

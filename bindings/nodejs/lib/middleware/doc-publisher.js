@@ -76,6 +76,7 @@ function MiddlewareInterface(port) {
         _this._app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
         _this._app.set('chatbot', chatbot);
 
+        _this._app.use('/static', express.static(path.resolve(__dirname, 'public_html')));
         publishIntentStory(_this._app);
 
         var _port = (port) ? port : 8080;

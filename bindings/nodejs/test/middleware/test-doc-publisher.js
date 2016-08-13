@@ -88,4 +88,19 @@ describe('Test docu publisher middleware', function() {
             done();
         });
     });
+
+    it('should return static viz script', function(done) {
+        request(Middleware._server)
+            .get('/static/viz.js')
+            .expect('Content-Type', 'application/javascript')
+            .expect(200)
+            .end(function(err, res) {
+                if(!err) {
+                    done();
+                }
+                else {
+                    console.error(err);
+                }
+            });
+    });
 });

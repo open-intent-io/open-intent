@@ -52,6 +52,14 @@ function deployPlatform(chatbot, platformName, platform, config, app) {
     }
 }
 
+function deployPlatforms(chatbot, platforms, config, app) {
+    for (var platformName in platforms) {
+        if (platforms.hasOwnProperty(platformName)) {
+            deployPlatform(chatbot, platformName, platforms[platformName], config, app);
+        }
+    }
+}
+
 function MiddlewareInterface(config) {
 
     this._platforms = {};
@@ -75,19 +83,18 @@ function MiddlewareInterface(config) {
 
     this.attach = function(chatbot) {
         var app = express();
+        var port = (config.general.port) ? config.general.port : 5000;
 
-        app.set('port', (config.general.port) ? config.general.port : 5000);
         app.use(express.static('public'));
 
-        var platforms = this._platforms;
-
-        for (var platformName in platforms) {
-            if (platforms.hasOwnProperty(platformName)) {
-                deployPlatform(chatbot, platformName, platforms[platformName], config, app);
-            }
+        try {
+            deployPlatforms(chatbot, this._platforms, config, app);
+        }
+        catch(err) {
+            console.error(err);
         }
 
-        this._server = app.listen(app.get('port'));
+        this._server = app.listen(port);
         this._app = app;
     };
 
