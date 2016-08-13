@@ -42,12 +42,14 @@ var chatbot =  require('./chatbot');
 var openintent = require('open-intent');
 var config = require('./config');
 
-var REST_PORT = 8080;
+var REST_PORT = process.env.REST_PORT || 8080;
+var DOC_PUBLISHER_PORT = process.env.DOC_PUBLISHER_PORT || 8081;
 
 var middlewares = [];
 
-middlewares.push(openintent.middleware.irc());
-middlewares.push(openintent.middleware.rest(REST_PORT));
-middlewares.push(openintent.middleware.platforms(config));
+middlewares.push(openintent.middleware.Irc());
+middlewares.push(openintent.middleware.Rest(REST_PORT));
+middlewares.push(openintent.middleware.Platforms(config));
+//middlewares.push(openintent.middleware.DocPublisher(DOC_PUBLISHER_PORT))
 
 chatbot(middlewares);

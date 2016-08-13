@@ -77,7 +77,7 @@ describe('Test docu publisher middleware', function() {
         Middleware.detach();
     });
 
-    it.only('should return the intent story graph in an HTML page', function(done) {
+    it('should return the intent story graph in an HTML page', function(done) {
         request(Middleware._server)
         .get('/intent-story')
         .set('Accept', 'application/json')
