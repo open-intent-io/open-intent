@@ -6,6 +6,7 @@ ENABLE_TESTING()
 
 # JSON thirdparty
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/json/src)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/spdlog/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 
 SET(SOURCE_FILES
@@ -43,7 +44,6 @@ if(GCOV_ENABLED)
         include(CodeCoverage)
         setup_target_for_coverage(${UNIT_TEST_TARGET}_coverage ${UNIT_TEST_TARGET} coverage)
     endif()
-
 endif()
 
 ADD_EXECUTABLE(${UNIT_TEST_TARGET} ${SOURCE_FILES})
@@ -51,6 +51,5 @@ TARGET_LINK_LIBRARIES(${UNIT_TEST_TARGET} ${PROJECT_NAME}-static
         gtest
         gmock
         gcov
-        boost_regex
 )
 

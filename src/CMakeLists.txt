@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.2)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/json/src)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/spdlog/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
 
-find_package(Boost COMPONENTS system filesystem regex log REQUIRED)
+SET(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+FIND_PACKAGE(Boost COMPONENTS system thread filesystem regex REQUIRED)
 
 SET(COMMON_SOURCE_FILES
         chatbot/Chatbot.cpp
@@ -34,12 +38,7 @@ SET(COMMON_SOURCE_FILES
         intent_story_service/IntentStoryModelSerializer.cpp
 )
 
-SET(NODEJS_SOURCE_FILES
-        bindings/nodejs/main.cpp
-        bindings/nodejs/SerialiazableChatbot.cpp
-)
-
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -static")
 
 ADD_LIBRARY(${PROJECT_NAME}-static STATIC ${COMMON_SOURCE_FILES} ${HEADER_FILES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}-static pthread ${Boost_LIBRARIES})
@@ -53,17 +52,4 @@ if(GCOV_ENABLED AND CMAKE_BUILD_TYPE STREQUAL "Debug")
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}-static ${GCOV_LIBRARIES_OPTIONAL})
 ENDIF()
 
-
-ADD_CUSTOM_TARGET(open-intent-js
-        DEPENDS ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
-)
-
-ADD_CUSTOM_COMMAND(
-        OUTPUT ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
-        DEPENDS ${COMMON_SOURCE_FILES} ${NODEJS_SOURCE_FILES} ${CMAKE_SOURCE_DIR}/binding.gyp
-        COMMAND npm install --unsafe-perm
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/build/Release/open-intent.node
-        ${CMAKE_SOURCE_DIR}/bindings/nodejs/lib/chatbot-api/open-intent.node
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
 

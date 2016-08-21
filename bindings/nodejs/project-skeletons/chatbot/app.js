@@ -42,8 +42,8 @@ var chatbot =  require('./chatbot');
 var openintent = require('open-intent');
 var config = require('./config');
 
-var REST_PORT = process.env.REST_PORT || 8080;
-var DOC_PUBLISHER_PORT = process.env.DOC_PUBLISHER_PORT || 8081;
+var REST_PORT = process.env.REST_PORT || 5001;
+var DOC_PUBLISHER_PORT = process.env.DOC_PUBLISHER_PORT || 5002;
 
 var middlewares = [];
 

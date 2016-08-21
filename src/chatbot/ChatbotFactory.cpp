@@ -111,8 +111,9 @@ bool ChatbotFactory::loadFromJsonModel(std::istream& model,
       chatbotModel = deserializer.deserialize<ChatbotModel>(model);
       loaded = true;
     } catch (...) {
-      LOG_ERROR() << "[ChatbotFactory::loadFromJsonModel] chatbotModel is a "
-                     "flawed json";
+      INTENT_LOG_ERROR()
+          << "[ChatbotFactory::loadFromJsonModel] chatbotModel is a "
+             "flawed json";
       loaded = false;
     }
   }
@@ -141,7 +142,7 @@ bool ChatbotFactory::loadFromOIML(std::istream& dictionaryModel,
 
       loaded = true;
     } catch (...) {
-      LOG_ERROR()
+      INTENT_LOG_ERROR()
           << "[ChatbotFactory::loadFromOIML] dictionaryModel is a flawed json";
       loaded = false;
     }

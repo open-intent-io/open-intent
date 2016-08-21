@@ -112,9 +112,10 @@ std::string replaceTemplateVariables(
 std::vector<std::string> Chatbot::prepareReplies(
     const std::string& actionId, const Chatbot::VariablesMap& intentVariables,
     Chatbot::VariablesMap& userDefinedVariables) {
-  LOG_INFO() << "Chatbot::prepareReplies starting";
+  INTENT_LOG_INFO() << "Chatbot::prepareReplies starting";
 
-  LOG_INFO() << "Chatbot::prepareReplies looking for reply : " << actionId;
+  INTENT_LOG_INFO() << "Chatbot::prepareReplies looking for reply : "
+                    << actionId;
   std::vector<std::string> replies;
   ChatbotActionModel::ReplyIdsByActionIdIndex::const_iterator repliesIt =
       m_chatbotActionModel->replyIdsByActionId.find(actionId);
@@ -122,7 +123,7 @@ std::vector<std::string> Chatbot::prepareReplies(
   if (repliesIt != m_chatbotActionModel->replyIdsByActionId.end()) {
     const std::vector<ChatbotActionModel::IndexType>& replyIds =
         repliesIt->second;
-    LOG_INFO() << "Chatbot::prepareReplies found reply";
+    INTENT_LOG_INFO() << "Chatbot::prepareReplies found reply";
 
     for (const ChatbotActionModel::IndexType& replyId : replyIds) {
       ChatbotActionModel::ReplyContentByReplyIdIndex::const_iterator replyIt =
@@ -130,9 +131,10 @@ std::vector<std::string> Chatbot::prepareReplies(
       if (replyIt != m_chatbotActionModel->replyContentByReplyIdIndex.end()) {
         replies.push_back(replaceTemplateVariables(
             replyIt->second, intentVariables, userDefinedVariables));
-        LOG_INFO() << "Chatbot::prepareReplies"
-                   << replaceTemplateVariables(replyIt->second, intentVariables,
-                                               userDefinedVariables);
+        INTENT_LOG_INFO() << "Chatbot::prepareReplies"
+                          << replaceTemplateVariables(replyIt->second,
+                                                      intentVariables,
+                                                      userDefinedVariables);
       }
     }
   }
@@ -144,7 +146,7 @@ void executeActions(const ChatbotActionModel& chatbotActionModel,
                     Chatbot::UserDefinedActionHandler& userDefinedActionHandler,
                     const Chatbot::VariablesMap& intentVariables,
                     Chatbot::VariablesMap& templateRepliesVariables) {
-  LOG_INFO() << "Execute user defined action \"" + actionId + "\".";
+  INTENT_LOG_INFO() << "Execute user defined action \"" + actionId + "\".";
   // Call the user defined action handler with the actionId.
 
   userDefinedActionHandler(actionId, intentVariables, templateRepliesVariables);
@@ -159,10 +161,11 @@ bool Chatbot::treatMessage(const std::string& msg, Context& context,
   if (result.found) {
     buildParams(intentVariables, result.intent);
 
-    LOG_DEBUG() << "Next state is \"" + result.nextStateId + "\".";
+    INTENT_LOG_DEBUG() << "Next state is \"" + result.nextStateId + "\".";
     if (m_intentStoryService.getIntentStoryServiceModel()
             .intentStoryModel->isStateIdTerminal(result.nextStateId)) {
-      LOG_DEBUG() << "Next state (" + result.nextStateId + ") is terminal.";
+      INTENT_LOG_DEBUG() << "Next state (" + result.nextStateId +
+                                ") is terminal.";
       context.currentStateId = m_intentStoryService.getIntentStoryServiceModel()
                                    .intentStoryModel->rootStateId;
     } else {

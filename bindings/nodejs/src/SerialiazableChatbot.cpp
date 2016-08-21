@@ -33,15 +33,14 @@ all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY,
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #include <node.h>
 #include <v8.h>
 #include <iostream>
-#include "intent/bindings/nodejs/SerializableChatbot.hpp"
+#include "intentjs/SerializableChatbot.hpp"
 #include "intent/chatbot/ChatbotFactory.hpp"
 #include "intent/intent_story_service/IntentStoryModelSerializer.hpp"
 #include "intent/utils/Logger.hpp"
@@ -77,7 +76,7 @@ void parseContext(Isolate *isolate, const Local<Object> &sessionContext,
                     context.currentStateId);
     } else {
       std::string error = "Current state must be a string.";
-      LOG_ERROR() << error << "\n";
+      INTENT_LOG_ERROR() << error << "\n";
 
       isolate->ThrowException(v8::Exception::TypeError(
           String::NewFromUtf8(isolate, error.c_str())));
@@ -136,7 +135,7 @@ void SerializableChatbot::Init(Isolate *isolate) {
  */
 void SerializableChatbot::TreatMessage(
     const FunctionCallbackInfo<Value> &args) {
-  LOG_TRACE() << "SerializableChatbot::TreatMessage\n";
+  INTENT_LOG_TRACE() << "SerializableChatbot::TreatMessage\n";
 
   Isolate *isolate = args.GetIsolate();
   SerializableChatbot *obj =
@@ -144,7 +143,7 @@ void SerializableChatbot::TreatMessage(
 
   if (!args[0]->IsObject()) {
     std::string error = "Context must be an object.";
-    LOG_ERROR() << error << "\n";
+    INTENT_LOG_ERROR() << error << "\n";
     isolate->ThrowException(
         v8::Exception::TypeError(String::NewFromUtf8(isolate, error.c_str())));
     return;
@@ -153,7 +152,7 @@ void SerializableChatbot::TreatMessage(
 
   if (!args[1]->IsString()) {
     std::string error = "The message must be a string.";
-    LOG_ERROR() << error << "\n";
+    INTENT_LOG_ERROR() << error << "\n";
     isolate->ThrowException(
         v8::Exception::TypeError(String::NewFromUtf8(isolate, error.c_str())));
     return;
@@ -162,7 +161,7 @@ void SerializableChatbot::TreatMessage(
 
   if (!args[2]->IsFunction()) {
     std::string error = "The user defined actions handler must be a function.";
-    LOG_ERROR() << error << "\n";
+    INTENT_LOG_ERROR() << error << "\n";
     isolate->ThrowException(
         v8::Exception::TypeError(String::NewFromUtf8(isolate, error.c_str())));
     return;
@@ -179,7 +178,7 @@ void SerializableChatbot::TreatMessage(
   intent::Chatbot::VariablesMap userDefinedVariables;
   intent::Chatbot::VariablesMap intentVariables;
 
-  LOG_TRACE() << "Call to C++ method treatMessage from chatbot";
+  INTENT_LOG_TRACE() << "Call to C++ method treatMessage from chatbot";
   bool intentFound =
       obj->m_chatbot->treatMessage(message, context, userDefinedActionHandler,
                                    intentVariables, userDefinedVariables);
@@ -189,7 +188,7 @@ void SerializableChatbot::TreatMessage(
 
 void extractMapFromObject(Local<Object> &object,
                           intent::Chatbot::VariablesMap &map) {
-  LOG_TRACE() << "Extracting variables from v8 map : \n";
+  INTENT_LOG_TRACE() << "Extracting variables from v8 map : \n";
   Local<Array> property_names = object->GetOwnPropertyNames();
 
   for (unsigned int i = 0; i < property_names->Length(); ++i) {
@@ -217,7 +216,7 @@ void SerializableChatbot::PrepareReplies(
   Isolate *isolate = args.GetIsolate();
   SerializableChatbot *obj =
       ObjectWrap::Unwrap<SerializableChatbot>(args.Holder());
-  LOG_TRACE() << "SerializableChatbot::PrepareReplies"
+  INTENT_LOG_TRACE() << "SerializableChatbot::PrepareReplies"
               << "\n";
 
   if (!args[0]->IsString()) {
@@ -249,7 +248,7 @@ void SerializableChatbot::PrepareReplies(
   std::vector<std::string> replies =
       obj->m_chatbot->prepareReplies(actionId, intentVariables, userVariables);
 
-  LOG_TRACE() << "Chatbot::prepareReplies "
+  INTENT_LOG_TRACE() << "Chatbot::prepareReplies "
               << "\n";
   Local<Array> repliesArray = Array::New(isolate);
   unsigned int i = 0;
@@ -326,7 +325,7 @@ void SerializableChatbot::InstantiateFromJsonModel(
 
     if (!chatbot.get()) {
       std::string error = "Error while creating chatbot.";
-      LOG_ERROR() << error << "\n";
+      INTENT_LOG_ERROR() << error << "\n";
       isolate->ThrowException(v8::Exception::TypeError(
           String::NewFromUtf8(isolate, error.c_str())));
     }
@@ -352,7 +351,7 @@ void SerializableChatbot::InstantiateFromJsonModel(
 
 void wrapInterpreterFeedback(Isolate *isolate, Local<Object> &v8feedback,
                              intent::InterpreterFeedback &feedback) {
-  LOG_TRACE() << "Collecting interpreter messages"
+  INTENT_LOG_TRACE() << "Collecting interpreter messages"
               << "\n";
   Local<Array> interpretMessages = Array::New(isolate, (int)feedback.size());
   for (unsigned int i = 0; i < feedback.size(); ++i) {
@@ -405,11 +404,11 @@ void SerializableChatbot::InstantiateFromOIML(
       Local<Object> interpreterFeedback = Object::New(isolate);
       wrapInterpreterFeedback(isolate, interpreterFeedback, feedback);
       std::string error = "Error while interpreting the model.";
-      LOG_ERROR() << error << "\n";
+      INTENT_LOG_ERROR() << error << "\n";
       isolate->ThrowException(interpreterFeedback);
     } else if (!chatbot.get()) {
       std::string error = "Error while creating chatbot.";
-      LOG_ERROR() << error << "\n";
+      INTENT_LOG_ERROR() << error << "\n";
       isolate->ThrowException(v8::Exception::TypeError(
           String::NewFromUtf8(isolate, error.c_str())));
     }

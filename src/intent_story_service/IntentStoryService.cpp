@@ -83,8 +83,8 @@ void buildIntentsIndex(
 
 IntentStoryService::Result IntentStoryService::evaluate(
     const std::string& stateId, const std::string& message) const {
-  LOG_INFO() << "Look for intent in \"" + message + "\" from state \"" +
-                    stateId + "\".";
+  INTENT_LOG_INFO() << "Look for intent in \"" + message + "\" from state \"" +
+                           stateId + "\".";
 
   IntentStoryService::Result intentStoryResult;
   IntentStoryModel::VertexByStateIdIndex::const_iterator vIt =
@@ -115,18 +115,18 @@ IntentStoryService::Result IntentStoryService::evaluate(
       intentStoryResult.nextStateId =
           foundEdge->second.getTarget().getInfo().stateId;
     } else if (otherwiseIntent) {
-      LOG_DEBUG() << "Otherwise intent detected.";
+      INTENT_LOG_DEBUG() << "Otherwise intent detected.";
       intentStoryResult.found = true;
       intentStoryResult.actionId = otherwiseIntent->getInfo().actionId;
       intentStoryResult.nextStateId =
           otherwiseIntent->getTarget().getInfo().stateId;
     }
   } else {
-    LOG_ERROR() << "There are no neighboor edges from state \"" + stateId +
-                       "\".";
+    INTENT_LOG_ERROR() << "There are no neighboor edges from state \"" +
+                              stateId + "\".";
   }
 
-  LOG_TRACE() << "Result = " << intentStoryResult;
+  INTENT_LOG_TRACE() << "Result = " << intentStoryResult;
 
   return intentStoryResult;
 }

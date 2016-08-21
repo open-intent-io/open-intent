@@ -48,11 +48,12 @@ ADD_CUSTOM_TARGET(run-all-tests
 )
 
 ADD_CUSTOM_TARGET(run-unit-tests
-        DEPENDS run-open-intent-js-test
+        DEPENDS run-unit-tests run-open-intent-js-test
 )
 
 ADD_CUSTOM_TARGET(run-integration-tests
-        DEPENDS run-open-intent-js-integration-test)
+        DEPENDS run-open-intent-js-integration-test
+)
 
 ADD_CUSTOM_COMMAND(TARGET run-integration-tests POST_BUILD
         COMMAND ${CMAKE_BINARY_DIR}/examples/Domotic/test/domotic-test

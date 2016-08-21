@@ -43,13 +43,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <iostream>
 
-#define BOOST_LOG_DYN_LINK
-
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/expressions.hpp>
-
-#endif
+#include "spdlog/spdlog.h"
 
 #include <string>
 #include <sstream>
@@ -99,31 +93,22 @@ class Logger {
     return *logger;
   }
 
+  template <int v>
+  struct Int2Type {
+    enum { value = v };
+  };
+
   /**
    * \brief Logger by level of severity.
    */
-  template <boost::log::trivial::severity_level LogLevel>
+  template <SeverityLevel::type LogLevel>
   class LoggerWithLevel {
    public:
-    /**
-     * \brief Log a string message.
-     */
-    LoggerWithLevel& operator<<(const std::string& message) {
-      BOOST_LOG_STREAM_WITH_PARAMS(
-          ::boost::log::trivial::logger::get(),
-          (::boost::log::keywords::severity = LogLevel))
-          << message;
-      return *this;
-    }
-
     /**
      * \brief Log a message from a string stream.
      */
     LoggerWithLevel& operator<<(const std::stringstream& message) {
-      BOOST_LOG_STREAM_WITH_PARAMS(
-          ::boost::log::trivial::logger::get(),
-          (::boost::log::keywords::severity = LogLevel))
-          << message.str();
+      //*this << message;
       return *this;
     }
 
@@ -131,12 +116,36 @@ class Logger {
      * \brief Log a message from an object that supports the stream operator.
      */
     template <typename T>
-    LoggerWithLevel& operator<<(T& message) {
-      BOOST_LOG_STREAM_WITH_PARAMS(
-          ::boost::log::trivial::logger::get(),
-          (::boost::log::keywords::severity = LogLevel))
-          << message;
+    LoggerWithLevel& operator<<(const T& message) {
+      std::stringstream ss;
+      ss << message;
+      log(ss.str(), Int2Type<LogLevel>());
       return *this;
+    }
+
+   private:
+    void log(const std::string& message, Int2Type<SeverityLevel::TRACE>) {
+      spdlog::get("console")->trace(message);
+    }
+
+    void log(const std::string& message, Int2Type<SeverityLevel::DEBUG>) {
+      spdlog::get("console")->debug(message);
+    }
+
+    void log(const std::string& message, Int2Type<SeverityLevel::INFO>) {
+      spdlog::get("console")->info(message);
+    }
+
+    void log(const std::string& message, Int2Type<SeverityLevel::WARNING>) {
+      spdlog::get("console")->warn(message);
+    }
+
+    void log(const std::string& message, Int2Type<SeverityLevel::ERROR>) {
+      spdlog::get("console")->error(message);
+    }
+
+    void log(const std::string& message, Int2Type<SeverityLevel::FATAL>) {
+      spdlog::get("console")->critical(message);
     }
   };
 
@@ -144,7 +153,7 @@ class Logger {
    * @brief Get the trace logger
    * \return the trace logger
    */
-  inline LoggerWithLevel<boost::log::trivial::trace>& trace() {
+  inline LoggerWithLevel<Logger::SeverityLevel::TRACE>& trace() {
     return m_loggerTrace;
   }
 
@@ -152,7 +161,7 @@ class Logger {
    * @brief Get the debug logger
    * \return the debug logger
    */
-  inline LoggerWithLevel<boost::log::trivial::debug>& debug() {
+  inline LoggerWithLevel<Logger::SeverityLevel::DEBUG>& debug() {
     return m_loggerDebug;
   }
 
@@ -160,7 +169,7 @@ class Logger {
    * @brief Get the info logger
    * \return the info logger
    */
-  inline LoggerWithLevel<boost::log::trivial::info>& info() {
+  inline LoggerWithLevel<Logger::SeverityLevel::INFO>& info() {
     return m_loggerInfo;
   }
 
@@ -168,7 +177,7 @@ class Logger {
    * @brief Get the warning logger
    * \return the warning logger
    */
-  inline LoggerWithLevel<boost::log::trivial::warning>& warning() {
+  inline LoggerWithLevel<Logger::SeverityLevel::WARNING>& warning() {
     return m_loggerWarning;
   }
 
@@ -176,7 +185,7 @@ class Logger {
    * @brief Get the error logger
    * \return the error logger
    */
-  inline LoggerWithLevel<boost::log::trivial::error>& error() {
+  inline LoggerWithLevel<Logger::SeverityLevel::ERROR>& error() {
     return m_loggerError;
   }
 
@@ -184,26 +193,28 @@ class Logger {
    * @brief Get the fatal logger
    * \return the fatal logger
    */
-  inline LoggerWithLevel<boost::log::trivial::fatal>& fatal() {
+  inline LoggerWithLevel<Logger::SeverityLevel::FATAL>& fatal() {
     return m_loggerFatal;
   }
 
  private:
   Logger() {}
 
-  LoggerWithLevel<boost::log::trivial::trace> m_loggerTrace;
-  LoggerWithLevel<boost::log::trivial::debug> m_loggerDebug;
-  LoggerWithLevel<boost::log::trivial::info> m_loggerInfo;
-  LoggerWithLevel<boost::log::trivial::warning> m_loggerWarning;
-  LoggerWithLevel<boost::log::trivial::error> m_loggerError;
-  LoggerWithLevel<boost::log::trivial::fatal> m_loggerFatal;
+  LoggerWithLevel<Logger::SeverityLevel::TRACE> m_loggerTrace;
+  LoggerWithLevel<Logger::SeverityLevel::DEBUG> m_loggerDebug;
+  LoggerWithLevel<Logger::SeverityLevel::INFO> m_loggerInfo;
+  LoggerWithLevel<Logger::SeverityLevel::WARNING> m_loggerWarning;
+  LoggerWithLevel<Logger::SeverityLevel::ERROR> m_loggerError;
+  LoggerWithLevel<Logger::SeverityLevel::FATAL> m_loggerFatal;
 };
 }
 }
 
-#define LOG_TRACE() intent::log::Logger::getInstance().trace()
-#define LOG_DEBUG() intent::log::Logger::getInstance().debug()
-#define LOG_INFO() intent::log::Logger::getInstance().info()
-#define LOG_WARNING() intent::log::Logger::getInstance().warning()
-#define LOG_ERROR() intent::log::Logger::getInstance().error()
-#define LOG_FATAL() intent::log::Logger::getInstance().fatal()
+#define INTENT_LOG_TRACE() intent::log::Logger::getInstance().trace()
+#define INTENT_LOG_DEBUG() intent::log::Logger::getInstance().debug()
+#define INTENT_LOG_INFO() intent::log::Logger::getInstance().info()
+#define INTENT_LOG_WARNING() intent::log::Logger::getInstance().warning()
+#define INTENT_LOG_ERROR() intent::log::Logger::getInstance().error()
+#define INTENT_LOG_FATAL() intent::log::Logger::getInstance().fatal()
+
+#endif

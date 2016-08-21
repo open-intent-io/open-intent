@@ -1,6 +1,8 @@
 #!/bin/bash
 
-pushd /src/
+set -x
+
+pushd /src/bindings/nodejs
 npm link
 popd
 
