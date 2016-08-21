@@ -37,18 +37,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var ModelBuilder = require('../lib/chatbot-api/model-builder');
 var fs = require('fs');
 var path = require('path');
 
 var dictionaryFile = path.resolve(__dirname, 'res/food_bot/dictionary.json');
-var userCommandsFile = path.resolve(__dirname, 'res/food_bot/user_commands.js');
 var scriptFile = path.resolve(__dirname, 'res/food_bot/bad_script.txt');
 
-var botmodel = ModelBuilder()
-    .withDictionaryFromFile(dictionaryFile)
-    .withJsUserCommandsFromFile(userCommandsFile)
-    .withOIMLFromFile(scriptFile)
-    .build();
+var botmodel = {
+    dictionary: JSON.parse(fs.readFileSync(dictionaryFile, 'utf-8')),
+    user_commands: require(path.resolve(__dirname, 'res/food_bot/user_commands.js')),
+    oiml: fs.readFileSync(scriptFile, 'utf-8')
+};
 
 module.exports = botmodel;

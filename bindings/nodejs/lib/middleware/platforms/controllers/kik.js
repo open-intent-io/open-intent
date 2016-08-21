@@ -37,7 +37,36 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-module.exports = {
-    'createChatbot': require('./lib/chatbot'),
-    'middleware': require('./lib/middleware/index')
+'use strict';
+
+
+let Bot  = require('@kikinteractive/kik');
+
+var replyHandler = function(message, reply) {
+    message.reply(reply);
+};
+
+var messageHandler = function(chatbotClient, message) {
+   chatbotClient.talk(message.from, message.body).then(function(replies) {
+        var reply = '';
+        if (replies.length)
+            reply = replies[0];
+        else
+            reply = "An error occured";
+        replyHandler(message, reply);
+   });     
+};
+
+//Weird and all but I guess this route is enforced by the lib
+module.exports.attach = function (chatbotClient, kikConfig, app) {
+    // Configure the bot API endpoint, details for your bot
+    let bot = new Bot(kikConfig);
+
+    bot.updateBotConfiguration();
+
+    bot.onTextMessage((message) => {
+        messageHandler(chatbotClient, message);
+    });
+
+    app.post('/incoming', bot.incoming());
 };

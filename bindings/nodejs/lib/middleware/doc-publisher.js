@@ -37,7 +37,55 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-module.exports = {
-    'createChatbot': require('./lib/chatbot'),
-    'middleware': require('./lib/middleware/index')
+module.exports = function(port) {
+    return new MiddlewareInterface(port);
 };
+
+var express = require('express');
+var bodyParser = require('body-parser');
+var fs = require('fs');
+var path = require('path');
+
+
+function publishIntentStory(app) {
+    app.get('/intent-story', function(req, res) {
+        var chatbot = req.app.get('chatbot');
+        var templateFilepath = path.resolve(__dirname, 'templates/intent-story.html');
+        var template = fs.readFileSync(templateFilepath, 'utf-8');
+
+        chatbot.getGraph()
+        .then(function(graph) {
+            template = template.replace(/\$\{GRAPH\}/, graph);
+
+            res.type('html');
+            res.send(template);
+        })
+        .fail(function(err) {
+            res.status(500).send({'message': err});
+        });
+    });
+}
+
+function MiddlewareInterface(port) {
+    var _this = this;
+    this._app = express();
+    this._server = undefined;
+
+    this.attach = function(chatbot) {
+        _this._app.use(bodyParser.json()); // support json encoded bodies
+        _this._app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+        _this._app.set('chatbot', chatbot);
+
+        _this._app.use('/static', express.static(path.resolve(__dirname, 'public_html')));
+        publishIntentStory(_this._app);
+
+        var _port = (port) ? port : 8080;
+        _this._server = _this._app.listen(_port);
+    };
+
+    this.detach = function() {
+        if(_this._server) {
+            _this._server.close();
+        }
+    };
+}

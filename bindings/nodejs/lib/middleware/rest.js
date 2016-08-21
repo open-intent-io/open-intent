@@ -37,7 +37,78 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-module.exports = {
-    'createChatbot': require('./lib/chatbot'),
-    'middleware': require('./lib/middleware/index')
+module.exports = function(port) {
+    return new MiddlewareInterface(port);
 };
+
+
+var express = require('express');
+var bodyParser = require('body-parser');
+
+
+function talk(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var sessionId = req.params.sessionId;
+    var message = req.body.message;
+
+    chatbot.talk(sessionId, message)
+    .then(function(replies) {
+        res.json({ 'replies': replies });
+    }).fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}
+
+
+function setstate(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var sessionId = req.params.sessionId;
+    var state = req.body.state;
+
+    chatbot.setState(sessionId, state)
+    .then(function(state) {
+        res.json({ 'message': 'OK' });
+    })
+    .fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}
+
+function getstate(req, res) {
+    var chatbot = req.app.get('chatbot');
+    var sessionId = req.params.sessionId;
+
+    chatbot.getState(sessionId)
+    .then(function(state) {
+        res.json({ 'state': state });
+    })
+    .fail(function(err) {
+        res.status(500).send({'message': err});
+    });
+}
+
+
+function MiddlewareInterface(port) {
+    var _this = this;
+    this._app = express();
+    this._server = undefined;
+
+    this.attach = function(chatbot) {
+        _this._app.use(bodyParser.json()); // support json encoded bodies
+        _this._app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+        _this._app.set('chatbot', chatbot);
+
+        _this._app.get('/state/:sessionId', getstate);
+        _this._app.put('/state/:sessionId', setstate);
+        _this._app.post('/talk/:sessionId', talk);
+
+        var _port = (port) ? port : 8080;
+        _this._server = _this._app.listen(_port);
+    };
+
+    this.detach = function() {
+        if(_this._server) {
+            _this._server.close();
+        }
+    };
+}

@@ -44,16 +44,15 @@ var Q = require('q');
 var path = require('path');
 
 var StandaloneSessionManager = require('../../lib/chatbot-api/session-manager/standalone-driver');
-var VMUserDefinedActionDriver = require('../../lib/chatbot-api/user-defined-actions/vm-driver');
+var SimpleUserCommandsDriver = require('../../lib/chatbot-api/user-defined-actions/simple-driver');
 
 var OpenIntentChatbot = require('../../lib/chatbot-api/chatbot-factory');
 
 var fs = require('fs');
 var file = path.resolve(__dirname, 'res/chatbot.json');
-var model = fs.readFileSync(file, "utf-8");
+var model = JSON.parse(fs.readFileSync(file, "utf-8"));
 
-var file = path.resolve(__dirname, 'res/userCommands.js');
-var userCommands = fs.readFileSync(file, "utf-8");
+var userCommands = require(path.resolve(__dirname, 'res/userCommands.js'));
 
 var file = path.resolve(__dirname, 'res/interpreter_model.txt');
 var interpreterModel = fs.readFileSync(file, "utf-8");
@@ -62,7 +61,7 @@ describe("Test Open Intent chatbot factory", function() {
     describe("Get the chatbot state initially", function() {
         it("should return the initial state of the chatbot", function(done) {
             var sessionManager = new StandaloneSessionManager();
-            var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
+            var userDefinedActionDriver = new SimpleUserCommandsDriver(userCommands);
             var chatbot = OpenIntentChatbot.fromJsonModel(model, sessionManager, userDefinedActionDriver);
             var sessionId = 'SESSION_ID';
             var getStateCallback = sinon.spy();
@@ -81,7 +80,7 @@ describe("Test Open Intent chatbot factory", function() {
     describe("Set the state to initial state initially", function() {
         it('should return the state "abc"', function(done) {
             var sessionManager = new StandaloneSessionManager();
-            var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
+            var userDefinedActionDriver = new SimpleUserCommandsDriver(userCommands);
             var chatbot = OpenIntentChatbot.fromJsonModel(model, sessionManager, userDefinedActionDriver);
             var sessionId = 'SESSION_ID';
             var STATE = 'abc';
@@ -100,7 +99,7 @@ describe("Test Open Intent chatbot factory", function() {
     describe("Somebody calls the waiter", function() {
         it("should ask what to order", function (done) {
             var sessionManager = new StandaloneSessionManager();
-            var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
+            var userDefinedActionDriver = new SimpleUserCommandsDriver(userCommands);
             var chatbot = OpenIntentChatbot.fromJsonModel(model, sessionManager, userDefinedActionDriver);
             var sessionId = 'SESSION_ID';
 
@@ -117,7 +116,7 @@ describe("Test Open Intent chatbot factory", function() {
     describe("Order 2 beverages in one shot", function() {
         it('should follow the conversation', function(done) {
             var sessionManager = new StandaloneSessionManager();
-            var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
+            var userDefinedActionDriver = new SimpleUserCommandsDriver(userCommands);
             var chatbot = OpenIntentChatbot.fromJsonModel(model, sessionManager, userDefinedActionDriver);
             var sessionId = 'SESSION_ID';
 
@@ -126,15 +125,15 @@ describe("Test Open Intent chatbot factory", function() {
                 return chatbot.talk(sessionId, 'Bob');
             })
             .then(function(replies) {
-                //expect(replies).to.deep.equal(["Que puis-je vous offrir ?"]);
+                expect(replies).to.deep.equal(["Que puis-je vous offrir ?"]);
                 return chatbot.talk(sessionId, 'Un Coca-Cola');
             })
             .then(function(replies) {
-                //expect(replies).to.deep.equal(["Vous-voulez quelque chose d'autre ?"]);
+                expect(replies).to.deep.equal(["Vous-voulez quelque chose d'autre ?"]);
                 return chatbot.talk(sessionId, 'rien');
             })
             .then(function(replies) {
-                //expect(replies).to.deep.equal(["Au revoir et à bientôt."]);
+                expect(replies).to.deep.equal(["Au revoir et à bientôt."]);
                 done();
             });
         });
@@ -143,7 +142,7 @@ describe("Test Open Intent chatbot factory", function() {
     describe("Test interactions with several sessions", function() {
         it("should handle 2 conversations", function(done) {
             var sessionManager = new StandaloneSessionManager();
-            var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
+            var userDefinedActionDriver = new SimpleUserCommandsDriver(userCommands);
             var chatbot = OpenIntentChatbot.fromJsonModel(model, sessionManager, userDefinedActionDriver);
             var sessionId1 = 'SESSION_ID1';
             var sessionId2 = 'SESSION_ID2';
@@ -180,7 +179,7 @@ describe("Test Open Intent chatbot factory", function() {
     describe("The chatbot returns the right initial state", function() {
         it('should return the initial state', function() {
             var sessionManager = new StandaloneSessionManager();
-            var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
+            var userDefinedActionDriver = new SimpleUserCommandsDriver(userCommands);
             var chatbot = OpenIntentChatbot.fromJsonModel(model, sessionManager, userDefinedActionDriver);
 
             assert.equal(chatbot.getInitialState(), "init");
@@ -190,7 +189,7 @@ describe("Test Open Intent chatbot factory", function() {
     describe("The chatbot returns the right terminal states", function() {
         it('should return the terminal states', function() {
             var sessionManager = new StandaloneSessionManager();
-            var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
+            var userDefinedActionDriver = new SimpleUserCommandsDriver(userCommands);
             var chatbot = OpenIntentChatbot.fromJsonModel(model, sessionManager, userDefinedActionDriver);
 
             assert.sameMembers(chatbot.getTerminalStates(), ["bye", "grab_it"]);
@@ -200,7 +199,7 @@ describe("Test Open Intent chatbot factory", function() {
     describe("When a given session talking to the chatbot is not stored, the chatbot starts from initial state", function() {
         it('should handle the message from initial state', function(done) {
             var sessionManager = new StandaloneSessionManager();
-            var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
+            var userDefinedActionDriver = new SimpleUserCommandsDriver(userCommands);
             var chatbot = OpenIntentChatbot.fromJsonModel(model, sessionManager, userDefinedActionDriver);
 
             chatbot.talk('ABC', "Bob")
@@ -261,7 +260,7 @@ describe("Test Open Intent chatbot factory", function() {
         describe("No session manager driver provided", function() {
 
             it('should throw an exception and not create the chatbot', function() {
-                var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
+                var userDefinedActionDriver = new SimpleUserCommandsDriver(userCommands);
                 var chatbot = undefined;
 
                 var fn = function() {
@@ -278,7 +277,7 @@ describe("Test Open Intent chatbot factory", function() {
         describe("When the OIML is right", function() {
             it('should create the corresponding chatbot and interact with it', function(done) {
                 var sessionManager = new StandaloneSessionManager();
-                var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
+                var userDefinedActionDriver = new SimpleUserCommandsDriver(userCommands);
                 var chatbot = OpenIntentChatbot.fromOIML(model, interpreterModel, sessionManager,
                     userDefinedActionDriver);
                 var SESSION_ID = 'abc';
@@ -299,7 +298,7 @@ describe("Test Open Intent chatbot factory", function() {
 
             it('should return the graph correctly', function(done) {
                 var sessionManager = new StandaloneSessionManager();
-                var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
+                var userDefinedActionDriver = new SimpleUserCommandsDriver(userCommands);
                 var chatbot = OpenIntentChatbot.fromOIML(model, interpreterModel, sessionManager,
                     userDefinedActionDriver);
 
@@ -312,7 +311,7 @@ describe("Test Open Intent chatbot factory", function() {
         describe("When the OIML is bad", function() {
             it('should throw with an interpreter feedback containing the issues', function() {
                 var sessionManager = new StandaloneSessionManager();
-                var userDefinedActionDriver = new VMUserDefinedActionDriver(userCommands);
+                var userDefinedActionDriver = new SimpleUserCommandsDriver(userCommands);
 
                 var file = path.resolve(__dirname, 'res/bad_interpreter_model.txt');
                 var badInterpreterModel = fs.readFileSync(file, "utf-8");

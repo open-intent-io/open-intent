@@ -37,7 +37,22 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-module.exports = {
-    'createChatbot': require('./lib/chatbot'),
-    'middleware': require('./lib/middleware/index')
-};
+var TelegramBot = require('node-telegram-bot-api');
+
+module.exports.attach = function (chatbot, telegramConfig) {
+    var token = telegramConfig.API_TOKEN;
+
+    var tlbot = new TelegramBot(token, {
+        polling: true
+    });
+
+    // Any kind of message
+    tlbot.on('message', function (msg) {
+        var senderId = msg.from.id;
+        var content = msg.text;
+        chatbot.talk(senderId, content).then(function(replies) {
+            var reply = replies.length ? replies[0] : "An error occured";
+            bot.sendMessage(senderId, reply);
+        });
+    });
+}

@@ -38,66 +38,14 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var OpenIntentChatbotFactory = require('./chatbot-factory');
+var SimpleUserCommandsDriver = require('./user-defined-actions/simple-driver');
 var StandaloneSessionManager = require('./session-manager/standalone-driver');
-var RedisSessionManager = require('./session-manager/redis-driver');
 var Q = require('q');
 
 var NO_CHATBOT_ERROR_MESSAGE = 'No model loaded in the chatbot';
 
-function ChatbotInterface(config) {
-    this._chatbot = undefined;
-    this._model = undefined;
-    this._sessionManagerDriver = undefined;
-
-    this.setModel = function(botmodel) {
-        var deferred = Q.defer();
-        var userCommandsDriver = undefined;
-
-        if(!botmodel) {
-            deferred.reject('You must provide a model');
-            return deferred.promise;
-        }
-
-        if(botmodel.hasJsCommands()) {
-            var VMUserCommandsDriver = require('./user-defined-actions/vm-driver');
-            userCommandsDriver = new VMUserCommandsDriver(botmodel.commands());
-        }
-        else if(botmodel.hasRestCommands()) {
-            var RestUserCommandsDriver = require('./user-defined-actions/rest-driver');
-            userCommandsDriver = new RestUserCommandsDriver();
-        }
-
-
-        try {
-            this._chatbot = OpenIntentChatbotFactory.fromOIML(botmodel.dictionary(), botmodel.oiml(),
-                this._sessionManagerDriver, userCommandsDriver);
-        }
-        catch(err) {
-            deferred.reject(err);
-            return deferred.promise;
-        }
-
-        if(this._chatbot) {
-            this._model = botmodel;
-            deferred.resolve();
-        }
-        else {
-            deferred.reject('Error while instantiating the chatbot');
-        }
-
-        return deferred.promise;
-    };
-
-    this.getModel = function() {
-        var deferred = Q.defer();
-        if(this._model) {
-            deferred.resolve(this._model);
-        }
-        else {
-            deferred.reject(NO_CHATBOT_ERROR_MESSAGE);
-        }
-        return deferred.promise;
-    };
+function ChatbotInterface(chatbot, sessionManagerDriver) {
+    this._chatbot = chatbot;
 
     this.talk = function(sessionId, message) {
         var deferred = Q.defer();
@@ -118,12 +66,12 @@ function ChatbotInterface(config) {
         }
 
         this._chatbot.talk(sessionId, message)
-            .then(function(replies) {
-                deferred.resolve(replies);
-            })
-            .fail(function(err) {
-                deferred.reject(err);
-            });
+        .then(function(replies) {
+            deferred.resolve(replies);
+        })
+        .fail(function(err) {
+            deferred.reject(err);
+        });
 
         return deferred.promise;
     };
@@ -147,12 +95,12 @@ function ChatbotInterface(config) {
         }
 
         this._chatbot.setState(sessionId, state)
-            .then(function() {
-                deferred.resolve();
-            })
-            .fail(function(err) {
-                deferred.reject(err);
-            });
+        .then(function() {
+            deferred.resolve();
+        })
+        .fail(function(err) {
+            deferred.reject(err);
+        });
 
         return deferred.promise;
     };
@@ -189,29 +137,54 @@ function ChatbotInterface(config) {
             return deferred.promise;
         }
 
-        var graph = this._chatbot.getGraph();
-        deferred.resolve(graph);
+        try {
+            var graph = this._chatbot.getGraph();
+            deferred.resolve(graph);
+        }
+        catch(err) {
+            deferred.reject();
+        }
 
         return deferred.promise;
     };
 
-    if(config && 'session' in config) {
-        var sessionEntry = config['session'];
-        if('type' in sessionEntry && 'config' in sessionEntry) {
-            if(sessionEntry['type'] == 'redis') {
-                redisConfig = sessionEntry['config'];
-                var hostname = redisConfig['host'];
-                var port = redisConfig['port'];
-                this._sessionManagerDriver = new RedisSessionManager(hostname, port);
-            }
-        }
-    }
-
-    if(!this._sessionManagerDriver) {
-        this._sessionManagerDriver = new StandaloneSessionManager();
-    }
-
     return this;
 }
 
-module.exports = ChatbotInterface;
+function createChatbotNoCatch(botmodel, config) {
+    var userCommandsDriver = new SimpleUserCommandsDriver(botmodel['user_commands']);
+    var sessionManagerDriver = new StandaloneSessionManager();
+    var openIntentChatbot = OpenIntentChatbotFactory.fromOIML(botmodel['dictionary'], botmodel['oiml'], sessionManagerDriver, userCommandsDriver);
+
+    if(config && 'redis' in config) {
+        var redisConfig = config['redis'];
+
+        var hostname = '127.0.0.1';
+        var port = 6379;
+        if ('host' in redisConfig) {
+            hostname = redisConfig['host'];
+        }
+        if ('port' in redisConfig) {
+            port = redisConfig['port'];
+        }
+        sessionManagerDriver = new RedisSessionManager(hostname, port);
+    }
+
+    return new ChatbotInterface(openIntentChatbot, sessionManagerDriver, userCommandsDriver);
+}
+
+function createChatbot(botmodel, config) {
+    var deferred = Q.defer();
+
+    try {
+        var chatbot = createChatbotNoCatch(botmodel, config);
+        deferred.resolve(chatbot);
+    }
+    catch(err) {
+        deferred.reject(err);
+    }
+    
+    return deferred.promise;
+}
+
+module.exports = createChatbot;

@@ -37,7 +37,70 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-module.exports = {
-    'createChatbot': require('./lib/chatbot'),
-    'middleware': require('./lib/middleware/index')
-};
+var should = require('should');
+var request = require('supertest');
+var fs = require('fs');
+var path = require('path');
+
+var createChatbot = require('../../lib/chatbot');
+var DocPublisher = require('../../lib/middleware/doc-publisher');
+
+var REST_PORT = 10010;
+
+describe('Test docu publisher middleware', function() {
+    var Middleware = undefined;
+
+    var file = path.resolve(__dirname, '../res/food_bot/dictionary.json');
+    var dictionary = JSON.parse(fs.readFileSync(file, 'utf-8'));
+
+    var file = path.resolve(__dirname, '../res/food_bot/script.txt');
+    var oiml = fs.readFileSync(file, 'utf-8');
+
+    var userCommands = require(path.resolve(__dirname, '../res/food_bot/user_commands.js'));
+
+    before(function(done) {
+        var botmodel = {
+            dictionary: dictionary,
+            oiml: oiml,
+            user_commands: userCommands
+        };
+
+        createChatbot(botmodel)
+        .then(function(chatbot) {
+            Middleware = DocPublisher(REST_PORT);
+            chatbot.use(Middleware);
+            done();
+        });
+    });
+
+    after(function() {
+        Middleware.detach();
+    });
+
+    it('should return the intent story graph in an HTML page', function(done) {
+        request(Middleware._server)
+        .get('/intent-story')
+        .set('Accept', 'application/json')
+        .expect('Content-Type', 'text/html')
+        .expect(200)
+        .end(function(err, res) {
+            res.text.should.eql(fs.readFileSync(path.resolve(__dirname, 'test-doc-publisher.expected.html'), 'utf-8'));
+            done();
+        });
+    });
+
+    it('should return static viz script', function(done) {
+        request(Middleware._server)
+            .get('/static/viz.js')
+            .expect('Content-Type', 'application/javascript')
+            .expect(200)
+            .end(function(err, res) {
+                if(!err) {
+                    done();
+                }
+                else {
+                    console.error(err);
+                }
+            });
+    });
+});

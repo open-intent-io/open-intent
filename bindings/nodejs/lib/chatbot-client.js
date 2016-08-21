@@ -37,7 +37,55 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-module.exports = {
-    'createChatbot': require('./lib/chatbot'),
-    'middleware': require('./lib/middleware/index')
+var requestify = require("requestify");
+var Q = require('q');
+
+var REQUEST_TIMEOUT = 5000;
+
+module.exports = function(uri) {
+
+    this.talk = function(sessionId, message) {
+        var deferred = Q.defer();
+        var url = uri + '/talk/' + sessionId;
+
+        requestify.post(url,
+            { 'message': message }, { 
+            'timeout': REQUEST_TIMEOUT,
+            'dataType': 'form-url-encoded'
+        })
+        .then(function(response) {
+            var replies = JSON.parse(response.body).replies;
+            deferred.resolve(replies);
+        })
+        .fail(function(error) {
+            deferred.reject(error);
+        });
+
+        return deferred.promise;
+    };
+
+    this.setState = function(sessionId, state) {
+        var url = uri + '/state/' + sessionId;
+        return requestify.put(url, {
+            'state': state,
+            'dataType': 'form-url-encoded'
+        }, { 'timeout': REQUEST_TIMEOUT });
+    };
+
+    this.getState = function(sessionId) {
+        var url = uri + '/state/' + sessionId;
+        var deferred = Q.defer();
+
+        requestify.get(url,
+            { 'timeout': REQUEST_TIMEOUT })
+        .then(function(response) {
+            deferred.resolve(JSON.parse(response.body).state);
+        })
+        .fail(function(error) {
+            deferred.reject(error);
+        });
+        return deferred.promise;
+    };
+
+    return this;
 };
