@@ -37,7 +37,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-module.exports = {
-    'createChatbot': require('./lib/chatbot'),
-    'middleware': require('./lib/middleware/index')
-};
+
+var chatbot =  require('./chatbot');
+var openintent = require('open-intent');
+var config = require('./config');
+
+var REST_PORT = process.env.REST_PORT || 8080;
+var DOC_PUBLISHER_PORT = process.env.DOC_PUBLISHER_PORT || 8081;
+
+var middlewares = [];
+
+middlewares.push(openintent.middleware.Irc());
+middlewares.push(openintent.middleware.Rest(REST_PORT));
+middlewares.push(openintent.middleware.Platforms(config));
+//middlewares.push(openintent.middleware.DocPublisher(DOC_PUBLISHER_PORT))
+
+chatbot(middlewares);

@@ -52,7 +52,6 @@ function compare(expected, actual) {
 describe('Time bot tests', function() {
    it('should give the current time', function(done) {
       var expected_output = [
-         ">>> Ready to talk to the chatbot <<<",
          "> Hello, I can tell you what time it is if you ask.",
          "> It is [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}.",
          "> "
@@ -72,7 +71,6 @@ describe('Time bot tests', function() {
 
    it('should tell name and give current time', function(done) {
       var expected_output = [
-         ">>> Ready to talk to the chatbot <<<",
          "> Hello, I can tell you what time it is if you ask.",
          "> My name is Bob.",
          "> It is [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}.",
@@ -93,7 +91,6 @@ describe('Time bot tests', function() {
 
    it('should reply when it does not understand', function(done) {
       var expected_output = [
-         ">>> Ready to talk to the chatbot <<<",
          "> Be gentle, say hello!",
          "> Hello, I can tell you what time it is if you ask.",
          "> I don't understand what you mean...",

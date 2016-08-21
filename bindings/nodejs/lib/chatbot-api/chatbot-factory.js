@@ -88,18 +88,18 @@ var talkInternal = function(chatbot, sessionManager, userCommandsDriver, session
     .fail(function(err) {
         var context = {
             '_state': chatbot.getInitialState()
-        }
+        };
         callTreatMessageWithContext(chatbot, sessionManager, userCommandsDriver, sessionId, context, msg, deferred);
     });
     return deferred.promise;
-}
+};
 
 var setStateInternal = function(sessionManager, sessionId, state) {
     var context = {
         _state: state
     };
     return sessionManager.save(sessionId, context);
-}
+};
 
 function getStateInternal(chatbot, sessionManager, sessionId) {
     var deferred = Q.defer();
@@ -152,13 +152,13 @@ function OpenIntentChatbot(serializableChatbot, sessionManagerDriver, userComman
 
 function createFromOIML(dictionaryModel, openIntentMLModel,
                         sessionManagerDriver, userCommandsDriver) {
-    return new OpenIntentChatbot(OpenIntent.createSerializableChatbotFromOIML(dictionaryModel, openIntentMLModel),
+    return new OpenIntentChatbot(OpenIntent.createSerializableChatbotFromOIML(JSON.stringify(dictionaryModel), openIntentMLModel),
         sessionManagerDriver, userCommandsDriver);
 }
 
 
 function createFromJsonModel(jsonModel, sessionManagerDriver, userCommandsDriver) {
-    return new OpenIntentChatbot(OpenIntent.createSerializableChatbotFromJsonModel(jsonModel), sessionManagerDriver,
+    return new OpenIntentChatbot(OpenIntent.createSerializableChatbotFromJsonModel(JSON.stringify(jsonModel)), sessionManagerDriver,
         userCommandsDriver);
 }
 

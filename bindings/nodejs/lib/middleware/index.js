@@ -38,6 +38,8 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 module.exports = {
-    'createChatbot': require('./lib/chatbot'),
-    'middleware': require('./lib/middleware/index')
-};
+    'Irc': require('./irc'),
+    'Rest': require('./rest'),
+    'Platforms': require('./platforms'),
+    'DocPublisher': require('./doc-publisher')
+}

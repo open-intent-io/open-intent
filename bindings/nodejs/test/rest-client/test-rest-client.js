@@ -38,44 +38,41 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var expect    = require("chai").expect;
-var sinon = require('sinon')
 var fs = require('fs');
 var foodBotModel = require('../food-bot-model');
-
-var RestChatbotClient = require('../../lib/rest-client');
-var RestChatbotServer = require('../../lib/rest-server');
+var Rest = require('../../lib/middleware/rest');
+var createChatbot = require('../../lib/chatbot');
+var ChatbotClient = require('../../lib/chatbot-client');
 
 var SERVICE_HOST = 'http://127.0.0.1';
-var SERVICE_PORT = 10010;
+var SERVICE_PORT = 10105;
 var server1 = undefined;
 
-describe('Testing the REST Chatbot', function() {
+describe('Testing the chatbot client of REST API', function() {
     var botmodel = foodBotModel;
+    var chatbot = undefined;
+    var middleware = undefined;
 
     describe('Interact with the chatbot', function() {
-        before(function() {
-            RestChatbotServer({
-                port: SERVICE_PORT,
-                model: botmodel
-            })
-            .then(function(chatbot) {
-                server1 = chatbot;
+        before(function(done) {
+            middleware = Rest(SERVICE_PORT);
+            createChatbot(botmodel)
+            .then(function(newChatbot) {
+                chatbot = newChatbot;
+                chatbot.use(middleware);
+                done();
             });
         });
 
         after(function() {
-            server1.close();
-            delete server1;
-        })
+            middleware.detach();
+        });
 
         it('should handle a static scenario correctly', function(done) {
-            client = new RestChatbotClient(SERVICE_HOST + ':' + SERVICE_PORT);
+            client = new ChatbotClient(SERVICE_HOST + ':' + SERVICE_PORT);
             var SESSION_ID = 'ABC';
 
-            client.setModel(botmodel)
-            .then(function() {
-                return client.talk(SESSION_ID, 'Hello');
-            })
+            client.talk(SESSION_ID, 'Hello')
             .then(function(replies) {
                 expect(replies).to.deep.equal(['Would you want to eat a pizza, a hamburger or a salad?']);
                 return client.talk(SESSION_ID, 'I want a burger');
@@ -94,31 +91,27 @@ describe('Testing the REST Chatbot', function() {
         });
     });
 
-    describe('Get model and state on initialized chatbot', function() {
-        before(function() {
-            RestChatbotServer({
-                'port': SERVICE_PORT,
-                'model': botmodel
-            })
-            .then(function(chatbot) {
-                server1 = chatbot;
+    describe('Get state on initialized chatbot', function() {
+        before(function(done) {
+            middleware = Rest(SERVICE_PORT);
+            createChatbot(botmodel)
+            .then(function(newChatbot) {
+                chatbot = newChatbot;
+                chatbot.use(middleware);
+                done();
             });
         });
 
         after(function() {
-            server1.close();
-            server1 = undefined;
-        })
+            middleware.detach();
+        });
 
         it('should set and return the state correctly when asked', function() {
-            client = RestChatbotClient(SERVICE_HOST + ':' + SERVICE_PORT);
+            client = ChatbotClient(SERVICE_HOST + ':' + SERVICE_PORT);
             var SESSION1 = 'sess1';
             var SESSION2 = 'sess2'
 
-            client.setModel(botmodel)
-            .then(function() {
-                return client.setState(SESSION1, 'state1');
-            })
+            client.setState(SESSION1, 'state1')
             .then(function() {
                 return client.getState(SESSION1);
             })
@@ -140,19 +133,6 @@ describe('Testing the REST Chatbot', function() {
                 expect(state).to.equal('state11');
                 done();
             })
-        });
-
-        it('should set and return the model correctly when asked', function() {
-            client = RestChatbotClient(SERVICE_HOST + ':' + SERVICE_PORT);
-
-            client.setModel(botmodel)
-            .then(function() {
-                return client.getModel();
-            })
-            .then(function(model) {
-                expect(model).to.deep.equal(botmodel);
-                done();
-            });
         });
     });
 });

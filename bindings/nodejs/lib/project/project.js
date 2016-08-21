@@ -193,7 +193,7 @@ function cloneSkeleton(name, destDir, cb) {
 
     var skeletonsDir = config.project.skeletonsDir;
 
-    var sourceDir = path.resolve(skeletonsDir, 'rest-chatbot');
+    var sourceDir = path.resolve(skeletonsDir, 'chatbot');
 
     var done = function(err) {
         if (err) { return cb(err); }

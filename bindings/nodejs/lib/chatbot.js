@@ -37,7 +37,34 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-module.exports = {
-    'createChatbot': require('./lib/chatbot'),
-    'middleware': require('./lib/middleware/index')
-};
+var createChatbot = require('./chatbot-api/chatbot');
+var Q = require('q');
+
+function ChatbotInterface(chatbot) {
+    this._chatbot = chatbot;
+    this._middlewares = [];
+
+    this.use = function(middleware) {
+        middleware.attach(this._chatbot);
+        this._middlewares.push(middleware);
+    };
+
+    return this;
+}
+
+function createChatbotInternal(botmodel, config) {
+    var deferred = Q.defer();
+
+    createChatbot(botmodel, config)
+    .then(function(chatbot) {
+        var chatbotInterface = new ChatbotInterface(chatbot);
+        deferred.resolve(chatbotInterface);
+    })
+    .fail(function(err) {
+        deferred.reject(err);
+    });
+
+    return deferred.promise;
+}
+
+module.exports = createChatbotInternal;

@@ -10,7 +10,6 @@ RUN apt-get update; apt-get install -y nodejs npm \
         libboost-log1.58
 
 WORKDIR /usr/src
-RUN npm install q
 
 RUN ln -s /usr/bin/nodejs /usr/bin/node
 

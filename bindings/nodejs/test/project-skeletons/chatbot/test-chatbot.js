@@ -37,7 +37,21 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-module.exports = {
-    'createChatbot': require('./lib/chatbot'),
-    'middleware': require('./lib/middleware/index')
-};
+var proxyquire = require('proxyquire');
+var oi = require('../../../index');
+var path = require('path');
+oi['@noCallThru'] = true;
+
+var chatbot = proxyquire(path.resolve(__dirname, '../../../project-skeletons/chatbot/chatbot'), {
+    'open-intent': oi
+});
+
+
+var h = proxyquire('../../../project-skeletons/chatbot/test/helpers', {
+    '../chatbot': chatbot,
+    'open-intent': oi
+});
+
+proxyquire('../../../project-skeletons/chatbot/test/test-chatbot', {
+    './helpers': h
+});
