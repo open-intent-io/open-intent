@@ -117,22 +117,7 @@ typedef std::vector<Scenario> Scenarios;
 typedef std::pair<LineRange, LineRange> InquiryToReply;
 typedef std::map<LineRange, LineRange> InquiryToReplies;
 
-enum MARKER {
-  ACTION = '#',
-  SAYING = '-',
-  STATE = '@',
-  START_SCENARIO = '{',
-  CLOSE_SCENARIO = '}',
-  PLACE_HOLDER = '_',
-  FALLBACK = '*'
-};
-
 const std::string REGEX_MARKERS = "[]|*";
-
-template <MARKER marker>
-bool isLine(const ScriptLine& line) {
-  return line.content[0] == marker;
-}
 
 /**
  * \brief Interpreter the OpenIntent chatbot language.

@@ -17,7 +17,9 @@ SET(COMMON_SOURCE_FILES
         interpreter/EdgeParser.cpp
         interpreter/SentenceToIntentTranslator.cpp
         interpreter/Interpreter.cpp
+        interpreter/LineTagger.cpp
         interpreter/ReplyTemplateInterpreter.cpp
+        interpreter/ScenarioIndexer.cpp
         intent_service/EntitiesMatcher.cpp
         utils/Deserializer.cpp
         utils/Levenshtein.cpp
