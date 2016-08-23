@@ -38,9 +38,9 @@ LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include <regex>
 #include <stdlib.h>
 #include <string>
 #include <iostream>
@@ -68,8 +68,8 @@ std::string RegexMatcher::padAroundRegexMarkersInSentence(
 }
 
 bool RegexMatcher::match(const std::string& input, const std::string& expr) {
-  regex expression(expr);
-  return regex_match(input, expression);
+  std::regex expression(expr);
+  return std::regex_match(input, expression);
 }
 
 bool RegexMatcher::isRegexMarker(const std::string& input) {

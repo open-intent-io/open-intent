@@ -11,3 +11,5 @@ node_modules/
 *.user
 
 *.vscode
+
+npm-debug.log

@@ -7,5 +7,7 @@ ADD entrypoint.sh /entrypoint.sh
 ADD res/ /custom_res
 ADD test/ /test
 
+WORKDIR /usr/src
+
 CMD ["/entrypoint.sh"]
 

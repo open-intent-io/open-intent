@@ -20,6 +20,7 @@ RUN ln -s /usr/bin/nodejs /usr/bin/node
 RUN cd /open-intent && \
     npm link && \
     cd / && \
+    npm link open-intent && \
     open-intent project create chatbot
 
 WORKDIR /chatbot

@@ -39,7 +39,7 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #include <ctime>
-#include <boost/regex.hpp>
+#include <regex>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include "intent/chatbot/Chatbot.hpp"
@@ -62,16 +62,16 @@ void buildParams(Chatbot::VariablesMap& params,
 }
 
 template <typename VariablesMap>
-std::string replaceVariables(const std::string& input,
-                             const boost::regex& regex,
+std::string replaceVariables(const std::string& input, const std::regex& regex,
                              const VariablesMap& variables) {
   std::string message = input;
   std::string::const_iterator start, end;
   start = input.begin();
   end = input.end();
-  boost::match_results<std::string::const_iterator> what;
-  boost::match_flag_type flags = boost::match_default;
-  while (regex_search(start, end, what, regex, flags)) {
+  std::match_results<std::string::const_iterator> what;
+  std::regex_constants::match_flag_type flags =
+      std::regex_constants::match_default;
+  while (std::regex_search(start, end, what, regex, flags)) {
     const std::string& variablePlaceholder = what[0];
     const std::string& variableName = what[1];
 
@@ -85,8 +85,7 @@ std::string replaceVariables(const std::string& input,
     // update search position:
     start = what[0].second;
     // update flags:
-    flags |= boost::match_prev_avail;
-    flags |= boost::match_not_bob;
+    flags |= std::regex_constants::match_prev_avail;
   }
 
   return message;
@@ -98,7 +97,7 @@ std::string replaceTemplateVariables(
     Chatbot::VariablesMap& userDefinedVariables) {
   std::string message;
 
-  boost::regex expression;
+  std::regex expression;
 
   expression = "\\$\\{([a-zA-Z0-9_@]+)\\}";
   message = replaceVariables(templateMessage, expression, userDefinedVariables);

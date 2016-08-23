@@ -38,10 +38,29 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var path = require('path');
+var fs = require('fs');
+
 var helpers = require('./helpers')(path.resolve(__dirname, '../res'));
 
-describe('Test the chatbot with several scripts', function() {
+var testConversationDirectory = path.resolve(__dirname, '..', 'test-conversations');
+var files = fs.readdirSync(testConversationDirectory);
+var filenames = [];
 
+for(var j in files) {
+    if(path.extname(files[j]) === ".txt") {
+        filenames.push(files[j]);
+    }
+}
+
+function extractScript(filename) {
+    var filepath = path.resolve(testConversationDirectory, filename);
+    var content = fs.readFileSync(filepath, 'utf-8');
+    return content.split(/\r?\n/);
+}
+
+
+
+describe('Given a script, the chatbot', function() {
     beforeEach(function(done) {
         helpers.beforeEach(done);
     });
@@ -50,71 +69,13 @@ describe('Test the chatbot with several scripts', function() {
         helpers.afterEach(done);
     });
 
-    it('should handle a conversation in which the user order a burger', function(done) {
-        var script = [
-            "Hello\n",
-            "Would you want to eat a pizza, a hamburger or a salad?\n",
-            "Hamburger\n",
-            "Got it, you want hamburger, right?\n",
-            "yes\n",
-            "I'm ordering, it is gonna be 5$.\n"
-        ];
-
-        helpers.checkScript(script, done);
-    });
-
-    it('should handle a conversation in which the user order a salad', function(done) {
-        var script = [
-            "Hello\n",
-            "Would you want to eat a pizza, a hamburger or a salad?\n",
-            "Salad\n",
-            "Got it, you want salad, right?\n",
-            "yes\n",
-            "I'm ordering, it is gonna be 5$.\n"
-        ];
-
-        helpers.checkScript(script, done);
-    });
-
-    it('should handle a conversation in which the user order a pizza', function(done) {
-        var script = [
-            "Hello\n",
-            "Would you want to eat a pizza, a hamburger or a salad?\n",
-            "Pizza\n",
-            "Got it, you want pizza, right?\n",
-            "yes\n",
-            "I'm ordering, it is gonna be 8$.\n"
-        ];
-
-        helpers.checkScript(script, done);
-    });
-
-    it('should handle a conversation in which the chatbot does not understand the item', function(done) {
-        var script = [
-            "Hello\n",
-            "Would you want to eat a pizza, a hamburger or a salad?\n",
-            "chicken\n",
-            "I did not understand. Pizza, hamburger or salad?\n"
-        ];
-
-        helpers.checkScript(script, done);
-    });
-
-    it('should handle a conversation in which the user made a mistake during ordering', function(done) {
-        var script = [
-            "Hello\n",
-            "Would you want to eat a pizza, a hamburger or a salad?\n",
-            "Pizza\n",
-            "Got it, you want pizza, right?\n",
-            "No\n",
-            "Tell me what you want. Pizza, hamburger or salad?\n",
-            "Salad\n",
-            "Got it, you want salad, right?\n",
-            "yes\n",
-            "I'm ordering, it is gonna be 5$.\n"
-
-        ];
-
-        helpers.checkScript(script, done);
-    });
+    for(i in filenames) {
+        (function() {
+            var filename = filenames[i];
+            it('should follow the conversation in "' + filename + '"', function(done) {
+                var script = extractScript(filename);
+                helpers.checkScript(script, done);
+            });
+        })();
+    }
 });

@@ -29,3 +29,8 @@ SET(RES_FILES
 include(Custom)
 COPY_RES_FILES(RES_FILES ${RES_FILES} DEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests)
 
+ADD_CUSTOM_TARGET(run-unit-tests-cpp
+    DEPENDS intent-test
+    COMMAND ${CMAKE_BINARY_DIR}/test/tests/intent-test
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/tests/
+)
