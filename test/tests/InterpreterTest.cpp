@@ -107,7 +107,7 @@ TEST_F(InterpreterTest, check_that_an_edge_is_parsed)
                             ScriptLine("#action"),
                             ScriptLine("-je vous en prie"),
                             ScriptLine("@end")};
-    const std::pair<int,int> inquiryToReply(1,3);
+    const InquiryToReply inquiryToReply({1,1},{3,3});
 
     int vertexCount = 0;
     std::unique_ptr<std::string> previousState;
@@ -125,7 +125,7 @@ TEST_F(InterpreterTest, check_that_an_edge_is_parsed)
 TEST_F(InterpreterTest, check_that_an_edge_is_parsed_wout_annot)
 {
     const Scenario lines = {ScriptLine("-je voudrais un coca"), ScriptLine("-je vous en prie")};
-    const std::pair<int,int> inquiryToReply(0,1);
+    const InquiryToReply inquiryToReply({0,0},{1,1});
 
     int vertexCount = 0;
     std::unique_ptr<std::string> previousState;
@@ -146,7 +146,7 @@ TEST_F(InterpreterTest, check_that_an_inquiry_is_parsed_with_regexp)
     const Scenario lines = {ScriptLine("-je voudrais (un coca)*"),
                             ScriptLine("-je vous en prie")};
 
-    const std::pair<int,int> inquiryToReply(0,1);
+    const InquiryToReply inquiryToReply({0,0},{1,1});
 
     int vertexCount = 0;
     std::unique_ptr<std::string> previousState;
@@ -169,7 +169,7 @@ TEST_F(InterpreterTest, check_that_successive_edges_are_parsed)
                             ScriptLine("-c'est noté"),
                             ScriptLine("@end")};
 
-    const std::pair<int,int> inquiryToReply1(1, 3);
+    const InquiryToReply inquiryToReply1({1,1}, {3,3});
 
     int vertexCount = 0;
     std::unique_ptr<std::string> previousState;
@@ -182,7 +182,7 @@ TEST_F(InterpreterTest, check_that_successive_edges_are_parsed)
     EXPECT_EQ("#action", edge1.edge.actionId);
     EXPECT_EQ(IntentEncoder::encode({1,0}), edge1.edge.intent.intentId);
 
-    const std::pair<int,int> inquiryToReply2(5, 7);
+    const InquiryToReply inquiryToReply2({5,5}, {7,7});
 
     EdgeDefinition edge2 = edgeParser.parse(lines, inquiryToReply2, previousState);
     EXPECT_EQ("@intermediary", edge2.source.stateId);
@@ -198,6 +198,31 @@ TEST_F(InterpreterTest, check_that_response_template_is_adapted)
     ASSERT_EQ("Ca vous fera ${0} et ${1} et ${2} et ${3} et enfin ${4}", replyTemplate);
 }
 
+
+TEST_F(InterpreterTest, check_that_multiple_lines_are_parsed)
+{
+    const Scenario lines = {ScriptLine("@root"),
+                            ScriptLine("-je voudrais un coca"),
+                            ScriptLine("eventuellement"),
+                            ScriptLine("#action"),
+                            ScriptLine("-je vous en prie"),
+                            ScriptLine("et vous salue"),
+                            ScriptLine("@end")};
+
+
+    const InquiryToReply inquiryToReply1({1,2}, {4,5});
+
+    int vertexCount = 0;
+    std::unique_ptr<std::string> previousState;
+    InterpreterFeedback interpreterFeedback;
+    EdgeParser edgeParser(m_dictionaryModel, vertexCount, interpreterFeedback);
+    EdgeDefinition edge1 = edgeParser.parse(lines, inquiryToReply1, previousState);
+
+    EXPECT_EQ("@root", edge1.source.stateId);
+    EXPECT_EQ("@end", edge1.target.stateId);
+    EXPECT_EQ("#action", edge1.edge.actionId);
+    EXPECT_EQ(IntentEncoder::encode({1,0}), edge1.edge.intent.intentId);
+}
 
 typedef std::map<std::string, float> Menu;
 typedef std::map<std::string, int> Cart;
@@ -308,7 +333,7 @@ TEST_F(InterpreterFeedbackTest, check_root_and_terminal_state_msg)
                             ScriptLine("#action", 2),
                             ScriptLine("-je vous en prie", 3),
                             ScriptLine("_no_state_", 4)};
-    const std::pair<int,int> inquiryToReply(1,3);
+    const InquiryToReply inquiryToReply({1,1}, {3,3});
 
     int vertexCount = 0;
     std::unique_ptr<std::string> previousState;
@@ -336,7 +361,7 @@ TEST_F(InterpreterFeedbackTest, check_no_action_warning)
                             ScriptLine("-je voudrais un coca", 1),
                             ScriptLine("-je vous en prie", 2),
                             ScriptLine("@end", 3)};
-    const std::pair<int,int> inquiryToReply(1,2);
+    const InquiryToReply inquiryToReply({1,1},{2,2});
 
     int vertexCount = 0;
     std::unique_ptr<std::string> previousState;
@@ -359,7 +384,7 @@ TEST_F(InterpreterFeedbackTest, check_no_entity_warning)
                             ScriptLine("#action", 2),
                             ScriptLine("-je vous en prie", 3),
                             ScriptLine("@end", 4)};
-    const std::pair<int,int> inquiryToReply(1,3);
+    const InquiryToReply inquiryToReply({1,1},{3,3});
 
     int vertexCount = 0;
     std::unique_ptr<std::string> previousState;

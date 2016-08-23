@@ -61,23 +61,62 @@ typedef IntentModel::Intent Intent;
 
 const std::string DEFAULT_REPLY_ID = "#reply";
 
+bool isMarkedLine(const ScriptLine& line)
+{
+    return isLine<ACTION>(line) ||
+           isLine<CLOSE_SCENARIO>(line) ||
+           isLine<START_SCENARIO>(line) ||
+           isLine<SAYING>(line) ||
+           isLine<STATE>(line) ||
+           isLine<PLACE_HOLDER>(line) ||
+           isLine<FALLBACK>(line);
+}
+
 void indexScenario(const Scenario& scenario,
-                   std::map<int, int>& inquiryToReply) {
+                   InquiryToReplies& inquiryToReplies) {
   int index = 0;
   int counter = 0;
-  std::pair<int, int> pair;
+  bool isInSaying = 0;
+
+  InquiryToReply inquiryToReply;
   std::for_each(
       scenario.begin(), scenario.end(),
-      [&pair, &index, &counter, &inquiryToReply](const ScriptLine& line) {
+      [&inquiryToReplies, &inquiryToReply, &index, &counter, &isInSaying](const ScriptLine& line) {
+        LineRange& inquiry = inquiryToReply.first;
+        LineRange& reply = inquiryToReply.second;
+
         if (isLine<SAYING>(line)) {
           if (counter % 2 == 0) {
-            pair.first = index;
+            inquiry.lower = index;
+            inquiry.upper = index;
+            reply.lower = -1;
           }
           if (counter % 2 == 1) {
-            pair.second = index;
-            inquiryToReply.insert(pair);
+            reply.lower = index;
+            reply.upper = index;
           }
+          isInSaying = true;
           ++counter;
+        }
+        else if (!isMarkedLine(line) && isInSaying)
+        {
+            if (reply.lower == -1)
+            {
+                inquiry.upper++;
+            }
+            else
+            {
+                reply.upper++;
+            }
+        }
+        else if (isMarkedLine(line) && isInSaying && reply.lower != -1)
+        {
+            inquiryToReplies.insert(inquiryToReply);
+            isInSaying = false;
+        }
+        else
+        {
+            isInSaying = false;
         }
         ++index;
       });
@@ -96,8 +135,13 @@ struct IntentInserter {
         m_scenario(scenario),
         m_dictionaryModel(dictionaryModel) {}
 
-  void operator()(const std::pair<int, int> inquiryToReply) {
-    std::string inquiry = extractSentence(m_scenario[inquiryToReply.first]);
+  void operator()(const InquiryToReply& inquiryToReply) {
+    LineRange inquiryBounds = inquiryToReply.first;
+
+    std::string inquiry = extractSentence(m_scenario[inquiryBounds.lower]);
+    for (int i = inquiryBounds.lower+1; i <= inquiryBounds.upper; ++i)
+       inquiry += m_scenario[i].content;
+
     std::pair<IndexType, Intent> intent =
         SentenceToIntentTranslator::translate(inquiry, m_dictionaryModel);
     m_intentModel.intentsByIntentId.insert(intent);
@@ -116,7 +160,7 @@ struct EdgeParserWrapper {
         m_edgeParser(edgeParser),
         m_previousStateInScenario(previousStateInScenario) {}
 
-  EdgeDefinition operator()(const std::pair<int, int> inquiryToReply) {
+  EdgeDefinition operator()(const InquiryToReply inquiryToReply) {
     return m_edgeParser.parse(m_scenario, inquiryToReply,
                               m_previousStateInScenario);
   }
@@ -136,7 +180,7 @@ struct FallbackEdgesRetriever {
         m_previousStateInScenario(previousStateInScenario),
         m_edgesToInsert(edgesToInsert) {}
 
-  void operator()(const std::pair<int, int> inquiryToReply) {
+  void operator()(const InquiryToReply inquiryToReply) {
     std::unique_ptr<EdgeDefinition> edge;
     edge = m_edgeParser.parseFallback(m_scenario, inquiryToReply,
                                       m_previousStateInScenario);
@@ -239,7 +283,7 @@ void completeModelFromScenario(
         vertexIndex,
     InterpreterFeedback& interpreterFeedback) {
   // link inquiries to replies which naturally represents an edge
-  std::map<int, int> inquiryToReplies;
+  InquiryToReplies inquiryToReplies;
   indexScenario(scenario, inquiryToReplies);
 
   // Add all intents of the scenario to the IntentModel

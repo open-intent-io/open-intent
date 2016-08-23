@@ -12,9 +12,11 @@
     -Vous-voulez quelque chose d'autre ?
 
 @wait_another_order
-    -Je voudrais une kro et un coca
+    -Je voudrais une kro
+     et un coca
         #append_order2
-    -Vous-voulez quelque chose d'autre ?
+    -Vous-voulez quelque
+     chose d'autre ?
 
 @wait_another_order
     -Je voudrais une kro

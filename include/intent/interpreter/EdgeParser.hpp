@@ -63,11 +63,11 @@ class EdgeParser {
         m_interpreterFeedback(interpreterFeedback) {}
 
   EdgeDefinition parse(const Scenario& scenario,
-                       const std::pair<int, int>& inquiryToReply,
+                       const InquiryToReply& inquiryToReply,
                        std::unique_ptr<std::string>& previousStateInScenario);
 
   std::unique_ptr<EdgeDefinition> parseFallback(
-      const Scenario& scenario, const std::pair<int, int>& inquiryToReply,
+      const Scenario& scenario, const InquiryToReply& inquiryToReply,
       std::unique_ptr<std::string>& previousStateInScenario);
 
  private:
