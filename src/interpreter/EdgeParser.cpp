@@ -126,17 +126,14 @@ void completeEdgeInfo(const Scenario& scenario,
 
   int potentialActionIdIndex = inquiryBounds.upper + 1;
   std::string inquiry = extractSentence(scenario[inquiryBounds.lower]);
-  for (int i = inquiryBounds.lower+1; i <= inquiryBounds.upper; ++i)
-      inquiry += " "+scenario[i].content;
+  for (int i = inquiryBounds.lower + 1; i <= inquiryBounds.upper; ++i)
+    inquiry += " " + scenario[i].content;
 
   // Get action line
   if (checkBoundaries(potentialActionIdIndex, scenario) &&
-      isLine<ACTION>(scenario[potentialActionIdIndex]))
-  {
+      isLine<ACTION>(scenario[potentialActionIdIndex])) {
     edge.edge.actionId = scenario[potentialActionIdIndex].content;
-  }
-  else
-  {
+  } else {
     interpreterFeedback.push_back(InterpreterMessage(
         NO_ACTION, scenario[potentialActionIdIndex], WARNING));
   }
@@ -146,10 +143,10 @@ void completeEdgeInfo(const Scenario& scenario,
       SentenceToIntentTranslator::translate(inquiry, context.dictionaryModel);
   edge.edge.intent = intent.second;
 
-  //TODO : extract this loop into a function of its own
+  // TODO : extract this loop into a function of its own
   std::string reply = extractSentence(scenario[replyBounds.lower]);
-  for (int i = replyBounds.lower+1; i <= replyBounds.upper; ++i)
-      reply += scenario[i].content;
+  for (int i = replyBounds.lower + 1; i <= replyBounds.upper; ++i)
+    reply += scenario[i].content;
 
   edge.edge.reply = reply;
 
@@ -177,14 +174,12 @@ EdgeDefinition EdgeParser::parse(
   completeEdgeInfo(scenario, inquiryToReply, context, edge,
                    m_interpreterFeedback);
 
-
-
-
-  if (checkBoundaries(inquiryToReply.second.upper, scenario))
-  {
-    std::string replyTemplate = extractSentence(scenario[inquiryToReply.second.lower]);
-    for (int i = inquiryToReply.second.lower+1; i<inquiryToReply.second.upper; ++i)
-        replyTemplate += scenario[i].content;
+  if (checkBoundaries(inquiryToReply.second.upper, scenario)) {
+    std::string replyTemplate =
+        extractSentence(scenario[inquiryToReply.second.lower]);
+    for (int i = inquiryToReply.second.lower + 1;
+         i < inquiryToReply.second.upper; ++i)
+      replyTemplate += scenario[i].content;
     edge.replyTemplate = replyTemplate;
   }
 
@@ -193,8 +188,7 @@ EdgeDefinition EdgeParser::parse(
 
 std::unique_ptr<EdgeDefinition> EdgeParser::parseFallback(
     const Scenario& scenario, const InquiryToReply& inquiryToReply,
-    std::unique_ptr<std::string>& previousStateInScenario)
-{
+    std::unique_ptr<std::string>& previousStateInScenario) {
   LineRange inquiryBounds = inquiryToReply.first;
   EdgeDefinition edge =
       parse(scenario, inquiryToReply, previousStateInScenario);

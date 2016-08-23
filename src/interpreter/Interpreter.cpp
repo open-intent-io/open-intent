@@ -64,7 +64,6 @@ typedef IntentModel::Intent Intent;
 
 const std::string DEFAULT_REPLY_ID = "#reply";
 
-
 std::string extractSentence(const ScriptLine& scriptLine) {
   std::string content = scriptLine.content;
   assert(content.size() > 1);
@@ -82,8 +81,8 @@ struct IntentInserter {
     LineRange inquiryBounds = inquiryToReply.first;
 
     std::string inquiry = extractSentence(m_scenario[inquiryBounds.lower]);
-    for (int i = inquiryBounds.lower+1; i <= inquiryBounds.upper; ++i)
-       inquiry += m_scenario[i].content;
+    for (int i = inquiryBounds.lower + 1; i <= inquiryBounds.upper; ++i)
+      inquiry += m_scenario[i].content;
 
     std::pair<IndexType, Intent> intent =
         SentenceToIntentTranslator::translate(inquiry, m_dictionaryModel);

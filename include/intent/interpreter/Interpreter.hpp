@@ -89,26 +89,16 @@ struct InterpreterMessage {
 };
 
 struct LineRange {
+  LineRange(int _lower, int _upper) : lower(_lower), upper(_upper) {}
 
-    LineRange(int _lower, int _upper)
-        :
-          lower(_lower),
-          upper(_upper)
-    {}
+  LineRange() : lower(-1), upper(-1) {}
 
-    LineRange()
-        :
-          lower(-1),
-          upper(-1)
-    {}
+  friend bool operator<(const LineRange& l, const LineRange& r) {
+    return l.lower < r.lower;
+  }
 
-    friend bool operator<(const LineRange& l, const LineRange& r)
-    {
-        return l.lower < r.lower;
-    }
-
-    int lower;
-    int upper;
+  int lower;
+  int upper;
 };
 
 typedef std::vector<InterpreterMessage> InterpreterFeedback;
