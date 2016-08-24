@@ -7,7 +7,6 @@ src/
 include/ 
 bindings/nodejs/src 
 bindings/nodejs/include
-bindings/nodejs/examples
 bindings/nodejs/lib
 bindings/nodejs/test
 test/tests

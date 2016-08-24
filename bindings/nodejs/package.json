@@ -4,11 +4,10 @@
   "description": "An API for the open-intent chatbots",
   "main": "bindings/nodejs/index.js",
   "bin": {
-    "open-intent": "bindings/nodejs/bin/open-intent.js"
+    "open-intent": "bin/open-intent.js"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha --reporter spec --recursive 'bindings/nodejs/test/**/*.js'",
-    "install": "rm -rf node_modules/.bin/touch && node-gyp rebuild -j 4"
+    "test": "./node_modules/.bin/mocha --reporter spec --recursive 'test/**/*.js'"
   },
   "repository": {
     "type": "git",

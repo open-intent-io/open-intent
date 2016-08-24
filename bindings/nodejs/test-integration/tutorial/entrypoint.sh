@@ -1,6 +1,8 @@
 #!/bin/bash
 
-pushd /src/
+echo "Run Chatbot Js integration test"
+
+pushd /src/bindings/nodejs
 npm link
 popd
 

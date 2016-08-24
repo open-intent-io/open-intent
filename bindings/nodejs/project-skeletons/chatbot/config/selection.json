@@ -1,7 +1,7 @@
 {
-    "messenger":true,
-    "kik":true,
-    "skype":false,
-    "slack":true,
-    "telegram":true
+    "messenger": true,
+    "kik": false,
+    "skype": false,
+    "slack": false,
+    "telegram": false
 }

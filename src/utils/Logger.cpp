@@ -73,33 +73,31 @@ Logger::SeverityLevel::type Logger::severityLevelFromString(
 }
 
 void Logger::initialize(SeverityLevel::type severityLevel) {
-  boost::log::trivial::severity_level boostSeverityLevel =
-      boost::log::trivial::error;
+  spdlog::level::level_enum spdlogSeverity = spdlog::level::err;
   switch (severityLevel) {
     case SeverityLevel::TRACE:
-      boostSeverityLevel = boost::log::trivial::trace;
+      spdlogSeverity = spdlog::level::trace;
       break;
     case SeverityLevel::DEBUG:
-      boostSeverityLevel = boost::log::trivial::debug;
+      spdlogSeverity = spdlog::level::debug;
       break;
     case SeverityLevel::INFO:
-      boostSeverityLevel = boost::log::trivial::info;
+      spdlogSeverity = spdlog::level::info;
       break;
     case SeverityLevel::WARNING:
-      boostSeverityLevel = boost::log::trivial::warning;
+      spdlogSeverity = spdlog::level::warn;
       break;
     case SeverityLevel::ERROR:
-      boostSeverityLevel = boost::log::trivial::error;
+      spdlogSeverity = spdlog::level::err;
       break;
     case SeverityLevel::FATAL:
-      boostSeverityLevel = boost::log::trivial::fatal;
+      spdlogSeverity = spdlog::level::critical;
       break;
   }
   Logger::getInstance();
 
-  boost::log::core::get()->reset_filter();
-  boost::log::core::get()->set_filter(boost::log::trivial::severity >=
-                                      boostSeverityLevel);
+  spdlog::stdout_logger_mt("console", false);
+  spdlog::set_level(spdlogSeverity);
 }
 }
 }

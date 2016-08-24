@@ -63,7 +63,7 @@ std::stringstream logResult(IntentService::Result& result) {
 IntentMatcher::IntentResult IntentService::resolveIntent(
     const std::string& input, const DictionaryModel& dictionaryModel,
     const IntentModel::IntentIndex& intentByIdIndex) const {
-  LOG_INFO() << "Look for intent in \"" + input + "\"";
+  INTENT_LOG_INFO() << "Look for intent in \"" + input + "\"";
 
   intent::Tokenizer::Tokens tokens;
   SentenceTokenizer sentenceTokenizer(dictionaryModel);
@@ -77,8 +77,8 @@ IntentMatcher::IntentResult IntentService::resolveIntent(
   IntentService::Result result =
       IntentMatcher::match(dictionaryModel, variables, intentByIdIndex);
 
-  LOG_TRACE() << "Result = " << result;
-  LOG_INFO() << logResult(result);
+  INTENT_LOG_TRACE() << "Result = " << result;
+  INTENT_LOG_INFO() << logResult(result);
 
   return result;
 }

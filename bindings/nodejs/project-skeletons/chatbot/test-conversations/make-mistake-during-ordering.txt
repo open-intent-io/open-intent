@@ -1,0 +1,10 @@
+Hello
+Would you want to eat a pizza, a hamburger or a salad?
+Pizza
+Got it, you want pizza, right?
+No
+Tell me what you want. Pizza, hamburger or salad?
+Salad
+Got it, you want salad, right?
+yes
+I'm ordering, it is gonna be 5$.

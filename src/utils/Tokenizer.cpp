@@ -178,6 +178,6 @@ std::string logTokenization(const std::string& message,
 void Tokenizer::tokenize(const std::string& message, Tokens& tokens) {
   Splits splits = splitRegexp(message, m_regexpList);
   tokenizeSplitsWithSingleCharacterDelimiter(splits, m_delimiters, tokens);
-  LOG_TRACE() << logTokenization(message, tokens);
+  INTENT_LOG_TRACE() << logTokenization(message, tokens);
 }
 }

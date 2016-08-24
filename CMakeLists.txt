@@ -43,28 +43,14 @@ if(DOXYGEN_FOUND)
             "Open file://${CMAKE_CURRENT_BINARY_DIR}/html/index.html")
 endif(DOXYGEN_FOUND)
 
+
+
+
 ADD_CUSTOM_TARGET(run-all-tests
         DEPENDS run-unit-tests run-integration-tests
 )
-
 ADD_CUSTOM_TARGET(run-unit-tests
-        DEPENDS run-open-intent-js-test
-)
+        DEPENDS run-unit-tests-cpp run-unit-tests-js)
 
 ADD_CUSTOM_TARGET(run-integration-tests
-        DEPENDS run-open-intent-js-integration-test)
-
-ADD_CUSTOM_COMMAND(TARGET run-integration-tests POST_BUILD
-        COMMAND ${CMAKE_BINARY_DIR}/examples/Domotic/test/domotic-test
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/examples/Domotic/test
-)
-
-ADD_CUSTOM_COMMAND(TARGET run-integration-tests POST_BUILD
-        COMMAND ${CMAKE_BINARY_DIR}/examples/BeerBar/test/beerbar-test
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/examples/BeerBar/test
-)
-
-ADD_CUSTOM_COMMAND(TARGET run-unit-tests POST_BUILD
-        COMMAND ${CMAKE_BINARY_DIR}/test/tests/intent-test
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/tests/
-)
+        DEPENDS run-integration-tests-cpp run-integration-tests-js)

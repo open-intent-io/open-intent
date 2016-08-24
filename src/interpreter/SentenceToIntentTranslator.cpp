@@ -121,9 +121,9 @@ std::pair<IndexType, Intent> SentenceToIntentTranslator::translate(
   completeVariableNames(entities, dictionaryModel, entityToVariableNames);
   intent.entityToVariableNames = entityToVariableNames;
 
-  LOG_INFO() << "Translate sentence \"" + sentence +
-                    "\" into intent with following entities [" +
-                    logEntities(entities, dictionaryModel) + "].";
+  INTENT_LOG_INFO() << "Translate sentence \"" + sentence +
+                           "\" into intent with following entities [" +
+                           logEntities(entities, dictionaryModel) + "].";
 
   std::string intentId = IntentEncoder::encode(entities);
   intent.intentId = intentId;

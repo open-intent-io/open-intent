@@ -40,6 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var expect    = require("chai").expect;
 var stream = require("mock-utf8-stream");
 var Q = require('q');
+var seqqueue = require('seq-queue');
 
 var talk = undefined;
 var chatbot = undefined;
@@ -87,33 +88,37 @@ module.exports = function(resDirectory) {
     };
 };
 
-function createAssertEqFunction(input, expected) {
-    return function(data) {
-        expect(data).to.equal(expected);
-        return talk(input);
-    }
-}
-
-function handleScript(script, done) {
-    var promise = talk(script[0]);
-    for(var i=2; i < script.length; i += 2) {
-        var input = script[i];
-        var expectedOutput = script[i - 1];
-
-        promise = promise
-            .then(createAssertEqFunction(input, expectedOutput))
-            .fail(function(err) {
-                console.error(err);
-            });
-    }
-
-    promise.then(function(data) {
-            expect(data).to.equal(script[script.length-1]);
-            done();
+function buildRequest(request, expectedAnswer, deferred) {
+    return function(task) {
+        talk(request)
+        .then(function(answer) {
+            expect(answer).to.equal(expectedAnswer);
+            deferred.resolve();
+            task.done();
         })
         .fail(function(err) {
             console.error(err);
+            deferred.reject();
         });
+    };
+}
+
+function handleScript(script, done) {
+    var queue = seqqueue.createQueue();
+    var promises = [];
+
+    for(var i=0; i < script.length; i += 2) {
+        var request = script[i] + '\n';
+        var answer = script[i+1] + '\n';
+        var deferred = Q.defer();
+        promises.push(deferred.promise);
+        queue.push(buildRequest(request, answer, deferred));
+    }
+
+    Q.all(promises).
+    then(function() {
+        done();
+    });
 }
 
 function _afterEach(done) {
