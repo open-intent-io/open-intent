@@ -224,6 +224,32 @@ TEST_F(InterpreterTest, check_that_multiple_lines_are_parsed)
     EXPECT_EQ(IntentEncoder::encode({1,0}), edge1.edge.intent.intentId);
 }
 
+TEST_F(InterpreterTest, check_that_multi_line_intent_is_detected)
+{
+    const Scenario lines = {ScriptLine("@root"),
+                            ScriptLine("-je voudrais un coca"),
+                            ScriptLine("et une Heineken"),
+                            ScriptLine("#action"),
+                            ScriptLine("-je vous en prie"),
+                            ScriptLine("et vous salue"),
+                            ScriptLine("@end")};
+
+
+    const InquiryToReply inquiryToReply1({1,2}, {4,5});
+
+    int vertexCount = 0;
+    std::unique_ptr<std::string> previousState;
+    InterpreterFeedback interpreterFeedback;
+    EdgeParser edgeParser(m_dictionaryModel, vertexCount, interpreterFeedback);
+    EdgeDefinition edge1 = edgeParser.parse(lines, inquiryToReply1, previousState);
+
+    EXPECT_EQ("@root", edge1.source.stateId);
+    EXPECT_EQ("@end", edge1.target.stateId);
+    EXPECT_EQ("#action", edge1.edge.actionId);
+    EXPECT_EQ(IntentEncoder::encode({1,0,1,0}), edge1.edge.intent.intentId);
+}
+
+
 typedef std::map<std::string, float> Menu;
 typedef std::map<std::string, int> Cart;
 class InterpreterWithChatbotTest : public ::testing::Test
@@ -283,7 +309,6 @@ TEST_F(InterpreterWithChatbotTest, test_full_scenario)
     EXPECT_THAT(reply3,
                 ElementsAre("Veuillez récupérer vos consommations au bar. Vous devrez payer 10.5€."));
 }
-
 
 TEST_F(InterpreterWithChatbotTest, test_fallback_reply_on_edges)
 {
