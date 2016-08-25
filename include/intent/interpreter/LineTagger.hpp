@@ -61,6 +61,8 @@ bool isLine(const ScriptLine& line) {
 }
 
 bool isMarkedLine(const ScriptLine& line);
+
+bool isLineComment(const ScriptLine& line);
 }
 
 #endif

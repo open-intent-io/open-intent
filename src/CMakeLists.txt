@@ -20,6 +20,7 @@ SET(COMMON_SOURCE_FILES
         interpreter/LineTagger.cpp
         interpreter/ReplyTemplateInterpreter.cpp
         interpreter/ScenarioIndexer.cpp
+        interpreter/ScenarioTrimmer.cpp
         intent_service/EntitiesMatcher.cpp
         utils/Deserializer.cpp
         utils/Levenshtein.cpp
