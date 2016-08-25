@@ -50,11 +50,8 @@ bool isMarkedLine(const ScriptLine& line) {
 }
 
 bool isLineComment(const ScriptLine& line) {
-    if (line.content.size() < 2)
-        return false;
-    if (line.content.substr(0,2) == "//")
-        return true;
-    return false;
+  if (line.content.size() < 2) return false;
+  if (line.content.substr(0, 2) == "//") return true;
+  return false;
 }
-
 }

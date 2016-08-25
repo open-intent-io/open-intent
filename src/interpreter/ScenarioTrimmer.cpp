@@ -47,15 +47,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace intent {
 
-    void _trimComments(Scenario& scenario)
-    {
-        Scenario::iterator toEraseBegin = std::remove_if(scenario.begin(), scenario.end(), isLineComment);
-        scenario.erase(toEraseBegin, scenario.end());
-    }
+void _trimComments(Scenario& scenario) {
+  Scenario::iterator toEraseBegin =
+      std::remove_if(scenario.begin(), scenario.end(), isLineComment);
+  scenario.erase(toEraseBegin, scenario.end());
+}
 
-    void trimComments(Scenarios& scenarios)
-    {
-        std::for_each(scenarios.begin(), scenarios.end(), _trimComments);
-    }
-
+void trimComments(Scenarios& scenarios) {
+  std::for_each(scenarios.begin(), scenarios.end(), _trimComments);
+}
 }
