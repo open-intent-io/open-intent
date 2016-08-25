@@ -15,7 +15,7 @@ website and translate those intents into business actions.
 
 This is as simple as this single line to start prototyping your bot
 
-    docker run -v $(pwd)/mychatbot:/app -it open-intent
+    docker run -v $(pwd)/mychatbot:/app -it openintent/chatbot
 
 This command starts an instance of bot with model located in the mychatbot/res/ directory on your host. In
 mychatbot/config, you'll find the configuration files for the available platforms. For now the only fully tested
