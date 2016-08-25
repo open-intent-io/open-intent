@@ -186,6 +186,7 @@ void completeModelFromScenario(
     IntentStoryModel& intentStoryModel, IntentModel& intentModel,
     ChatbotActionModel& chatbotActionModel, int& repliesCounter,
     int& vertexCounter,
+    int& anonymousActionCounter,
     std::unordered_map<std::string, IntentStoryModel::StoryGraph::Vertex>&
         vertexIndex,
     InterpreterFeedback& interpreterFeedback) {
@@ -201,7 +202,7 @@ void completeModelFromScenario(
   // Transform inquiry to reply into an edgeDefinition
   std::vector<EdgeDefinition> edgesToInsert;
   std::unique_ptr<std::string> previousStateInScenario;
-  EdgeParser edgeParser(dictionaryModel, vertexCounter, interpreterFeedback);
+  EdgeParser edgeParser(dictionaryModel, vertexCounter, anonymousActionCounter, interpreterFeedback);
   EdgeParserWrapper edgeParserWrapper(scenario, previousStateInScenario,
                                       edgeParser);
   std::transform(inquiryToReplies.begin(), inquiryToReplies.end(),
@@ -210,7 +211,7 @@ void completeModelFromScenario(
   // Retrieve fallback replies on the edges
   previousStateInScenario.reset(NULL);
   InterpreterFeedback dummyFeedback;
-  EdgeParser fallbackEdgeParser(dictionaryModel, vertexCounter, dummyFeedback);
+  EdgeParser fallbackEdgeParser(dictionaryModel, vertexCounter, anonymousActionCounter, dummyFeedback);
   FallbackEdgesRetriever fallbackEdgesRetriever(
       scenario, previousStateInScenario, fallbackEdgeParser, edgesToInsert);
   std::for_each(inquiryToReplies.begin(), inquiryToReplies.end(),
@@ -248,6 +249,7 @@ ChatbotModel Interpreter::build(const std::string& script,
 
   int repliesCounter = 0;
   int vertexCounter = 0;
+  int anonymousActionCounter = 0;
   std::unordered_map<std::string, IntentStoryModel::StoryGraph::Vertex>
       vertexIndex;
 
@@ -277,11 +279,11 @@ ChatbotModel Interpreter::build(const std::string& script,
 
   std::for_each(scenarios.begin(), scenarios.end(),
                 [&intentStoryModel, &intentModel, &chatbotActionModel,
-                 &repliesCounter, &vertexCounter, &dict, &vertexIndex,
+                 &repliesCounter, &vertexCounter, &anonymousActionCounter, &dict, &vertexIndex,
                  &interpreterFeedback](const Scenario& scenario) {
                   completeModelFromScenario(scenario, dict, intentStoryModel,
                                             intentModel, chatbotActionModel,
-                                            repliesCounter, vertexCounter,
+                                            repliesCounter, vertexCounter, anonymousActionCounter,
                                             vertexIndex, interpreterFeedback);
                 });
 

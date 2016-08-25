@@ -51,6 +51,7 @@ typedef IntentModel::IndexType IndexType;
 typedef IntentModel::Intent Intent;
 
 static const std::string ANONYMOUS_STATE = "@anonymous_state";
+static const std::string ANONYMOUS_ACTION = "#anonymous_action";
 
 template <typename T>
 bool checkBoundaries(const int index, const std::vector<T>& vec) {
@@ -64,13 +65,17 @@ std::string extractSentence(const ScriptLine& scriptLine) {
 }
 
 struct ParsingContext {
-  ParsingContext(int& vertexCount, const DictionaryModel& dictionaryModel,
+  ParsingContext(int& vertexCount,
+                 int& anonymousActionCount,
+                 const DictionaryModel& dictionaryModel,
                  std::unique_ptr<std::string>& previousState)
       : vertexCount(vertexCount),
+        anonymousActionCount(anonymousActionCount),
         dictionaryModel(dictionaryModel),
         previousState(previousState) {}
 
   int& vertexCount;
+  int& anonymousActionCount;
   const DictionaryModel& dictionaryModel;
   std::unique_ptr<std::string>& previousState;
 };
@@ -119,7 +124,8 @@ void completeTargetState(const Scenario& scenario,
 
 void completeEdgeInfo(const Scenario& scenario,
                       const InquiryToReply& inquiryToReply,
-                      ParsingContext& context, EdgeDefinition& edge,
+                      ParsingContext& context,
+                      EdgeDefinition& edge,
                       InterpreterFeedback& interpreterFeedback) {
   LineRange inquiryBounds = inquiryToReply.first;
   LineRange replyBounds = inquiryToReply.second;
@@ -134,8 +140,12 @@ void completeEdgeInfo(const Scenario& scenario,
       isLine<ACTION>(scenario[potentialActionIdIndex])) {
     edge.edge.actionId = scenario[potentialActionIdIndex].content;
   } else {
+
+    edge.edge.actionId = ANONYMOUS_ACTION+std::to_string(context.anonymousActionCount);
+    ++context.anonymousActionCount;
+
     interpreterFeedback.push_back(InterpreterMessage(
-        NO_ACTION, scenario[potentialActionIdIndex], WARNING));
+        ANONYMOUS_ACTION_CREATION, scenario[potentialActionIdIndex], INFO));
   }
 
   // identify the intent to complete intentModel and edge
@@ -162,7 +172,7 @@ EdgeDefinition EdgeParser::parse(
     const Scenario& scenario, const InquiryToReply& inquiryToReply,
     std::unique_ptr<std::string>& previousStateInScenario) {
   EdgeDefinition edge;
-  ParsingContext context(m_vertexCounter, m_dictionaryModel,
+  ParsingContext context(m_vertexCounter, m_anonymousActionCounter, m_dictionaryModel,
                          previousStateInScenario);
 
   completeSourceState(scenario, inquiryToReply, context, edge,
