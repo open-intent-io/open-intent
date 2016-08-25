@@ -39,6 +39,7 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #include "intent/interpreter/EdgeParser.hpp"
+#include "intent/interpreter/LineTagger.hpp"
 #include "intent/interpreter/SentenceToIntentTranslator.hpp"
 #define ANY_INTENT_TOKEN "_"
 
@@ -75,10 +76,12 @@ struct ParsingContext {
 };
 
 void completeSourceState(const Scenario& scenario,
-                         const std::pair<int, int>& inquiryToReply,
+                         const InquiryToReply& inquiryToReply,
                          ParsingContext& context, EdgeDefinition& edge,
                          InterpreterFeedback& interpreterFeedback) {
-  int potentialSourceIdIndex = inquiryToReply.first - 1;
+  LineRange inquiryBounds = inquiryToReply.first;
+
+  int potentialSourceIdIndex = inquiryBounds.lower - 1;
 
   // Get source state
   if (context.previousState.get()) {
@@ -89,16 +92,17 @@ void completeSourceState(const Scenario& scenario,
   } else {
     edge.source.stateId = ANONYMOUS_STATE + std::to_string(context.vertexCount);
     interpreterFeedback.push_back(InterpreterMessage(
-        ANONYMOUS_STATE_CREATION, scenario[inquiryToReply.first]));
+        ANONYMOUS_STATE_CREATION, scenario[inquiryBounds.lower]));
     context.vertexCount++;
   }
 }
 
 void completeTargetState(const Scenario& scenario,
-                         const std::pair<int, int>& inquiryToReply,
+                         const InquiryToReply& inquiryToReply,
                          ParsingContext& context, EdgeDefinition& edge,
                          InterpreterFeedback& interpreterFeedback) {
-  int potentialTargetIdIndex = inquiryToReply.second + 1;
+  LineRange replyBounds = inquiryToReply.second;
+  int potentialTargetIdIndex = replyBounds.upper + 1;
 
   // Get target state
   if (checkBoundaries(potentialTargetIdIndex, scenario) &&
@@ -107,18 +111,23 @@ void completeTargetState(const Scenario& scenario,
   } else {
     edge.target.stateId = ANONYMOUS_STATE + std::to_string(context.vertexCount);
     interpreterFeedback.push_back(InterpreterMessage(
-        ANONYMOUS_STATE_CREATION, scenario[inquiryToReply.second]));
+        ANONYMOUS_STATE_CREATION, scenario[replyBounds.lower]));
     context.vertexCount++;
   }
   context.previousState.reset(new std::string(edge.target.stateId));
 }
 
 void completeEdgeInfo(const Scenario& scenario,
-                      const std::pair<int, int>& inquiryToReply,
+                      const InquiryToReply& inquiryToReply,
                       ParsingContext& context, EdgeDefinition& edge,
                       InterpreterFeedback& interpreterFeedback) {
-  int potentialActionIdIndex = inquiryToReply.first + 1;
-  std::string inquiry = extractSentence(scenario[inquiryToReply.first]);
+  LineRange inquiryBounds = inquiryToReply.first;
+  LineRange replyBounds = inquiryToReply.second;
+
+  int potentialActionIdIndex = inquiryBounds.upper + 1;
+  std::string inquiry = extractSentence(scenario[inquiryBounds.lower]);
+  for (int i = inquiryBounds.lower + 1; i <= inquiryBounds.upper; ++i)
+    inquiry += " " + scenario[i].content;
 
   // Get action line
   if (checkBoundaries(potentialActionIdIndex, scenario) &&
@@ -133,18 +142,24 @@ void completeEdgeInfo(const Scenario& scenario,
   std::pair<IndexType, Intent> intent =
       SentenceToIntentTranslator::translate(inquiry, context.dictionaryModel);
   edge.edge.intent = intent.second;
-  edge.edge.reply = extractSentence(scenario[inquiryToReply.second]);
+
+  // TODO : extract this loop into a function of its own
+  std::string reply = extractSentence(scenario[replyBounds.lower]);
+  for (int i = replyBounds.lower + 1; i <= replyBounds.upper; ++i)
+    reply += scenario[i].content;
+
+  edge.edge.reply = reply;
 
   if (intent.first.empty()) {
     interpreterFeedback.push_back(
-        InterpreterMessage(NO_ENTITY, scenario[inquiryToReply.first], WARNING));
+        InterpreterMessage(NO_ENTITY, scenario[inquiryBounds.lower], WARNING));
   }
 }
 
 }  // anonymous
 
 EdgeDefinition EdgeParser::parse(
-    const Scenario& scenario, const std::pair<int, int>& inquiryToReply,
+    const Scenario& scenario, const InquiryToReply& inquiryToReply,
     std::unique_ptr<std::string>& previousStateInScenario) {
   EdgeDefinition edge;
   ParsingContext context(m_vertexCounter, m_dictionaryModel,
@@ -159,20 +174,27 @@ EdgeDefinition EdgeParser::parse(
   completeEdgeInfo(scenario, inquiryToReply, context, edge,
                    m_interpreterFeedback);
 
-  if (checkBoundaries(inquiryToReply.second, scenario))
-    edge.replyTemplate = extractSentence(scenario[inquiryToReply.second]);
+  if (checkBoundaries(inquiryToReply.second.upper, scenario)) {
+    std::string replyTemplate =
+        extractSentence(scenario[inquiryToReply.second.lower]);
+    for (int i = inquiryToReply.second.lower + 1;
+         i < inquiryToReply.second.upper; ++i)
+      replyTemplate += scenario[i].content;
+    edge.replyTemplate = replyTemplate;
+  }
 
   return edge;
 }
 
 std::unique_ptr<EdgeDefinition> EdgeParser::parseFallback(
-    const Scenario& scenario, const std::pair<int, int>& inquiryToReply,
+    const Scenario& scenario, const InquiryToReply& inquiryToReply,
     std::unique_ptr<std::string>& previousStateInScenario) {
+  LineRange inquiryBounds = inquiryToReply.first;
   EdgeDefinition edge =
       parse(scenario, inquiryToReply, previousStateInScenario);
   std::unique_ptr<EdgeDefinition> fallbackEdge;
 
-  int potentialFallbackReplyIdIndex = inquiryToReply.first + 2;
+  int potentialFallbackReplyIdIndex = inquiryBounds.upper + 2;
   if (checkBoundaries(potentialFallbackReplyIdIndex, scenario) &&
       isLine<FALLBACK>(scenario[potentialFallbackReplyIdIndex])) {
     fallbackEdge.reset(new EdgeDefinition(edge));

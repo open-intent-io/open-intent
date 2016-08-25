@@ -39,8 +39,11 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #include "intent/interpreter/Interpreter.hpp"
+
 #include "intent/intent_service/EntitiesMatcher.hpp"
 #include "intent/interpreter/EdgeParser.hpp"
+#include "intent/interpreter/LineTagger.hpp"
+#include "intent/interpreter/ScenarioIndexer.hpp"
 #include "intent/interpreter/SentenceToIntentTranslator.hpp"
 #include "intent/interpreter/ReplyTemplateInterpreter.hpp"
 
@@ -61,28 +64,6 @@ typedef IntentModel::Intent Intent;
 
 const std::string DEFAULT_REPLY_ID = "#reply";
 
-void indexScenario(const Scenario& scenario,
-                   std::map<int, int>& inquiryToReply) {
-  int index = 0;
-  int counter = 0;
-  std::pair<int, int> pair;
-  std::for_each(
-      scenario.begin(), scenario.end(),
-      [&pair, &index, &counter, &inquiryToReply](const ScriptLine& line) {
-        if (isLine<SAYING>(line)) {
-          if (counter % 2 == 0) {
-            pair.first = index;
-          }
-          if (counter % 2 == 1) {
-            pair.second = index;
-            inquiryToReply.insert(pair);
-          }
-          ++counter;
-        }
-        ++index;
-      });
-}
-
 std::string extractSentence(const ScriptLine& scriptLine) {
   std::string content = scriptLine.content;
   assert(content.size() > 1);
@@ -96,8 +77,13 @@ struct IntentInserter {
         m_scenario(scenario),
         m_dictionaryModel(dictionaryModel) {}
 
-  void operator()(const std::pair<int, int> inquiryToReply) {
-    std::string inquiry = extractSentence(m_scenario[inquiryToReply.first]);
+  void operator()(const InquiryToReply& inquiryToReply) {
+    LineRange inquiryBounds = inquiryToReply.first;
+
+    std::string inquiry = extractSentence(m_scenario[inquiryBounds.lower]);
+    for (int i = inquiryBounds.lower + 1; i <= inquiryBounds.upper; ++i)
+      inquiry += m_scenario[i].content;
+
     std::pair<IndexType, Intent> intent =
         SentenceToIntentTranslator::translate(inquiry, m_dictionaryModel);
     m_intentModel.intentsByIntentId.insert(intent);
@@ -116,7 +102,7 @@ struct EdgeParserWrapper {
         m_edgeParser(edgeParser),
         m_previousStateInScenario(previousStateInScenario) {}
 
-  EdgeDefinition operator()(const std::pair<int, int> inquiryToReply) {
+  EdgeDefinition operator()(const InquiryToReply inquiryToReply) {
     return m_edgeParser.parse(m_scenario, inquiryToReply,
                               m_previousStateInScenario);
   }
@@ -136,7 +122,7 @@ struct FallbackEdgesRetriever {
         m_previousStateInScenario(previousStateInScenario),
         m_edgesToInsert(edgesToInsert) {}
 
-  void operator()(const std::pair<int, int> inquiryToReply) {
+  void operator()(const InquiryToReply inquiryToReply) {
     std::unique_ptr<EdgeDefinition> edge;
     edge = m_edgeParser.parseFallback(m_scenario, inquiryToReply,
                                       m_previousStateInScenario);
@@ -174,42 +160,6 @@ struct ActionInserter {
 
 }  // anonymous
 
-std::vector<ScriptLine> tokenizeInLines(const std::string& input) {
-  std::vector<std::string> lines;
-  std::vector<char> delimiters = {'\n'};
-  SingleCharacterDelimiterTokenizer::tokenize(input, delimiters, lines);
-  std::vector<ScriptLine> scriptLines;
-  for (unsigned int i = 0; i < lines.size(); ++i) {
-    scriptLines.push_back({lines[i], i});
-  }
-  return scriptLines;
-}
-
-void extractScenarios(const std::string& script, Scenarios& scenarios) {
-  int braceCounter = 0;
-  Scenario scenario;
-  std::vector<ScriptLine> lines = tokenizeInLines(script);
-
-  std::for_each(lines.begin(), lines.end(),
-                [&scenarios, &scenario, &braceCounter](ScriptLine& line) {
-                  boost::trim(line.content);
-                  if (isLine<CLOSE_SCENARIO>(line)) {
-                    --braceCounter;
-                  }
-                  if (braceCounter == 1) {
-                    scenario.push_back(line);
-                  }
-                  if (isLine<START_SCENARIO>(line)) {
-                    ++braceCounter;
-                  }
-                  if (braceCounter == 0) {
-                    if (!scenario.empty()) scenarios.push_back(scenario);
-                    scenario.clear();
-                  }
-
-                });
-}
-
 void addEdgeDefinitionToModel(
     const EdgeDefinition& edge, IntentStoryModel& intentStoryModel,
     std::unordered_map<std::string, IntentStoryModel::StoryGraph::Vertex>&
@@ -239,7 +189,7 @@ void completeModelFromScenario(
         vertexIndex,
     InterpreterFeedback& interpreterFeedback) {
   // link inquiries to replies which naturally represents an edge
-  std::map<int, int> inquiryToReplies;
+  InquiryToReplies inquiryToReplies;
   indexScenario(scenario, inquiryToReplies);
 
   // Add all intents of the scenario to the IntentModel

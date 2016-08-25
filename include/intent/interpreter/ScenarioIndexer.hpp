@@ -38,91 +38,17 @@ LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef INTENT_INTERPRETER_HPP
-#define INTENT_INTERPRETER_HPP
+#ifndef INTENT_INTERPRETER_SCENARIOINDEXER_HPP
+#define INTENT_INTERPRETER_SCENARIOINDEXER_HPP
 
-#include "intent/chatbot/ChatbotModel.hpp"
-
-#include <string>
-#include <vector>
+#include "intent/interpreter/Interpreter.hpp"
 
 namespace intent {
-enum message_code {
-  ROOT_STATE_MSG,
-  TERMINAL_STATE_MSG,
-  NO_ENTITY,
-  NO_ACTION,
-  ANONYMOUS_STATE_CREATION,
-  DUPLICATE_ACTION_ID
-};
 
-namespace {
-const char* messagesText[] = {
-    "first line of first scenario should be root state",
-    "final line of first scenario should be terminal state",
-    "no entity was found for the line",
-    "no action was found for the edge",
-    "creating anonymous state ",
-    "The actionID was specified twice"};
-}
+void indexScenario(const Scenario& scenario,
+                   InquiryToReplies& inquiryToReplies);
 
-struct ScriptLine {
-  ScriptLine(std::string content, unsigned int position)
-      : content(content), position(position) {}
-
-  ScriptLine(std::string content) : content(content), position(0) {}
-
-  std::string content;
-  unsigned int position;
-};
-
-enum LogLevel { WARNING, ERROR, INFO };
-
-struct InterpreterMessage {
-  InterpreterMessage(message_code msg_code, ScriptLine scriptLine,
-                     LogLevel level = INFO)
-      : level(level), message(messagesText[msg_code]), line(scriptLine) {}
-
-  LogLevel level;
-  std::string message;
-  ScriptLine line;
-};
-
-struct LineRange {
-  LineRange(int _lower, int _upper) : lower(_lower), upper(_upper) {}
-
-  LineRange() : lower(-1), upper(-1) {}
-
-  friend bool operator<(const LineRange& l, const LineRange& r) {
-    return l.lower < r.lower;
-  }
-
-  int lower;
-  int upper;
-};
-
-typedef std::vector<InterpreterMessage> InterpreterFeedback;
-typedef std::vector<ScriptLine> Scenario;
-typedef std::vector<Scenario> Scenarios;
-typedef std::pair<LineRange, LineRange> InquiryToReply;
-typedef std::map<LineRange, LineRange> InquiryToReplies;
-
-const std::string REGEX_MARKERS = "[]|*";
-
-/**
- * \brief Interpreter the OpenIntent chatbot language.
- */
-class Interpreter {
- public:
-  /**
-   * \brief build a ChatbotModel from a script.
-   * \param intput The input cript.
-   * \return The ChatbotModel.
-   */
-  static ChatbotModel build(const std::string& script,
-                            DictionaryModel::SharedPtr dictionaryModel,
-                            InterpreterFeedback& m_interpreterFeedback);
-};
+void extractScenarios(const std::string& script, Scenarios& scenarios);
 }
 
 #endif

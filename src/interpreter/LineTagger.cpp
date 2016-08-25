@@ -38,43 +38,14 @@ LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef INTENT_EDGE_PARSER_HPP
-#define INTENT_EDGE_PARSER_HPP
-
-#include "intent/interpreter/Interpreter.hpp"
-#include "intent/intent_story_service/IntentStoryModel.hpp"
-#include "intent/intent_service/DictionaryModel.hpp"
+#include "intent/interpreter/LineTagger.hpp"
 
 namespace intent {
 
-struct EdgeDefinition {
-  IntentStoryModel::EdgeInfo edge;
-  IntentStoryModel::VertexInfo source;
-  IntentStoryModel::VertexInfo target;
-  std::string replyTemplate;
-};
-
-class EdgeParser {
- public:
-  EdgeParser(const DictionaryModel& dictionaryModel, int& vertexCounter,
-             InterpreterFeedback& interpreterFeedback)
-      : m_dictionaryModel(dictionaryModel),
-        m_vertexCounter(vertexCounter),
-        m_interpreterFeedback(interpreterFeedback) {}
-
-  EdgeDefinition parse(const Scenario& scenario,
-                       const InquiryToReply& inquiryToReply,
-                       std::unique_ptr<std::string>& previousStateInScenario);
-
-  std::unique_ptr<EdgeDefinition> parseFallback(
-      const Scenario& scenario, const InquiryToReply& inquiryToReply,
-      std::unique_ptr<std::string>& previousStateInScenario);
-
- private:
-  const DictionaryModel& m_dictionaryModel;
-  int m_vertexCounter;
-  InterpreterFeedback& m_interpreterFeedback;
-};
+bool isMarkedLine(const ScriptLine& line) {
+  return isLine<ACTION>(line) || isLine<CLOSE_SCENARIO>(line) ||
+         isLine<START_SCENARIO>(line) || isLine<SAYING>(line) ||
+         isLine<STATE>(line) || isLine<PLACE_HOLDER>(line) ||
+         isLine<FALLBACK>(line);
 }
-
-#endif
+}
