@@ -249,7 +249,6 @@ TEST_F(InterpreterTest, check_that_multi_line_intent_is_detected)
     EXPECT_EQ(IntentEncoder::encode({1,0,1,0}), edge1.edge.intent.intentId);
 }
 
-
 typedef std::map<std::string, float> Menu;
 typedef std::map<std::string, int> Cart;
 class InterpreterWithChatbotTest : public ::testing::Test
