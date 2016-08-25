@@ -38,20 +38,14 @@ LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#include "intent/interpreter/LineTagger.hpp"
+#ifndef INTENT_INTERPRETER_SCENARIOTRIMMER_HPP
+#define INTENT_INTERPRETER_SCENARIOTRIMMER_HPP
+
+#include "intent/interpreter/Interpreter.hpp"
 
 namespace intent {
 
-bool isMarkedLine(const ScriptLine& line) {
-  return isLine<ACTION>(line) || isLine<CLOSE_SCENARIO>(line) ||
-         isLine<START_SCENARIO>(line) || isLine<SAYING>(line) ||
-         isLine<STATE>(line) || isLine<PLACE_HOLDER>(line) ||
-         isLine<FALLBACK>(line);
+void trimComments(Scenarios& scenarios);
 }
 
-bool isLineComment(const ScriptLine& line) {
-  if (line.content.size() < 2) return false;
-  if (line.content.substr(0, 2) == "//") return true;
-  return false;
-}
-}
+#endif

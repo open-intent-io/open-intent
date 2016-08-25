@@ -38,20 +38,22 @@ LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+#include "intent/interpreter/ScenarioTrimmer.hpp"
+
+#include <boost/algorithm/string.hpp>
+
 #include "intent/interpreter/LineTagger.hpp"
+#include "intent/utils/SingleCharacterDelimiterTokenizer.hpp"
 
 namespace intent {
 
-bool isMarkedLine(const ScriptLine& line) {
-  return isLine<ACTION>(line) || isLine<CLOSE_SCENARIO>(line) ||
-         isLine<START_SCENARIO>(line) || isLine<SAYING>(line) ||
-         isLine<STATE>(line) || isLine<PLACE_HOLDER>(line) ||
-         isLine<FALLBACK>(line);
+void _trimComments(Scenario& scenario) {
+  Scenario::iterator toEraseBegin =
+      std::remove_if(scenario.begin(), scenario.end(), isLineComment);
+  scenario.erase(toEraseBegin, scenario.end());
 }
 
-bool isLineComment(const ScriptLine& line) {
-  if (line.content.size() < 2) return false;
-  if (line.content.substr(0, 2) == "//") return true;
-  return false;
+void trimComments(Scenarios& scenarios) {
+  std::for_each(scenarios.begin(), scenarios.end(), _trimComments);
 }
 }

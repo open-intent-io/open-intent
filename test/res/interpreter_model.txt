@@ -7,9 +7,16 @@
 
 @wait_order
     -Je voudrais une kro
+
+        //Roses are red
         #append_order1
+
+        //Violets are blue
         *Soyez le plus précis possible
+
+    //This is a comment
     -Vous-voulez quelque chose d'autre ?
+    //and this is too!
 
 @wait_another_order
     -Je voudrais une kro
