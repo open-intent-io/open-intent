@@ -38,32 +38,24 @@ LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef INTENT_INTERPRETER_LINETAGGER_HPP
-#define INTENT_INTERPRETER_LINETAGGER_HPP
+#include "intent/interpreter/ScenarioTrimmer.hpp"
 
-#include "intent/interpreter/Interpreter.hpp"
+#include <boost/algorithm/string.hpp>
+
+#include "intent/interpreter/LineTagger.hpp"
+#include "intent/utils/SingleCharacterDelimiterTokenizer.hpp"
 
 namespace intent {
 
-enum MARKER {
-  ACTION = '#',
-  SAYING = '-',
-  STATE = '@',
-  START_SCENARIO = '{',
-  CLOSE_SCENARIO = '}',
-  PLACE_HOLDER = '_',
-  FALLBACK = '*'
-};
+    void _trimComments(Scenario& scenario)
+    {
+        Scenario::iterator toEraseBegin = std::remove_if(scenario.begin(), scenario.end(), isLineComment);
+        scenario.erase(toEraseBegin, scenario.end());
+    }
 
-template <MARKER marker>
-bool isLine(const ScriptLine& line) {
-  return line.content[0] == marker;
-}
-
-bool isMarkedLine(const ScriptLine& line);
-
-bool isLineComment(const ScriptLine& line);
+    void trimComments(Scenarios& scenarios)
+    {
+        std::for_each(scenarios.begin(), scenarios.end(), _trimComments);
+    }
 
 }
-
-#endif

@@ -44,6 +44,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "intent/interpreter/EdgeParser.hpp"
 #include "intent/interpreter/LineTagger.hpp"
 #include "intent/interpreter/ScenarioIndexer.hpp"
+#include "intent/interpreter/ScenarioTrimmer.hpp"
 #include "intent/interpreter/SentenceToIntentTranslator.hpp"
 #include "intent/interpreter/ReplyTemplateInterpreter.hpp"
 
@@ -252,6 +253,8 @@ ChatbotModel Interpreter::build(const std::string& script,
 
   Scenarios scenarios;
   extractScenarios(script, scenarios);
+
+  trimComments(scenarios);
 
   assert(scenarios.size() > 0);
   Scenario firstScenario = scenarios[0];

@@ -38,31 +38,14 @@ LIABILITY,
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#ifndef INTENT_INTERPRETER_LINETAGGER_HPP
-#define INTENT_INTERPRETER_LINETAGGER_HPP
+#ifndef INTENT_INTERPRETER_SCENARIOTRIMMER_HPP
+#define INTENT_INTERPRETER_SCENARIOTRIMMER_HPP
 
 #include "intent/interpreter/Interpreter.hpp"
 
 namespace intent {
 
-enum MARKER {
-  ACTION = '#',
-  SAYING = '-',
-  STATE = '@',
-  START_SCENARIO = '{',
-  CLOSE_SCENARIO = '}',
-  PLACE_HOLDER = '_',
-  FALLBACK = '*'
-};
-
-template <MARKER marker>
-bool isLine(const ScriptLine& line) {
-  return line.content[0] == marker;
-}
-
-bool isMarkedLine(const ScriptLine& line);
-
-bool isLineComment(const ScriptLine& line);
+void trimComments(Scenarios& scenarios);
 
 }
 

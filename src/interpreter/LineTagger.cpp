@@ -48,4 +48,13 @@ bool isMarkedLine(const ScriptLine& line) {
          isLine<STATE>(line) || isLine<PLACE_HOLDER>(line) ||
          isLine<FALLBACK>(line);
 }
+
+bool isLineComment(const ScriptLine& line) {
+    if (line.content.size() < 2)
+        return false;
+    if (line.content.substr(0,2) == "//")
+        return true;
+    return false;
+}
+
 }
