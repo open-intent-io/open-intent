@@ -56,8 +56,7 @@ struct EdgeDefinition {
 
 class EdgeParser {
  public:
-  EdgeParser(const DictionaryModel& dictionaryModel,
-             int vertexCounter,
+  EdgeParser(const DictionaryModel& dictionaryModel, int vertexCounter,
              int anonymousActionCounter,
              InterpreterFeedback& interpreterFeedback)
       : m_dictionaryModel(dictionaryModel),

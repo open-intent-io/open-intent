@@ -65,8 +65,7 @@ std::string extractSentence(const ScriptLine& scriptLine) {
 }
 
 struct ParsingContext {
-  ParsingContext(int& vertexCount,
-                 int& anonymousActionCount,
+  ParsingContext(int& vertexCount, int& anonymousActionCount,
                  const DictionaryModel& dictionaryModel,
                  std::unique_ptr<std::string>& previousState)
       : vertexCount(vertexCount),
@@ -124,8 +123,7 @@ void completeTargetState(const Scenario& scenario,
 
 void completeEdgeInfo(const Scenario& scenario,
                       const InquiryToReply& inquiryToReply,
-                      ParsingContext& context,
-                      EdgeDefinition& edge,
+                      ParsingContext& context, EdgeDefinition& edge,
                       InterpreterFeedback& interpreterFeedback) {
   LineRange inquiryBounds = inquiryToReply.first;
   LineRange replyBounds = inquiryToReply.second;
@@ -140,8 +138,8 @@ void completeEdgeInfo(const Scenario& scenario,
       isLine<ACTION>(scenario[potentialActionIdIndex])) {
     edge.edge.actionId = scenario[potentialActionIdIndex].content;
   } else {
-
-    edge.edge.actionId = ANONYMOUS_ACTION+std::to_string(context.anonymousActionCount);
+    edge.edge.actionId =
+        ANONYMOUS_ACTION + std::to_string(context.anonymousActionCount);
     ++context.anonymousActionCount;
 
     interpreterFeedback.push_back(InterpreterMessage(
@@ -172,8 +170,8 @@ EdgeDefinition EdgeParser::parse(
     const Scenario& scenario, const InquiryToReply& inquiryToReply,
     std::unique_ptr<std::string>& previousStateInScenario) {
   EdgeDefinition edge;
-  ParsingContext context(m_vertexCounter, m_anonymousActionCounter, m_dictionaryModel,
-                         previousStateInScenario);
+  ParsingContext context(m_vertexCounter, m_anonymousActionCounter,
+                         m_dictionaryModel, previousStateInScenario);
 
   completeSourceState(scenario, inquiryToReply, context, edge,
                       m_interpreterFeedback);
