@@ -110,9 +110,10 @@ TEST_F(InterpreterTest, check_that_an_edge_is_parsed)
     const InquiryToReply inquiryToReply({1,1},{3,3});
 
     int vertexCount = 0;
+    int anonymousActionCount = 0;
     std::unique_ptr<std::string> previousState;
     InterpreterFeedback interpreterFeedback;
-    EdgeParser edgeParser(m_dictionaryModel, vertexCount, interpreterFeedback);
+    EdgeParser edgeParser(m_dictionaryModel, vertexCount, anonymousActionCount, interpreterFeedback);
 
     EdgeDefinition edge = edgeParser.parse(lines, inquiryToReply, previousState);
 
@@ -130,13 +131,14 @@ TEST_F(InterpreterTest, check_that_an_edge_is_parsed_wout_annot)
     int vertexCount = 0;
     std::unique_ptr<std::string> previousState;
     InterpreterFeedback interpreterFeedback;
-    EdgeParser edgeParser(m_dictionaryModel, vertexCount, interpreterFeedback);
+    int anonymousActionCount = 0;
+    EdgeParser edgeParser(m_dictionaryModel, vertexCount, anonymousActionCount, interpreterFeedback);
 
     EdgeDefinition edge = edgeParser.parse(lines, inquiryToReply, previousState);
 
     EXPECT_EQ("@anonymous_state0", edge.source.stateId);
     EXPECT_EQ("@anonymous_state1", edge.target.stateId);
-    EXPECT_EQ("", edge.edge.actionId);
+    EXPECT_EQ("#anonymous_action0", edge.edge.actionId);
     EXPECT_EQ(IntentEncoder::encode({1,0}), edge.edge.intent.intentId);
 }
 
@@ -149,9 +151,10 @@ TEST_F(InterpreterTest, check_that_an_inquiry_is_parsed_with_regexp)
     const InquiryToReply inquiryToReply({0,0},{1,1});
 
     int vertexCount = 0;
+    int anonymousActionCount = 0;
     std::unique_ptr<std::string> previousState;
     InterpreterFeedback interpreterFeedback;
-    EdgeParser edgeParser(m_dictionaryModel, vertexCount, interpreterFeedback);
+    EdgeParser edgeParser(m_dictionaryModel, vertexCount, anonymousActionCount, interpreterFeedback);
 
     EdgeDefinition edge = edgeParser.parse(lines, inquiryToReply, previousState);
     EXPECT_EQ(IntentEncoder::encode({0xFFFD,1,0,0xFFFC,0xFFFA}), edge.edge.intent.intentId);
@@ -172,9 +175,10 @@ TEST_F(InterpreterTest, check_that_successive_edges_are_parsed)
     const InquiryToReply inquiryToReply1({1,1}, {3,3});
 
     int vertexCount = 0;
+    int anonymousActionCount = 0;
     std::unique_ptr<std::string> previousState;
     InterpreterFeedback interpreterFeedback;
-    EdgeParser edgeParser(m_dictionaryModel, vertexCount, interpreterFeedback);
+    EdgeParser edgeParser(m_dictionaryModel, vertexCount, anonymousActionCount, interpreterFeedback);
 
     EdgeDefinition edge1 = edgeParser.parse(lines, inquiryToReply1, previousState);
     EXPECT_EQ("@root", edge1.source.stateId);
@@ -213,9 +217,10 @@ TEST_F(InterpreterTest, check_that_multiple_lines_are_parsed)
     const InquiryToReply inquiryToReply1({1,2}, {4,5});
 
     int vertexCount = 0;
+    int anonymousActionCount = 0;
     std::unique_ptr<std::string> previousState;
     InterpreterFeedback interpreterFeedback;
-    EdgeParser edgeParser(m_dictionaryModel, vertexCount, interpreterFeedback);
+    EdgeParser edgeParser(m_dictionaryModel, vertexCount, anonymousActionCount, interpreterFeedback);
     EdgeDefinition edge1 = edgeParser.parse(lines, inquiryToReply1, previousState);
 
     EXPECT_EQ("@root", edge1.source.stateId);
@@ -238,9 +243,10 @@ TEST_F(InterpreterTest, check_that_multi_line_intent_is_detected)
     const InquiryToReply inquiryToReply1({1,2}, {4,5});
 
     int vertexCount = 0;
+    int anonymousActionCount = 0;
     std::unique_ptr<std::string> previousState;
     InterpreterFeedback interpreterFeedback;
-    EdgeParser edgeParser(m_dictionaryModel, vertexCount, interpreterFeedback);
+    EdgeParser edgeParser(m_dictionaryModel, vertexCount, anonymousActionCount, interpreterFeedback);
     EdgeDefinition edge1 = edgeParser.parse(lines, inquiryToReply1, previousState);
 
     EXPECT_EQ("@root", edge1.source.stateId);
@@ -360,9 +366,10 @@ TEST_F(InterpreterFeedbackTest, check_root_and_terminal_state_msg)
     const InquiryToReply inquiryToReply({1,1}, {3,3});
 
     int vertexCount = 0;
+    int anonymousActionCount = 0;
     std::unique_ptr<std::string> previousState;
     InterpreterFeedback interpreterFeedback;
-    EdgeParser edgeParser(m_dictionaryModel, vertexCount, interpreterFeedback);
+    EdgeParser edgeParser(m_dictionaryModel, vertexCount, anonymousActionCount, interpreterFeedback);
 
     EdgeDefinition edge = edgeParser.parse(lines, inquiryToReply, previousState);
 
@@ -388,17 +395,18 @@ TEST_F(InterpreterFeedbackTest, check_no_action_warning)
     const InquiryToReply inquiryToReply({1,1},{2,2});
 
     int vertexCount = 0;
+    int anonymousActionCount = 0;
     std::unique_ptr<std::string> previousState;
     InterpreterFeedback interpreterFeedback;
-    EdgeParser edgeParser(m_dictionaryModel, vertexCount, interpreterFeedback);
+    EdgeParser edgeParser(m_dictionaryModel, vertexCount, anonymousActionCount, interpreterFeedback);
 
     EdgeDefinition edge = edgeParser.parse(lines, inquiryToReply, previousState);
 
     EXPECT_EQ_SIGNED(1, interpreterFeedback.size());
-    EXPECT_EQ(messagesText[NO_ACTION], interpreterFeedback[0].message);
+    EXPECT_EQ(messagesText[ANONYMOUS_ACTION_CREATION], interpreterFeedback[0].message);
     EXPECT_EQ("-je vous en prie", interpreterFeedback[0].line.content);
     EXPECT_EQ_SIGNED(2, interpreterFeedback[0].line.position);
-    EXPECT_EQ(WARNING, interpreterFeedback[0].level);
+    EXPECT_EQ(INFO, interpreterFeedback[0].level);
 }
 
 TEST_F(InterpreterFeedbackTest, check_no_entity_warning)
@@ -411,9 +419,10 @@ TEST_F(InterpreterFeedbackTest, check_no_entity_warning)
     const InquiryToReply inquiryToReply({1,1},{3,3});
 
     int vertexCount = 0;
+    int anonymousActionCount = 0;
     std::unique_ptr<std::string> previousState;
     InterpreterFeedback interpreterFeedback;
-    EdgeParser edgeParser(m_dictionaryModel, vertexCount, interpreterFeedback);
+    EdgeParser edgeParser(m_dictionaryModel, vertexCount, anonymousActionCount, interpreterFeedback);
 
     EdgeDefinition edge = edgeParser.parse(lines, inquiryToReply, previousState);
 
@@ -465,7 +474,7 @@ TEST_F(InterpreterIncorrectModelTest, check_interpreter_feedback_when_wrong_mode
     EXPECT_EQ("-Bob!", m_interpreterFeedback[1].line.content);
     EXPECT_EQ_SIGNED(2, m_interpreterFeedback[1].line.position);
 
-    EXPECT_EQ(messagesText[NO_ACTION], m_interpreterFeedback[2].message);
+    EXPECT_EQ(messagesText[ANONYMOUS_ACTION_CREATION], m_interpreterFeedback[2].message);
     EXPECT_EQ("_wake", m_interpreterFeedback[2].line.content);
     EXPECT_EQ_SIGNED(3, m_interpreterFeedback[2].line.position);
 }

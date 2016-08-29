@@ -53,7 +53,8 @@ enum message_code {
   NO_ENTITY,
   NO_ACTION,
   ANONYMOUS_STATE_CREATION,
-  DUPLICATE_ACTION_ID
+  DUPLICATE_ACTION_ID,
+  ANONYMOUS_ACTION_CREATION
 };
 
 namespace {
@@ -63,7 +64,8 @@ const char* messagesText[] = {
     "no entity was found for the line",
     "no action was found for the edge",
     "creating anonymous state ",
-    "The actionID was specified twice"};
+    "The actionID was specified twice",
+    "no action was found for the interaction, anonymous action created"};
 }
 
 struct ScriptLine {
