@@ -113,5 +113,10 @@ app
     .option('-n, --node-args <args>', 'run node with extra arguments (like --node-args \"--test\")')
     .action(execute(project.start));
 
+app
+    .command('configure [directory]')
+    .description('Configure the parameters of the platforms')
+    .option('-m, --messenger', 'configure messenger')
+    .action(execute(project.configure));
 
 app.parse(process.argv);

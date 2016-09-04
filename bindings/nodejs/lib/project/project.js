@@ -41,14 +41,15 @@ var util = require('util');
 var path = require('path');
 var fs = require('fs-extra');
 var _ = require('lodash');
+var readline = require('readline-sync');
 
 var config = require('../../config/config');
 
 module.exports = {
     create: create,
-    start: start
+    start: start,
+    configure: configure
 };
-
 
 function create(name, options, cb) {
     function validateName(name) {
@@ -138,7 +139,45 @@ function start(directory, options, cb) {
     });
 }
 
+function askParam(param, configObj) {
+    var request = util.format("Please input %s : ", param);
+    var answer = readline.question(request);
+    configObj[param] = answer;
+}
 
+function configureObject(configObj, filename) {
+    for (var param in configObj) {
+        if (configObj.hasOwnProperty(param)) {
+           askParam(param, configObj);
+        }
+    }
+    
+    console.log("writing in file : "+filename);
+    fs.writeJsonSync(filename, configObj);
+}
+
+function configure(directory, options, cb) {
+
+    var config = require(path.resolve(directory, 'config.js'));
+    var selection = config.selection;
+
+    for (var param in selection) {
+        if (selection.hasOwnProperty(param)) {
+            if (selection[param])
+            {
+                var request = util.format("Would you like to configure %s? (y/n) : ", param);
+                var answer = readline.question(request);
+                if (answer.toLowerCase() === 'y')
+                {
+                    var filename = path.resolve(directory, 'config/'+param+'/default.json');
+                    configureObject(config[param], filename);
+                    console.log(util.format("%s configured"), param);
+                }    
+            }    
+        }
+    }
+    cb();
+}
 
 function readProject(directory, options, cb) {
 
