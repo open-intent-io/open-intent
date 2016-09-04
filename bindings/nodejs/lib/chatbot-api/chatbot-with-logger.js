@@ -37,45 +37,52 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var path = require('path');
-var fs = require('fs');
+var ChatbotInterface = require('./chatbot-interface');
+var util = require('util');
+var Q = require('q');
 
-var helpers = require('./helpers')(path.resolve(__dirname, '../res'));
+function ChatbotWithLogger(chatbot) {
+    this._logger = undefined;
 
-var testConversationDirectory = path.resolve(__dirname, '..', 'test-conversations');
-var files = fs.readdirSync(testConversationDirectory);
-var filenames = [];
+    ChatbotInterface.call(this, chatbot);
 
-for(var j in files) {
-    if(path.extname(files[j]) === ".txt") {
-        filenames.push(files[j]);
-    }
-}
+    this.talk = function(sessionId, message) {
+        var deferred = Q.defer();
+        var logger = this._logger;
 
-function extractScript(filename) {
-    var filepath = path.resolve(testConversationDirectory, filename);
-    var content = fs.readFileSync(filepath, 'utf-8');
-    return content.split(/\r?\n/);
-}
-
-
-
-describe('Given a script, the chatbot', function() {
-    beforeEach(function(done) {
-        helpers.beforeEach(done);
-    });
-
-    afterEach(function(done) {
-        helpers.afterEach(done);
-    });
-
-    for(i in filenames) {
-        (function() {
-            var filename = filenames[i];
-            it('should follow the conversation in "' + filename + '"', function(done) {
-                var script = extractScript(filename);
-                helpers.checkScript(script, done);
+        if (logger) {
+            logger.log({
+                'sessionId': sessionId,
+                'message': message,
+                'type': 'intent'
             });
-        })();
-    }
-});
+        }
+
+        this._chatbot.talk(sessionId, message)
+        .then(function (replies) {
+            if (logger) {
+                for(var i in replies) {
+                    logger.log({
+                        'session_id': sessionId,
+                        'message': replies[i],
+                        'type': 'replies'
+                    });
+                }
+            }
+            deferred.resolve(replies);
+        })
+        .fail(function (err) {
+            deferred.reject(err);
+        });
+
+        return deferred.promise;
+    };
+
+    this.setLogger = function(logger) {
+        this._logger = logger;
+    };
+}
+
+util.inherits(ChatbotWithLogger, ChatbotInterface);
+
+module.exports = ChatbotWithLogger;

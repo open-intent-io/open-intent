@@ -113,9 +113,11 @@ describe('Test platforms middleware', function() {
             createChatbot(botmodel)
             .then(function(chatbot) {
                 PlatformsMiddleware = Platforms(config);
-                chatbot.use(PlatformsMiddleware);
-                PlatformsMiddleware.detach();
-                done();
+                chatbot.use(PlatformsMiddleware)
+                .then(function() {
+                    PlatformsMiddleware.detach();
+                    done();
+                });
             })
             .fail(function(err) {
                 console.error('Error:', err);
@@ -150,8 +152,13 @@ describe('Test platforms middleware', function() {
             createChatbot(botmodel)
             .then(function(chatbot) {
                 PlatformsMiddleware = Platforms(config);
-                chatbot.use(PlatformsMiddleware);
-                done();
+                chatbot.use(PlatformsMiddleware)
+                .then(function() {
+                    chatbot.start()
+                    .then(function() {
+                        done();
+                    });
+                });
             })
             .fail(function(err) {
                 console.error('Error:', err);

@@ -40,13 +40,32 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var exec = require('child_process').exec;
 var should = require('should');
 
+function combine(arr1, arr2) {
+   if(arr1.length == 0 && arr2.length == 0
+       || arr1.length != arr2.length) {
+      return [];
+   }
+
+   var val1 = arr1[0];
+   var val2 = arr2[0];
+
+   var tail1 = arr1.slice(1);
+   var tail2 = arr2.slice(2);
+
+   var output = [[val1, val2]];
+   output.concat(combine(tail1, tail2));
+   return output;
+}
+
 function compare(expected, actual) {
    should.equal(expected.length, actual.length);
 
-   for(var i=0; i<expected.length; ++i) {
-      var re = new RegExp(expected[i]);
-      actual[i].should.match(re);
-   }
+   var expectedAndActual = combine(expected, actual);
+
+   expectedAndActual.map(function(currentValue, index, arr) {
+      var re = new RegExp(currentValue[0]);
+      currentValue[1].should.match(re);
+   });
 }
 
 describe('Time bot tests', function() {

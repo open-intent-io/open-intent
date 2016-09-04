@@ -46,7 +46,6 @@ var ChatbotClient = require('../../lib/chatbot-client');
 
 var SERVICE_HOST = 'http://127.0.0.1';
 var SERVICE_PORT = 10105;
-var server1 = undefined;
 
 describe('Testing the chatbot client of REST API', function() {
     var botmodel = foodBotModel;
@@ -59,8 +58,13 @@ describe('Testing the chatbot client of REST API', function() {
             createChatbot(botmodel)
             .then(function(newChatbot) {
                 chatbot = newChatbot;
-                chatbot.use(middleware);
-                done();
+                chatbot.use(middleware)
+                .then(function() {
+                    return chatbot.start();
+                })
+                .then(function() {
+                    done();
+                });
             });
         });
 

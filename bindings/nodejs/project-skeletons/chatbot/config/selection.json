@@ -1,5 +1,5 @@
 {
-    "messenger": true,
+    "messenger": false,
     "kik": false,
     "skype": false,
     "slack": false,

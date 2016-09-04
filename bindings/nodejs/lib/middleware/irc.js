@@ -44,6 +44,7 @@ module.exports = function(stdio) {
 
 var readline = require('readline');
 var seqqueue = require('seq-queue');
+var Q = require('q');
 
 var SESSION_ID='ABC';
 
@@ -72,6 +73,7 @@ function exitCallback() {
 }
 
 function startIRCClient(chatbot, rl, stdout) {
+    var deferred = Q.defer();
     var queue = seqqueue.createQueue();
 
     rl.prompt();
@@ -81,6 +83,9 @@ function startIRCClient(chatbot, rl, stdout) {
         }
         queue.push(buildTalkTask(chatbot, rl, stdout, line));
     });
+
+    deferred.resolve();
+    return deferred.promise;
 }
 
 
@@ -96,14 +101,21 @@ function MiddlewareInterface(stdio) {
     }
 
     this.attach = function(chatbot) {
+        var deferred = Q.defer();
+        _this._chatbot = chatbot;
         _this._readline = readline.createInterface({
             input: stdio.stdin,
             output: stdio.stdout,
             prompt: '> '
         });
-        startIRCClient(chatbot, _this._readline, stdio.stdout);
+        deferred.resolve();
+        return deferred.promise;
     };
 
     this.detach = function() {
+    };
+
+    this.start = function() {
+        return startIRCClient(_this._chatbot, _this._readline, stdio.stdout);
     };
 }

@@ -68,8 +68,13 @@ describe('Test REST middleware', function() {
         createChatbot(botmodel)
         .then(function(chatbot) {
             RestMiddleware = Rest(REST_PORT);
-            chatbot.use(RestMiddleware);
-            done();
+            chatbot.use(RestMiddleware)
+            .then(function() {
+                return chatbot.start();
+            })
+            .then(function() {
+                done();
+            })
         });
     });
 

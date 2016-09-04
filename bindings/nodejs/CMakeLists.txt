@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.2)
 
 
 ADD_CUSTOM_TARGET(open-intent-js
+        COMMAND npm install
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lib/chatbot-api/open-intent.node
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 SET(SOURCE_FILES

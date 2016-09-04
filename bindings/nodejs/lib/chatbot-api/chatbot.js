@@ -40,121 +40,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var OpenIntentChatbotFactory = require('./chatbot-factory');
 var SimpleUserCommandsDriver = require('./user-defined-actions/simple-driver');
 var StandaloneSessionManager = require('./session-manager/standalone-driver');
+var ChatbotWithLogger = require('./chatbot-with-logger');
 var Q = require('q');
-
-var NO_CHATBOT_ERROR_MESSAGE = 'No model loaded in the chatbot';
-
-function ChatbotInterface(chatbot, sessionManagerDriver) {
-    this._chatbot = chatbot;
-
-    this.talk = function(sessionId, message) {
-        var deferred = Q.defer();
-
-        if(!sessionId) {
-            deferred.reject('No sessionId provided');
-            return deferred.promise;
-        }
-
-        if(!message) {
-            deferred.reject('No message provided');
-            return deferred.promise;
-        }
-
-        if(!this._chatbot) {
-            deferred.reject(NO_CHATBOT_ERROR_MESSAGE);
-            return deferred.promise;
-        }
-
-        this._chatbot.talk(sessionId, message)
-        .then(function(replies) {
-            deferred.resolve(replies);
-        })
-        .fail(function(err) {
-            deferred.reject(err);
-        });
-
-        return deferred.promise;
-    };
-
-    this.setState = function(sessionId, state) {
-        var deferred = Q.defer();
-
-        if(!sessionId) {
-            deferred.reject('No sessionId provided');
-            return deferred.promise;
-        }
-
-        if(!state) {
-            deferred.reject('No state provided');
-            return deferred.promise;
-        }
-
-        if(!this._chatbot) {
-            deferred.reject(NO_CHATBOT_ERROR_MESSAGE);
-            return deferred.promise;
-        }
-
-        this._chatbot.setState(sessionId, state)
-        .then(function() {
-            deferred.resolve();
-        })
-        .fail(function(err) {
-            deferred.reject(err);
-        });
-
-        return deferred.promise;
-    };
-
-    this.getState = function(sessionId) {
-        var deferred = Q.defer();
-
-        if(!sessionId) {
-            deferred.reject('No sessionId provided');
-            return deferred.promise;
-        }
-
-        if(!this._chatbot) {
-            deferred.reject(NO_CHATBOT_ERROR_MESSAGE);
-            return deferred.promise;
-        }
-
-        this._chatbot.getState(sessionId)
-        .then(function(state) {
-            deferred.resolve(state);
-        })
-        .fail(function(err) {
-            deferred.reject(err);
-        });
-
-        return deferred.promise;
-    };
-
-    this.getGraph = function() {
-        var deferred = Q.defer();
-
-        if(!this._chatbot) {
-            deferred.reject(NO_CHATBOT_ERROR_MESSAGE);
-            return deferred.promise;
-        }
-
-        try {
-            var graph = this._chatbot.getGraph();
-            deferred.resolve(graph);
-        }
-        catch(err) {
-            deferred.reject();
-        }
-
-        return deferred.promise;
-    };
-
-    return this;
-}
 
 function createChatbotNoCatch(botmodel, config) {
     var userCommandsDriver = new SimpleUserCommandsDriver(botmodel['user_commands']);
     var sessionManagerDriver = new StandaloneSessionManager();
-    var openIntentChatbot = OpenIntentChatbotFactory.fromOIML(botmodel['dictionary'], botmodel['oiml'], sessionManagerDriver, userCommandsDriver);
 
     if(config && 'redis' in config) {
         var redisConfig = config['redis'];
@@ -169,8 +60,11 @@ function createChatbotNoCatch(botmodel, config) {
         }
         sessionManagerDriver = new RedisSessionManager(hostname, port);
     }
+    
+    var openIntentChatbot = OpenIntentChatbotFactory.fromOIML(botmodel['dictionary'], botmodel['oiml'],
+        sessionManagerDriver, userCommandsDriver);
 
-    return new ChatbotInterface(openIntentChatbot, sessionManagerDriver, userCommandsDriver);
+    return new ChatbotWithLogger(openIntentChatbot);
 }
 
 function createChatbot(botmodel, config) {
@@ -183,7 +77,7 @@ function createChatbot(botmodel, config) {
     catch(err) {
         deferred.reject(err);
     }
-    
+
     return deferred.promise;
 }
 

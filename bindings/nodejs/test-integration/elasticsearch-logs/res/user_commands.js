@@ -37,25 +37,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+function getDateTime() {
+    return new Date().toString().substring(16,24);
+}
 
-var openintent = require('open-intent');
-
-var chatbot =  require('./app/chatbot');
-var config = require('./app/config');
-
-var REST_PORT = process.env.REST_PORT || 5001;
-var DOC_PUBLISHER_PORT = process.env.DOC_PUBLISHER_PORT || 5002;
-
-var middlewares = [];
-
-middlewares.push(openintent.middleware.Irc());
-middlewares.push(openintent.middleware.Rest(REST_PORT));
-middlewares.push(openintent.middleware.Platforms(config));
-
-middlewares.push(openintent.middleware.DocPublisher(DOC_PUBLISHER_PORT))
-middlewares.push(openintent.middleware.Logger(config.loggers));
-
-chatbot(middlewares)
-.fail(function(err) {
-    console.error('Error:', err);
-});
+module.exports = {
+    '#telltime': function(intentVariables, sessionId, next) {
+        var replyVariables = {};
+        replyVariables['0'] = getDateTime();
+        next(replyVariables);
+    }
+};

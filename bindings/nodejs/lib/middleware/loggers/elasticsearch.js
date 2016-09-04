@@ -37,25 +37,81 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+module.exports = ElasticSearchLogger;
 
-var openintent = require('open-intent');
+var fs = require('fs');
+var path = require('path');
+var elasticsearch = require('elasticsearch');
+var Q = require('q');
 
-var chatbot =  require('./app/chatbot');
-var config = require('./app/config');
+var TYPE = 'logentry';
 
-var REST_PORT = process.env.REST_PORT || 5001;
-var DOC_PUBLISHER_PORT = process.env.DOC_PUBLISHER_PORT || 5002;
+function initialize(client, indexName) {
+    var deferred = Q.defer();
+    var mappings = {
+        'properties': {
+            'data': {
+                'type': 'object',
+                'properties': {
+                    type: { type: 'string'},
+                    session_id: { type: 'string'},
+                    message: { type: 'string'}
+                }
+            },
+            'timestamp': { type: 'date'}
+        }
+    };
 
-var middlewares = [];
+    var body = {};
+    body[TYPE] = mappings;
 
-middlewares.push(openintent.middleware.Irc());
-middlewares.push(openintent.middleware.Rest(REST_PORT));
-middlewares.push(openintent.middleware.Platforms(config));
+    client.indices.create({
+        index: indexName,
+        type: TYPE
+    }, function(error, response) {
+        client.indices.putMapping({
+            index: indexName,
+            type: TYPE,
+            body: body
+        }, function(error, response) {
+            if(error) {
+                deferred.reject(error);
+                return 1;
+            }
+            deferred.resolve(response);
+        });
+    });
 
-middlewares.push(openintent.middleware.DocPublisher(DOC_PUBLISHER_PORT))
-middlewares.push(openintent.middleware.Logger(config.loggers));
+    return deferred.promise;
+}
 
-chatbot(middlewares)
-.fail(function(err) {
-    console.error('Error:', err);
-});
+function ElasticSearchLogger(config) {
+    var host = config.host || 'localhost';
+    var port = config.port || 9200;
+    var indexName = config.index || 'conversations';
+
+    this._client = new elasticsearch.Client({
+        host: host + ':' + port
+    });
+
+    this.initialize = function() {
+        return initialize(this._client, indexName);
+    };
+
+    this.log = function(data) {
+        this._client.index({
+            index: indexName,
+            type: TYPE,
+            body: {
+                'data': data,
+                'timestamp': new Date()
+            }
+        }, function(err, res) {
+            if(err) {
+                console.trace(err);
+                return 1;
+            }
+            console.log(res);
+        });
+    }
+}

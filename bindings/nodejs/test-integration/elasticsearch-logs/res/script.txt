@@ -1,0 +1,22 @@
+{
+@root_state
+    -Hello
+        #greetings
+        *Be gentle, say hello!
+    -Hello, I can tell you what time it is if you ask.
+@ask_state
+    -What time is it?
+        #telltime
+        *I don't understand what you mean...
+     -It is _.
+@end_state
+}
+
+{
+@ask_state
+    -What is your name?
+        #tellname
+        *I don't understand what you mean...
+     -My name is Bob.
+@ask_state
+}

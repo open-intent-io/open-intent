@@ -45,6 +45,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 var path = require('path');
+var Q = require('q');
 
 
 function publishIntentStory(app) {
@@ -72,6 +73,7 @@ function MiddlewareInterface(port) {
     this._server = undefined;
 
     this.attach = function(chatbot) {
+        var deferred = Q.defer();
         _this._app.use(bodyParser.json()); // support json encoded bodies
         _this._app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
         _this._app.set('chatbot', chatbot);
@@ -80,7 +82,11 @@ function MiddlewareInterface(port) {
         publishIntentStory(_this._app);
 
         var _port = (port) ? port : 8080;
-        _this._server = _this._app.listen(_port);
+        _this._server = _this._app.listen(_port, function() {
+            deferred.resolve();
+        });
+
+        return deferred.promise;
     };
 
     this.detach = function() {
@@ -88,4 +94,6 @@ function MiddlewareInterface(port) {
             _this._server.close();
         }
     };
+
+    this.start = function() {}
 }

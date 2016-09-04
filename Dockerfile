@@ -2,8 +2,7 @@ FROM ubuntu:xenial
 
 RUN apt-get update && \
     apt-get install -y libboost-system1.58-dev \
-        libboost-regex1.58-dev \
-        libboost-log1.58-dev \
+        libboost-thread1.58-dev libboost-filesystem1.58-dev \
         cmake g++ git \
         doxygen node-gyp nodejs npm clang-format-3.7
 
