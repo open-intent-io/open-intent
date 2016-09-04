@@ -37,25 +37,55 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+var exec = require('child_process').exec;
+var should = require('should');
 
-var openintent = require('open-intent');
+function combine(arr1, arr2) {
+   if(arr1.length == 0 && arr2.length == 0
+       || arr1.length != arr2.length) {
+      return [];
+   }
 
-var chatbot =  require('./app/chatbot');
-var config = require('./app/config');
+   var val1 = arr1[0];
+   var val2 = arr2[0];
 
-var REST_PORT = process.env.REST_PORT || 5001;
-var DOC_PUBLISHER_PORT = process.env.DOC_PUBLISHER_PORT || 5002;
+   var tail1 = arr1.slice(1);
+   var tail2 = arr2.slice(2);
 
-var middlewares = [];
+   var output = [[val1, val2]];
+   output.concat(combine(tail1, tail2));
+   return output;
+}
 
-middlewares.push(openintent.middleware.Irc());
-middlewares.push(openintent.middleware.Rest(REST_PORT));
-middlewares.push(openintent.middleware.Platforms(config));
+function compare(expected, actual) {
+   should.equal(expected.length, actual.length);
 
-middlewares.push(openintent.middleware.DocPublisher(DOC_PUBLISHER_PORT))
-middlewares.push(openintent.middleware.Logger(config.loggers));
+   var expectedAndActual = combine(expected, actual);
 
-chatbot(middlewares)
-.fail(function(err) {
-    console.error('Error:', err);
+   expectedAndActual.map(function(currentValue, index, arr) {
+      var re = new RegExp(currentValue[0]);
+      currentValue[1].should.match(re);
+   });
+}
+
+describe('Food bot tests', function() {
+   it('should ask what the customer wish and she is supposed to answer salad', function(done) {
+      var expected_output = [
+         "> Would you want to eat a pizza, a hamburger or a salad?",
+         "> Got it, you want salad, right?",
+         "> I'm ordering, it is gonna be 5$.",
+         ">"
+      ];
+
+      exec('echo "Hello\nSalad\nyes\nquit\n" | nodejs app.js', function(error, stdout, stderr) {
+         if(error) {
+            console.error(error);
+            return;
+         }
+
+         stdout = stdout.split('\n');
+         compare(expected_output, stdout);
+         done();
+      });
+   });
 });

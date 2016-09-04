@@ -8,7 +8,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
 SET(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-FIND_PACKAGE(Boost COMPONENTS system thread filesystem regex REQUIRED)
+FIND_PACKAGE(Boost COMPONENTS system thread filesystem REQUIRED)
 
 SET(COMMON_SOURCE_FILES
         chatbot/Chatbot.cpp

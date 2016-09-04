@@ -41,5 +41,6 @@ module.exports = {
     'Irc': require('./irc'),
     'Rest': require('./rest'),
     'Platforms': require('./platforms'),
-    'DocPublisher': require('./doc-publisher')
+    'DocPublisher': require('./doc-publisher'),
+    'Logger': require('./loggers/logger')
 }

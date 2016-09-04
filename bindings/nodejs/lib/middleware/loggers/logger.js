@@ -37,25 +37,53 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+var ElasticSearchLogger = require('./elasticsearch');
+var Q = require('q');
 
-var openintent = require('open-intent');
+module.exports = function(callbacks) {
+    return new MiddlewareInterface(callbacks);
+};
 
-var chatbot =  require('./app/chatbot');
-var config = require('./app/config');
+function Logger(config) {
+    this._loggers = [];
+    this._config = config;
 
-var REST_PORT = process.env.REST_PORT || 5001;
-var DOC_PUBLISHER_PORT = process.env.DOC_PUBLISHER_PORT || 5002;
+    this.initialize = function() {
+        var promises = [];
+        if(config.selection.elasticsearch) {
+            var elasticsearchLogger = new ElasticSearchLogger(config.elasticsearch);
 
-var middlewares = [];
+            promises.push(elasticsearchLogger.initialize());
+            this._loggers.push(elasticsearchLogger);
+        }
 
-middlewares.push(openintent.middleware.Irc());
-middlewares.push(openintent.middleware.Rest(REST_PORT));
-middlewares.push(openintent.middleware.Platforms(config));
+        return Q.all(promises);
+    };
 
-middlewares.push(openintent.middleware.DocPublisher(DOC_PUBLISHER_PORT))
-middlewares.push(openintent.middleware.Logger(config.loggers));
+    this.log = function(data) {
+        for(var i in this._loggers) {
+            this._loggers[i].log(data);
+        }
+    };
+}
 
-chatbot(middlewares)
-.fail(function(err) {
-    console.error('Error:', err);
-});
+function MiddlewareInterface(config) {
+    this._logger = new Logger(config);
+
+    this.attach = function(chatbot) {
+        var logger = this._logger;
+        var promise = this._logger.initialize();
+
+        promise.then(function() {
+            chatbot.setLogger(logger);
+        });
+
+        return promise;
+    };
+
+    this.detach = function(chatbot) {
+        chatbot.setLogger(this._logger);
+    };
+
+    this.start = function() {};
+}

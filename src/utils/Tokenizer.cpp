@@ -43,9 +43,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "intent/utils/SingleCharacterDelimiterTokenizer.hpp"
 #include "intent/utils/Logger.hpp"
 
-#include "boost/regex/regex_traits.hpp"
-#include <boost/regex.hpp>
-#include <boost/algorithm/string.hpp>
+#include <regex>
 
 namespace intent {
 
@@ -62,39 +60,25 @@ bool operator==(const Split& s1, const Split& s2) {
   return s1.part == s2.part && s1.tokenizable == s2.tokenizable;
 }
 
-class IndexClassesPred {
-  const Split& m_split;
-  Splits& nextSplits;
-  std::string::const_iterator m_begin;
-  std::string::const_iterator m_end;
+void splitMatch(const std::smatch& match, Splits& nextSplits) {
+  Split s1, s2, s3;
 
- public:
-  IndexClassesPred(const Split& a, Splits& nextSplits)
-      : m_split(a), nextSplits(nextSplits) {}
-  bool operator()(
-      const boost::match_results<std::string::const_iterator>& what) {
-    Split s1, s2, s3;
-    std::string::const_iterator begin = m_split.part.begin();
-    std::string::const_iterator end = m_split.part.end();
-
-    if (what[0].first != begin) {
-      s1.part = std::string(begin, what[0].first);
-      s1.tokenizable = true;
-      nextSplits.push_back(s1);
-    }
-
-    s2.part = std::string(what[0].first, what[0].second);
-    s2.tokenizable = false;
-    nextSplits.push_back(s2);
-
-    if (what[0].second != end) {
-      s3.part = std::string(what[0].second, end);
-      s3.tokenizable = true;
-      nextSplits.push_back(s3);
-    }
-    return true;
+  if (match.prefix().length() > 0) {
+    s1.part = match.prefix();
+    s1.tokenizable = true;
+    nextSplits.push_back(s1);
   }
-};
+
+  s2.part = match[0];
+  s2.tokenizable = false;
+  nextSplits.push_back(s2);
+
+  if (match.suffix().length() > 0) {
+    s3.part = match.suffix();
+    s3.tokenizable = true;
+    nextSplits.push_back(s3);
+  }
+}
 
 Splits splitRegexp(const std::string& message,
                    const std::vector<std::string>& regexpList) {
@@ -117,12 +101,13 @@ Splits splitRegexp(const std::string& message,
 
       if (split.tokenizable && !regexpList.empty()) {
         for (const std::string& regexStr : regexpList) {
-          boost::regex expression(regexStr);
-          splitted = boost::regex_grep(IndexClassesPred(split, nextSplits),
-                                       split.part, expression);
+          std::regex expression(regexStr);
+          std::smatch match;
+          splitted = std::regex_search(split.part, match, expression);
           found_matching |= splitted;
 
           if (splitted) {
+            splitMatch(match, nextSplits);
             break;
           }
         }

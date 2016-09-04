@@ -1,7 +1,6 @@
-FROM open-intent
+FROM open-intent-integration
 MAINTAINER open-intent.io
 
-ADD entrypoint.sh /entrypoint.sh
+ADD test /chatbot-test/test
 
-CMD ["/entrypoint.sh"]
 

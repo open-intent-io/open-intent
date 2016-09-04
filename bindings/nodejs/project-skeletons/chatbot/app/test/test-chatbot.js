@@ -37,25 +37,45 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+var path = require('path');
+var fs = require('fs');
 
-var openintent = require('open-intent');
+var helpers = require('./helpers')();
 
-var chatbot =  require('./app/chatbot');
-var config = require('./app/config');
+var testConversationDirectory = path.resolve(__dirname, '..', '..', 'test-conversations');
+var files = fs.readdirSync(testConversationDirectory);
+var filenames = [];
 
-var REST_PORT = process.env.REST_PORT || 5001;
-var DOC_PUBLISHER_PORT = process.env.DOC_PUBLISHER_PORT || 5002;
+for(var j in files) {
+    if(path.extname(files[j]) === ".txt") {
+        filenames.push(files[j]);
+    }
+}
 
-var middlewares = [];
+function extractScript(filename) {
+    var filepath = path.resolve(testConversationDirectory, filename);
+    var content = fs.readFileSync(filepath, 'utf-8');
+    return content.split(/\r?\n/);
+}
 
-middlewares.push(openintent.middleware.Irc());
-middlewares.push(openintent.middleware.Rest(REST_PORT));
-middlewares.push(openintent.middleware.Platforms(config));
 
-middlewares.push(openintent.middleware.DocPublisher(DOC_PUBLISHER_PORT))
-middlewares.push(openintent.middleware.Logger(config.loggers));
 
-chatbot(middlewares)
-.fail(function(err) {
-    console.error('Error:', err);
+describe('Given a script, the chatbot', function() {
+    beforeEach(function(done) {
+        helpers.beforeEach(done);
+    });
+
+    afterEach(function(done) {
+        helpers.afterEach(done);
+    });
+
+    for(i in filenames) {
+        (function() {
+            var filename = filenames[i];
+            it('should follow the conversation in "' + filename + '"', function(done) {
+                var script = extractScript(filename);
+                helpers.checkScript(script, done);
+            });
+        })();
+    }
 });

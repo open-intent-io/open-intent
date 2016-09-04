@@ -105,8 +105,11 @@ describe('Test the IRC client', function() {
 
         createChatbot(botmodel)
         .then(function(newChatbot) {
-            newChatbot.use(IrcClient(stdio));
-            done();
+            newChatbot.use(IrcClient(stdio))
+            .then(function() {
+                newChatbot.start();
+                done();
+            });
         });
     });
     

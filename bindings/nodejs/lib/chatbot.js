@@ -45,8 +45,21 @@ function ChatbotInterface(chatbot) {
     this._middlewares = [];
 
     this.use = function(middleware) {
-        middleware.attach(this._chatbot);
-        this._middlewares.push(middleware);
+        var middlewares = this._middlewares;
+        var promise = middleware.attach(this._chatbot);
+        promise.then(function() {
+            middlewares.push(middleware);
+        });
+        return promise;
+    };
+
+    this.start = function() {
+        var middlewares = this._middlewares;
+        var promises = [];
+        for(var i in middlewares) {
+            promises.push(middlewares[i].start());
+        }
+        return Q.all(promises);
     };
 
     return this;

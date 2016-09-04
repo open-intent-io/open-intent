@@ -42,7 +42,8 @@ const
     request = require('request'),
     express = require('express'),
     fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    Q = require('q');
 
 function deployPlatform(chatbot, platformName, platform, config, app) {
     var selection = config.selection;
@@ -82,8 +83,8 @@ function MiddlewareInterface(config) {
         this._platforms['telegram'] = require(path.resolve(__dirname, "platforms/controllers/telegram"));
 
     this.attach = function(chatbot) {
+        var deferred = Q.defer();
         var app = express();
-        var port = (config.general.port) ? config.general.port : 5000;
 
         app.use(express.static('public'));
 
@@ -92,10 +93,12 @@ function MiddlewareInterface(config) {
         }
         catch(err) {
             console.error(err);
+            throw Error(err);
         }
-
-        this._server = app.listen(port);
         this._app = app;
+        deferred.resolve();
+
+        return deferred.promise;
     };
 
     this.detach = function() {
@@ -103,6 +106,16 @@ function MiddlewareInterface(config) {
             this._server.close();
         }
     };
+
+    this.start = function() {
+        var deferred = Q.defer();
+        var port = (config.general.port) ? config.general.port : 5000;
+
+        this._server = this._app.listen(port, function() {
+            deferred.resolve();
+        });
+        return deferred.promise;
+    }
 }
 
 

@@ -45,7 +45,7 @@ var seqqueue = require('seq-queue');
 var talk = undefined;
 var chatbot = undefined;
 
-module.exports = function(resDirectory) {
+module.exports = function() {
     var chatbot = require('../chatbot');
     var openintent = require('open-intent');
 
@@ -62,7 +62,8 @@ module.exports = function(resDirectory) {
 
         middlewares.push(openintent.middleware.Irc(stdio));
 
-        chatbot(middlewares, function(error) {
+        chatbot(middlewares)
+        .then(function(error) {
             talk = function(input) {
                 var deferred = Q.defer();
 
