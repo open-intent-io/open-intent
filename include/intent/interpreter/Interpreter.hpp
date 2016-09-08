@@ -78,7 +78,7 @@ struct ScriptLine {
   unsigned int position;
 };
 
-enum LogLevel { WARNING, ERROR, INFO };
+enum LogLevel { WARNING, _ERROR, INFO };
 
 struct InterpreterMessage {
   InterpreterMessage(message_code msg_code, ScriptLine scriptLine,

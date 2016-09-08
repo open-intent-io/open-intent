@@ -71,7 +71,7 @@ typename Graph<VertexInfo, EdgeInfo>::Edge Graph<VertexInfo, EdgeInfo>::addEdge(
 template <typename VertexInfo, typename EdgeInfo>
 typename Graph<VertexInfo, EdgeInfo>::Edges
 Graph<VertexInfo, EdgeInfo>::nextEdges(
-    const Graph<VertexInfo, EdgeInfo>::Vertex& v) const {
+    const typename Graph<VertexInfo, EdgeInfo>::Vertex& v) const {
   typedef typename Graph<VertexInfo, EdgeInfo>::Edges Edges;
   typedef typename Graph<VertexInfo, EdgeInfo>::_Graph _Graph;
 
@@ -87,7 +87,7 @@ Graph<VertexInfo, EdgeInfo>::nextEdges(
 
 template <typename VertexInfo, typename EdgeInfo>
 template <typename WriterMaker>
-void Graph<VertexInfo, EdgeInfo>::dump(std::ostream& ostream,
+void typename Graph<VertexInfo, EdgeInfo>::dump(std::ostream& ostream,
                                        WriterMaker& wm) const {
   boost::write_graphviz(ostream, m_graph, wm.makeVertexWriter(m_graph),
                         wm.makeEdgeWriter(m_graph));

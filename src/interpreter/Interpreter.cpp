@@ -268,7 +268,7 @@ ChatbotModel Interpreter::build(const std::string& script,
   intentStoryModel.rootStateId = firstScenario[0].content;
   if (!isLine<STATE>(firstScenario[0].content))
     interpreterFeedback.push_back(
-        InterpreterMessage(ROOT_STATE_MSG, firstScenario[0], ERROR));
+        InterpreterMessage(ROOT_STATE_MSG, firstScenario[0], _ERROR));
 
   const DictionaryModel& dict = *dictionaryModel;
 
@@ -276,7 +276,7 @@ ChatbotModel Interpreter::build(const std::string& script,
       firstScenario[firstScenario.size() - 1].content);
   if (!isLine<STATE>(firstScenario[firstScenario.size() - 1].content))
     interpreterFeedback.push_back(InterpreterMessage(
-        TERMINAL_STATE_MSG, firstScenario[firstScenario.size() - 1], ERROR));
+        TERMINAL_STATE_MSG, firstScenario[firstScenario.size() - 1], _ERROR));
 
   std::for_each(
       scenarios.begin(), scenarios.end(),

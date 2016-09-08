@@ -42,6 +42,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "intent/utils/Levenshtein.hpp"
 
 #include <algorithm>
+#include <numeric>
+#include <iterator>
 #include "intent/intent_service/DictionaryModel.hpp"
 #include "intent/intent_service/TermIndex.hpp"
 #include "intent/utils/Levenshtein.hpp"

@@ -62,7 +62,7 @@ Logger::SeverityLevel::type Logger::severityLevelFromString(
   }
 
   if (severity == "ERROR") {
-    return Logger::SeverityLevel::ERROR;
+    return Logger::SeverityLevel::_ERROR;
   }
 
   if (severity == "FATAL") {
@@ -87,7 +87,7 @@ void Logger::initialize(SeverityLevel::type severityLevel) {
     case SeverityLevel::WARNING:
       spdlogSeverity = spdlog::level::warn;
       break;
-    case SeverityLevel::ERROR:
+    case SeverityLevel::_ERROR:
       spdlogSeverity = spdlog::level::err;
       break;
     case SeverityLevel::FATAL:

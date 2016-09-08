@@ -57,7 +57,7 @@ class Logger {
    * \brief The severity levels handled by the logger
    */
   struct SeverityLevel {
-    enum type { TRACE, DEBUG, INFO, WARNING, ERROR, FATAL };
+    enum type { TRACE, DEBUG, INFO, WARNING, _ERROR, FATAL };
   };
 
   /**
@@ -140,7 +140,7 @@ class Logger {
       spdlog::get("console")->warn(message);
     }
 
-    void log(const std::string& message, Int2Type<SeverityLevel::ERROR>) {
+    void log(const std::string& message, Int2Type<SeverityLevel::_ERROR>) {
       spdlog::get("console")->error(message);
     }
 
@@ -185,7 +185,7 @@ class Logger {
    * @brief Get the error logger
    * \return the error logger
    */
-  inline LoggerWithLevel<Logger::SeverityLevel::ERROR>& error() {
+  inline LoggerWithLevel<Logger::SeverityLevel::_ERROR>& error() {
     return m_loggerError;
   }
 
@@ -204,7 +204,7 @@ class Logger {
   LoggerWithLevel<Logger::SeverityLevel::DEBUG> m_loggerDebug;
   LoggerWithLevel<Logger::SeverityLevel::INFO> m_loggerInfo;
   LoggerWithLevel<Logger::SeverityLevel::WARNING> m_loggerWarning;
-  LoggerWithLevel<Logger::SeverityLevel::ERROR> m_loggerError;
+  LoggerWithLevel<Logger::SeverityLevel::_ERROR> m_loggerError;
   LoggerWithLevel<Logger::SeverityLevel::FATAL> m_loggerFatal;
 };
 }
