@@ -56,8 +56,10 @@ unsigned int Levenshtein::distance(const std::string& s1,
 
   for (unsigned int i = 1; i <= len1; ++i)
     for (unsigned int j = 1; j <= len2; ++j)
-      d[i][j] = std::min(d[i - 1][j] + 1, std::min(d[i][j - 1] + 1,
-                          d[i - 1][j - 1] + (s1[i - 1] == s2[j - 1] ? 0 : 1)));
+      d[i][j] = std::min(
+          d[i - 1][j] + 1,
+          std::min(d[i][j - 1] + 1,
+                   d[i - 1][j - 1] + (s1[i - 1] == s2[j - 1] ? 0 : 1)));
   return d[len1][len2];
 }
 }
