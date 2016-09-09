@@ -88,7 +88,7 @@ Graph<VertexInfo, EdgeInfo>::nextEdges(
 template <typename VertexInfo, typename EdgeInfo>
 template <typename WriterMaker>
 void Graph<VertexInfo, EdgeInfo>::dump(std::ostream& ostream,
-                                                WriterMaker& wm) const {
+                                       WriterMaker& wm) const {
   boost::write_graphviz(ostream, m_graph, wm.makeVertexWriter(m_graph),
                         wm.makeEdgeWriter(m_graph));
 }
