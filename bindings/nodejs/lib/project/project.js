@@ -158,7 +158,7 @@ function configureObject(configObj, filename) {
 
 function configure(directory, options, cb) {
 
-    var config = require(path.resolve(directory, 'config.js'));
+    var config = require(path.resolve(directory, 'app/config.js'));
     var selection = config.selection;
 
     for (var param in selection) {
