@@ -1,0 +1,3 @@
+heroku create &&
+heroku buildpacks:add --index 1 https://github.com/ddollar/heroku-buildpack-apt.git &&
+heroku buildpacks:add --index 2 heroku/nodejs

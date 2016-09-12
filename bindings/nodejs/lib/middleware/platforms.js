@@ -109,7 +109,7 @@ function MiddlewareInterface(config) {
 
     this.start = function() {
         var deferred = Q.defer();
-        var port = (config.general.port) ? config.general.port : 5000;
+        var port = process.env.PORT || (config.general.port) || 5000;
 
         this._server = this._app.listen(port, function() {
             deferred.resolve();

@@ -9,7 +9,7 @@
   "main": "app.js",
   "dependencies": {
     "nodemon": "^1.9.2",
-    "open-intent": "^1.0.0",
+    "open-intent": "1.0.5",
     "q": "^1.4.1"
   },
   "devDependencies": {
@@ -20,5 +20,8 @@
   "scripts": {
     "start": "node app.js",
     "test": "./node_modules/.bin/mocha --reporter spec"
+  },
+  "engines": {
+    "node": "4.2.6"
   }
 }
