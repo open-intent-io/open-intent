@@ -6,8 +6,7 @@
 
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)][MIT License] [![Gitter](https://badges.gitter.im/open-intent-io/open-intent.svg)](https://gitter.im/open-intent-io/open-intent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Build Status](https://travis-ci.org/open-intent-io/open-intent.svg?branch=master)](https://travis-ci.org/open-intent-io/open-intent)
 
-Open-intent is the only simple solution allowing you to create your own chat bot in minutes and easily deploy it on your
- infrastructure thanks to docker.
+Open-intent is the only simple solution allowing you to create your own chat bot in minutes and easily deploy it on your infrastructure thanks to npm and docker.
 As a virtual assistant, open-intent will understand the needs of your user via a conversation on messenger or your own
 website and translate those intents into business actions.
 
@@ -15,14 +14,18 @@ website and translate those intents into business actions.
 
 This is as simple as this single line to start prototyping your bot
 
-    docker run -v $(pwd)/mychatbot:/app -it openintent/chatbot
+    npm install -g open-intent
+    open-intent project create mychatbot
 
 This command starts an instance of bot with model located in the mychatbot/res/ directory on your host. In
 mychatbot/config, you'll find the configuration files for the available platforms. For now the only fully tested
 platform is *Messenger* but you can try the others at your own risks.
 
-Once that container is started, you can test your bot right away by typing in the console. Say 'hello' to your new bot!
-You can then edit the model and config files and the bot will restart automatically when files are saved.
+Once the configuration is done, you can test your bot right away:
+
+    open-intent project start mychatbot
+     
+Say 'hello' to your new bot!  You can then edit the model or config files and the bot restarts automatically when files are saved.
 
 ## Your first bot model
 
