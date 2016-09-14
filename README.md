@@ -27,6 +27,8 @@ Once the configuration is done, you can test your bot right away:
      
 Say 'hello' to your new bot!  You can then edit the model or config files and the bot restarts automatically when files are saved.
 
+You can also follow the [tutorial](https://github.com/open-intent-io/open-intent/wiki/Full-chatbot-deployment-tutorial) to write your first bot and deploy it on heroku for free.
+
 ## Your first bot model
 
 Below is the initial bot model you'll find in mychatbot/res/ when you create the instance. 3 files are required to
