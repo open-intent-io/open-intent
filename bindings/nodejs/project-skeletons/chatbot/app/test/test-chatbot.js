@@ -55,7 +55,7 @@ for(var j in files) {
 function extractScript(filename) {
     var filepath = path.resolve(testConversationDirectory, filename);
     var content = fs.readFileSync(filepath, 'utf-8');
-    return content.split(/\r?\n/);
+    return content.split(/\r?\n/).filter(function (e) { return e != ''; });
 }
 
 
