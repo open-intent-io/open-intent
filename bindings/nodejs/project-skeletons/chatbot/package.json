@@ -8,8 +8,9 @@
   "license": "",
   "main": "app.js",
   "dependencies": {
+    "chai": "^3.5.0",
     "nodemon": "^1.9.2",
-    "open-intent": "1.0.5",
+    "open-intent": "^1.0.0",
     "q": "^1.4.1"
   },
   "devDependencies": {
@@ -19,9 +20,6 @@
   },
   "scripts": {
     "start": "node app.js",
-    "test": "./node_modules/.bin/mocha --reporter spec"
-  },
-  "engines": {
-    "node": "4.2.6"
+    "test": "./node_modules/.bin/mocha --reporter spec app/test/**"
   }
 }

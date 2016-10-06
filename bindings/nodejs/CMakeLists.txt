@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.2)
 
 
 ADD_CUSTOM_TARGET(open-intent-js
-        COMMAND npm install
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lib/chatbot-api/open-intent.node
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -16,8 +15,9 @@ SET(SOURCE_FILES
 ADD_CUSTOM_COMMAND(
         OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/lib/chatbot-api/open-intent.node
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/binding.gyp intent-static ${SOURCE_FILES}
-        COMMAND node-gyp configure
-        COMMAND export BINARY_DIR=${CMAKE_BINARY_DIR} && node-gyp rebuild -j 4
+        COMMAND npm install node-gyp
+        COMMAND node_modules/.bin/node-gyp configure
+        COMMAND export BINARY_DIR=${CMAKE_BINARY_DIR} && node_modules/.bin/node-gyp rebuild -j 4
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/build/Release/open-intent.node
             ${CMAKE_CURRENT_SOURCE_DIR}/lib/chatbot-api/open-intent.node
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
