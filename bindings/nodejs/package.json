@@ -1,6 +1,6 @@
 {
   "name": "open-intent",
-  "version": "1.0.5",
+  "version": "1.0.18",
   "description": "An API for the open-intent chatbots",
   "main": "bindings/nodejs/index.js",
   "bin": {
@@ -32,7 +32,7 @@
     "nodemon": "^1.10.0",
     "q": "^1.4.1",
     "readline": "^1.3.0",
-    "readline-sync":"^1.4.4",
+    "readline-sync": "^1.4.4",
     "redis": "^2.6.0-2",
     "request": "^2.73.0",
     "requestify": "^0.1.17",
