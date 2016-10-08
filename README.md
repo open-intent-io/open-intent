@@ -1,27 +1,30 @@
 <p align="center">
-  <img src="/doc/img/logo.png" alt="Logo"/>
+  <a href="https://www.open-intent.io">
+    <img src="/doc/img/logo.png" alt="Logo"/>
+  </a>
 </p>
 
 ====================
 
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)][MIT License] [![Gitter](https://badges.gitter.im/open-intent-io/open-intent.svg)](https://gitter.im/open-intent-io/open-intent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Build Status](https://travis-ci.org/open-intent-io/open-intent.svg?branch=master)](https://travis-ci.org/open-intent-io/open-intent)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)][MIT License] [![Gitter](https://badges.gitter.im/open-intent-io/open-intent.svg)](https://gitter.im/open-intent-io/open-intent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Build Status](https://travis-ci.org/open-intent-io/open-intent.svg?branch=master)](https://travis-ci.org/open-intent-io/open-intent) ![platform](https://img.shields.io/badge/platform-linux%20only-green.svg)
 
-Open-intent is the only simple solution allowing you to create your own chat bot in minutes and easily deploy it on your infrastructure thanks to npm and docker.
-As a virtual assistant, open-intent will understand the needs of your user via a conversation on messenger or your own
-website and translate those intents into business actions.
+[open-intent] is a framework that helps you create and deploy your bots in minutes thanks to [npm](https://preview.npmjs.com/package/open-intent) and [docker](https://hub.docker.com/r/openintent/chatbot/).
+Open-intent will help you translate your user intents into actual business actions on messenger and your own website.
+
+Please note that [open-intent] is only available on **Linux** for now.
 
 # Example
 
-This is as simple as this single line to start prototyping your bot
+This is as simple as those two lines to start prototyping your bot
 
     npm install -g open-intent
     open-intent project create mychatbot
 
-This command starts an instance of bot with model located in the mychatbot/res/ directory on your host. In
-mychatbot/config, you'll find the configuration files for the available platforms. For now the only fully tested
-platform is *Messenger* but you can try the others at your own risks.
+This command starts an instance of bot with model located in the **mychatbot/res/** directory on your host. In
+**mychatbot/config**, you'll find the configuration files used to plug your bot in the available platforms. For now the only fully tested
+platform is **Messenger** but you can try the others at your own risks.
 
-Once the configuration is done, you can test your bot right away:
+Once the configuration is done, you can test your bot right away with the following command:
 
     open-intent project start mychatbot
      
@@ -31,8 +34,7 @@ You can also follow the [tutorial](https://github.com/open-intent-io/open-intent
 
 ## Your first bot model
 
-Below is the initial bot model you'll find in mychatbot/res/ when you create the instance. 3 files are required to
-describe a bot. The dictionary of entities is the first one and is as follows:
+3 files are required to describe a bot: the dictionary file, the model file and the user actions file. Below is the initial dictionary file you'll find in **mychatbot/res/** when you create the bot. It is used to teach your bot what words and concepts it'll have to deal with:
 
     {
       "entities": {
@@ -56,9 +58,10 @@ describe a bot. The dictionary of entities is the first one and is as follows:
       }
     }
 
-The Open-Intent Markup Language script is required to give example of the kind of business the bot will have to handle.
-It uses the dictionary to find the user intent (an ordered list of entities). This is like teaching a little story that
-will drive the conversations of your user.
+The model file is a description of a typical conversation your bot will have to handle.
+It is written with the Open-Intent Markup Language that is very close to natural language.
+It uses the entities in the dictionary to detect the user intents (an ordered list of entities).
+This is like teaching a little story that will drive the conversations of your user.
 
     {
     @root
@@ -108,7 +111,7 @@ Of course, there is a Javascript file to handle your business logic when actions
     }
 
 
-If you want to fully understand the model, we have created a
+This bot is a very simple one but there is a lot more in the open-intent framework. If you want to fully understand the model, we have created a
 [tutorial](https://github.com/open-intent-io/open-intent/wiki/Time-bot-tutorial) to help you quickly
 learn the basics on how to create your first bot with open-intent in 5 minutes.
 
@@ -151,3 +154,4 @@ open-intent is **licensed** under the **[MIT License]**. The terms of the licens
 [MIT License]: https://opensource.org/licenses/MIT
 [GitHub]: https://github.com/open-intent-io/open-intent
 [logo]: /doc/img/logo.png
+[open-intent]: https://www.open-intent.io
