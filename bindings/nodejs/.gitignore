@@ -2,8 +2,6 @@
 build/
 node_modules/
 
-*.node
-
 # IDE files
 .idea
 
