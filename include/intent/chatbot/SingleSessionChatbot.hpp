@@ -96,8 +96,9 @@ class SingleSessionChatbot : protected Chatbot {
   class UserDefinedActionHandlerAdapter
       : public Chatbot::UserDefinedActionHandler {
    public:
-    UserDefinedActionHandlerAdapter(const std::string& state,
-        SingleSessionChatbot& chatbot, std::vector<std::string>& replies,
+    UserDefinedActionHandlerAdapter(
+        const std::string& state, SingleSessionChatbot& chatbot,
+        std::vector<std::string>& replies,
         typename Chatbot::UserDefinedActionHandler::SharedPtr
             userDefinedActionHandler)
         : m_state(state),
@@ -115,7 +116,7 @@ class SingleSessionChatbot : protected Chatbot {
     }
 
    private:
-      const std::string m_state;
+    const std::string m_state;
     typename Chatbot::UserDefinedActionHandler::SharedPtr
         m_userDefinedActionHandler;
     SingleSessionChatbot& m_chatbot;

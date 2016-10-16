@@ -96,15 +96,13 @@ void SerializableChatbot::Init(Isolate *isolate) {
       FunctionTemplate::New(isolate, InstantiateFromJsonModel);
   fromJsonModelTemplate->SetClassName(
       String::NewFromUtf8(isolate, "SerializableChatbot"));
-  fromJsonModelTemplate->InstanceTemplate()->SetInternalFieldCount(5);
+  fromJsonModelTemplate->InstanceTemplate()->SetInternalFieldCount(4);
 
   // Prototype
   NODE_SET_PROTOTYPE_METHOD(fromJsonModelTemplate, "treatMessage",
                             TreatMessage);
   NODE_SET_PROTOTYPE_METHOD(fromJsonModelTemplate, "getInitialState",
                             GetInitialState);
-  NODE_SET_PROTOTYPE_METHOD(fromJsonModelTemplate, "getTerminalStates",
-                            GetTerminalStates);
   NODE_SET_PROTOTYPE_METHOD(fromJsonModelTemplate, "getGraph", GetGraph);
   NODE_SET_PROTOTYPE_METHOD(fromJsonModelTemplate, "prepareReplies",
                             PrepareReplies);
@@ -115,14 +113,12 @@ void SerializableChatbot::Init(Isolate *isolate) {
       FunctionTemplate::New(isolate, InstantiateFromOIML);
   fromOIMLTemplate->SetClassName(
       String::NewFromUtf8(isolate, "SerializableChatbot"));
-  fromOIMLTemplate->InstanceTemplate()->SetInternalFieldCount(5);
+  fromOIMLTemplate->InstanceTemplate()->SetInternalFieldCount(4);
 
   // Prototype
   NODE_SET_PROTOTYPE_METHOD(fromOIMLTemplate, "treatMessage", TreatMessage);
   NODE_SET_PROTOTYPE_METHOD(fromOIMLTemplate, "getInitialState",
                             GetInitialState);
-  NODE_SET_PROTOTYPE_METHOD(fromOIMLTemplate, "getTerminalStates",
-                            GetTerminalStates);
   NODE_SET_PROTOTYPE_METHOD(fromOIMLTemplate, "getGraph", GetGraph);
   NODE_SET_PROTOTYPE_METHOD(fromOIMLTemplate, "prepareReplies", PrepareReplies);
 
@@ -221,32 +217,41 @@ void SerializableChatbot::PrepareReplies(
 
   if (!args[0]->IsString()) {
     isolate->ThrowException(v8::Exception::TypeError(
+            String::NewFromUtf8(isolate, "state must be a String")));
+    return;
+  }
+  std::string state;
+  parseV8String(isolate, args[0]->ToString(), state);
+
+  if (!args[1]->IsString()) {
+    isolate->ThrowException(v8::Exception::TypeError(
         String::NewFromUtf8(isolate, "actionId must be a String")));
     return;
   }
   std::string actionId;
-  parseV8String(isolate, args[0]->ToString(), actionId);
+  parseV8String(isolate, args[1]->ToString(), actionId);
 
-  if (!args[1]->IsObject()) {
+  if (!args[2]->IsObject()) {
     isolate->ThrowException(v8::Exception::TypeError(
         String::NewFromUtf8(isolate, "IntentVariables must be a map.")));
     return;
   }
-  Local<Object> v8intentVariables = Local<Object>::Cast(args[1]);
+  Local<Object> v8intentVariables = Local<Object>::Cast(args[2]);
   intent::Chatbot::VariablesMap intentVariables;
   extractMapFromObject(v8intentVariables, intentVariables);
 
-  if (!args[2]->IsObject()) {
+  if (!args[3]->IsObject()) {
     isolate->ThrowException(v8::Exception::TypeError(
         String::NewFromUtf8(isolate, "UserVariables must be a map.")));
     return;
   }
-  Local<Object> v8userVariables = Local<Object>::Cast(args[2]);
+  Local<Object> v8userVariables = Local<Object>::Cast(args[3]);
   intent::Chatbot::VariablesMap userVariables;
   extractMapFromObject(v8userVariables, userVariables);
 
+
   std::vector<std::string> replies =
-      obj->m_chatbot->prepareReplies(actionId, intentVariables, userVariables);
+      obj->m_chatbot->prepareReplies(state, actionId, intentVariables, userVariables);
 
   INTENT_LOG_TRACE() << "Chatbot::prepareReplies "
               << "\n";
@@ -271,23 +276,6 @@ void SerializableChatbot::GetInitialState(
       isolate, obj->m_chatbot->getInitialState().c_str());
 
   args.GetReturnValue().Set(initialState);
-}
-
-void SerializableChatbot::GetTerminalStates(
-    const FunctionCallbackInfo<Value> &args) {
-  Isolate *isolate = args.GetIsolate();
-  SerializableChatbot *obj =
-      ObjectWrap::Unwrap<SerializableChatbot>(args.Holder());
-
-  Local<Array> terminalStates = Array::New(isolate);
-  unsigned int i = 0;
-
-  for (const std::string &state : obj->m_chatbot->getTerminalStates()) {
-    Local<Value> v8state = v8::String::NewFromUtf8(isolate, state.c_str());
-    terminalStates->Set(i++, v8state);
-  }
-
-  args.GetReturnValue().Set(terminalStates);
 }
 
 void SerializableChatbot::GetGraph(const FunctionCallbackInfo<Value> &args) {

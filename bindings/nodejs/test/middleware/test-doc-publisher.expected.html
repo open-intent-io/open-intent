@@ -10,7 +10,7 @@
 0[label=<@root>];
 1[label=<@get_food_type>];
 2[label=<@yesno>];
-3[label=<@end>, peripheries=2, color=".7 .3 1.0"];
+3[label=<@end>];
 0->1 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0001</td></tr><tr><td>intent_desc</td><td>Hello</td></tr><tr><td>entities</td><td>[greetings]</td></tr><tr><td>action</td><td>#greetings</td></tr><tr><td>reply</td><td>Would you want to eat a pizza, a hamburger or a salad?</td></tr></table> >];
 1->2 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0000</td></tr><tr><td>intent_desc</td><td>Pizza, please.</td></tr><tr><td>entities</td><td>[food_type]</td></tr><tr><td>action</td><td>#get_food_type</td></tr><tr><td>reply</td><td>Got it, you want _, right?</td></tr></table> >];
 1->1 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>_</td></tr><tr><td>intent_desc</td><td>Pizza, please.</td></tr><tr><td>entities</td><td></td></tr><tr><td>action</td><td>@get_food_type*</td></tr><tr><td>reply</td><td>I did not understand. Pizza, hamburger or salad?</td></tr></table> >];

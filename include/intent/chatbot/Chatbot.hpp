@@ -149,7 +149,8 @@ class Chatbot {
    */
 
   std::vector<std::string> prepareReplies(
-      const std::string& state, const std::string& actionId, const Chatbot::VariablesMap& intentVariables,
+      const std::string& state, const std::string& actionId,
+      const Chatbot::VariablesMap& intentVariables,
       Chatbot::VariablesMap& userDefinedVariables);
 
   /**

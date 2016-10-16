@@ -108,8 +108,9 @@ std::string replaceTemplateVariables(
   return message;
 }
 
-std::vector<std::string> Chatbot::prepareReplies(const std::string& state,
-    const std::string& actionId, const Chatbot::VariablesMap& intentVariables,
+std::vector<std::string> Chatbot::prepareReplies(
+    const std::string& state, const std::string& actionId,
+    const Chatbot::VariablesMap& intentVariables,
     Chatbot::VariablesMap& userDefinedVariables) {
   INTENT_LOG_INFO() << "Chatbot::prepareReplies starting";
 
@@ -120,8 +121,9 @@ std::vector<std::string> Chatbot::prepareReplies(const std::string& state,
   stateAndActionId.state = state;
   stateAndActionId.actionId = actionId;
 
-  ChatbotActionModel::ReplyIdsByStateAndActionIdIndex::const_iterator repliesIt =
-      m_chatbotActionModel->replyIdsByStateAndActionId.find(stateAndActionId);
+  ChatbotActionModel::ReplyIdsByStateAndActionIdIndex::const_iterator
+      repliesIt = m_chatbotActionModel->replyIdsByStateAndActionId.find(
+          stateAndActionId);
 
   if (repliesIt != m_chatbotActionModel->replyIdsByStateAndActionId.end()) {
     const std::vector<ChatbotActionModel::IndexType>& replyIds =

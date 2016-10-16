@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.2)
 
 
 ADD_CUSTOM_TARGET(open-intent-js
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/open-intent.tgz
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lib/chatbot-api/open-intent.node ${JS_SOURCE_FILES}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
@@ -42,7 +42,7 @@ FIND_PROGRAM( DOCKER_PATH docker )
 
 IF(DOCKER_PATH)
     ADD_CUSTOM_TARGET(open-intent-docker
-            DEPENDS open-intent-js
+            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/open-intent.tgz
             COMMAND docker build -t open-intent .
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )

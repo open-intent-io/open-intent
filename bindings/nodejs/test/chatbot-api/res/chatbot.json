@@ -94,13 +94,23 @@
       "dont_understand_reply": "Je ne comprends pas.",
       "dont_understand_reply2": "Pouvez-vous répéter ?"
     },
-    "replies_by_action": {
-      "wake": ["what_can_i_get_you_reply"],
-      "append_order1": ["want_something_else_reply"],
-      "append_order2": ["want_something_else_reply"],
-      "bye": ["bye_reply"],
-      "grab_it": ["grab_it_reply", "bye_reply"],
-      "dont_understand": ["dont_understand_reply"]
+    "replies_by_state_action": {
+      "init": {
+        "wake": ["what_can_i_get_you_reply"],
+        "dont_understand": ["dont_understand_reply"]
+      },
+      "wait_order": {
+        "append_order1": ["want_something_else_reply"],
+        "append_order2": ["want_something_else_reply"],
+        "dont_understand": ["dont_understand_reply"],
+        "bye": ["bye_reply"]
+      },
+      "wait_another_order": {
+        "append_order1": ["want_something_else_reply"],
+        "append_order2": ["want_something_else_reply"],
+        "dont_understand": ["dont_understand_reply"],
+        "grab_it": ["grab_it_reply", "bye_reply"]
+      }
     }
   },
 
@@ -115,17 +125,15 @@
       "wait_order": {
         "order1:append_order1": "wait_another_order",
         "order2:append_order2": "wait_another_order",
-        "nothing:bye": "bye",
+        "nothing:bye": "init",
         "_:dont_understand": "wait_order"
       },
       "wait_another_order": {
         "order1:append_order1": "wait_another_order",
         "order2:append_order2": "wait_another_order",
-        "nothing:bye": "grab_it",
+        "nothing:grab_it": "init",
         "_:dont_understand": "wait_another_order"
-      },
-      "grab_it": {},
-      "bye" : {}
+      }
     }
   }
 }

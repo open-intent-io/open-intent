@@ -383,42 +383,50 @@ void deserializeReplies(const nlohmann::json::object_t& replies,
   }
 }
 
-void appendRepliesListByStateAndActionId(const std::string& state, const std::string& actionId,
-                                         const nlohmann::json::array_t& repliesList,
-                                         ChatbotActionModel& chatbotActionModel)
-{
+void appendRepliesListByStateAndActionId(
+    const std::string& state, const std::string& actionId,
+    const nlohmann::json::array_t& repliesList,
+    ChatbotActionModel& chatbotActionModel) {
   ChatbotActionModel::StateAndActionId stateAndActionId;
   stateAndActionId.state = state;
   stateAndActionId.actionId = actionId;
 
   for (const std::string& replyId : repliesList) {
-    chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId].push_back(replyId);
+    chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId].push_back(
+        replyId);
   }
 }
 
-void deserializeReplyIdsByActionId(const nlohmann::json::object_t& repliesByAction,
-                                   const std::string& state,
-                                   ChatbotActionModel& chatbotActionModel)
-{
-  nlohmann::json::object_t::const_iterator repliesByActionIt = repliesByAction.begin();
-  nlohmann::json::object_t::const_iterator repliesByActionItEnd = repliesByAction.end();
+void deserializeReplyIdsByActionId(
+    const nlohmann::json::object_t& repliesByAction, const std::string& state,
+    ChatbotActionModel& chatbotActionModel) {
+  nlohmann::json::object_t::const_iterator repliesByActionIt =
+      repliesByAction.begin();
+  nlohmann::json::object_t::const_iterator repliesByActionItEnd =
+      repliesByAction.end();
 
   for (; repliesByActionIt != repliesByActionItEnd; ++repliesByActionIt) {
     const std::string& actionId = repliesByActionIt->first;
     const nlohmann::json::array_t& repliesList = repliesByActionIt->second;
 
-    appendRepliesListByStateAndActionId(state, actionId, repliesList, chatbotActionModel);
+    appendRepliesListByStateAndActionId(state, actionId, repliesList,
+                                        chatbotActionModel);
   }
 }
 
-void deserializeReplyIdsByStateAndActionId(const nlohmann::json::object_t& repliesByStatesAndActions,
-                                   ChatbotActionModel& chatbotActionModel) {
-  nlohmann::json::object_t::const_iterator repliesByStatesAndActionsIt = repliesByStatesAndActions.begin();
-  nlohmann::json::object_t::const_iterator repliesByStatesAndActionsItEnd = repliesByStatesAndActions.end();
+void deserializeReplyIdsByStateAndActionId(
+    const nlohmann::json::object_t& repliesByStatesAndActions,
+    ChatbotActionModel& chatbotActionModel) {
+  nlohmann::json::object_t::const_iterator repliesByStatesAndActionsIt =
+      repliesByStatesAndActions.begin();
+  nlohmann::json::object_t::const_iterator repliesByStatesAndActionsItEnd =
+      repliesByStatesAndActions.end();
 
-  for (; repliesByStatesAndActionsIt != repliesByStatesAndActionsItEnd; ++repliesByStatesAndActionsIt) {
+  for (; repliesByStatesAndActionsIt != repliesByStatesAndActionsItEnd;
+       ++repliesByStatesAndActionsIt) {
     const std::string& state = repliesByStatesAndActionsIt->first;
-    const nlohmann::json::object_t& repliesByActions = repliesByStatesAndActionsIt->second;
+    const nlohmann::json::object_t& repliesByActions =
+        repliesByStatesAndActionsIt->second;
 
     deserializeReplyIdsByActionId(repliesByActions, state, chatbotActionModel);
   }

@@ -142,19 +142,21 @@ struct ActionInserter {
         m_chatbotActionModel(chatbotActionModel) {}
 
   void operator()(EdgeDefinition& edge) {
-    const std::string replyId = DEFAULT_REPLY_ID + "_" + edge.source.stateId + "_" + edge.edge.actionId;
+    const std::string replyId =
+        DEFAULT_REPLY_ID + "_" + edge.source.stateId + "_" + edge.edge.actionId;
 
     ReplyTemplateInterpreter::adapt(edge.replyTemplate);
     m_chatbotActionModel.replyContentByReplyIdIndex[replyId] =
         edge.replyTemplate;
 
-      ChatbotActionModel::StateAndActionId stateAndActionId;
-      stateAndActionId.state = edge.source.stateId;
-      stateAndActionId.actionId = edge.edge.actionId;
+    ChatbotActionModel::StateAndActionId stateAndActionId;
+    stateAndActionId.state = edge.source.stateId;
+    stateAndActionId.actionId = edge.edge.actionId;
 
-    if (m_chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId].empty()) {
-      m_chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId].push_back(
-          replyId);
+    if (m_chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId]
+            .empty()) {
+      m_chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId]
+          .push_back(replyId);
     }
     ++m_repliesCounter;
   }

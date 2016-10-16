@@ -57,7 +57,8 @@ std::vector<std::string> MultiSessionChatbot<SessionIdType>::treatMessage(
   std::vector<std::string> replies;
 
   if (it != m_sessionIndex.end()) {
-    UserDefinedActionHandlerAdapter actionHandler(it->second.currentStateId, *this, replies, it->first,
+    UserDefinedActionHandlerAdapter actionHandler(it->second.currentStateId,
+                                                  *this, replies, it->first,
                                                   m_userDefinedActionHandler);
 
     Chatbot::VariablesMap userDefinedVariables;

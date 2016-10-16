@@ -15,13 +15,10 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/json/src)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/spdlog/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 
-# Copy ressource files
-include(Custom)
-
 ADD_CUSTOM_TARGET(run-unit-tests-cpp
     DEPENDS intent-test
-    COMMAND ${CMAKE_BINARY_DIR}/test/tests/intent-test
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/tests/
+    COMMAND ${CMAKE_BINARY_DIR}/test/intent-test
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test
 )
 
 SET(SOURCE_FILES
