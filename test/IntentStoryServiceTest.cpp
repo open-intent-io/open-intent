@@ -43,8 +43,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <gtest/gtest.h>
 
-#include "../launcher/ResourceManager.hpp"
-#include "../launcher/TestContext.hpp"
+#include "launcher/ResourceManager.hpp"
+#include "launcher/TestContext.hpp"
 #include "json.hpp"
 
 #include "intent/intent_story_service/IntentStoryService.hpp"

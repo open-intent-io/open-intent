@@ -13,7 +13,6 @@ namespace intent
         TestContext::TestContext(const std::string &resourceDirectory)
             : m_resourceManager(resourceDirectory)
         {
-
         }
 
         void TestContext::SetUp()
@@ -31,28 +30,27 @@ namespace intent
 
         void TestContext::TearDown()
         {
-
         }
 
         void TestContext::registerResources()
         {
             m_resourceManager.registerFile(ResourceManager::ResourceId::INTENT_DICTIONARY_DESERIALIZATION_JSON_EXAMPLE,
-                                           "intent_dictionary_deserialization_test.json");
+                                           "res/intent_dictionary_deserialization_test.json");
             m_resourceManager.registerFile(ResourceManager::ResourceId::INTENT_DICTIONARY_DESERIALIZATION_INVALID_JSON_EXAMPLE,
-                                           "intent_dictionary_deserialization_invalid_test.json");
+                                           "res/intent_dictionary_deserialization_invalid_test.json");
             m_resourceManager.registerFile(ResourceManager::ResourceId::ORDER_BEVERAGE_INTENT_JSON,
-                                           "order_beverage_intent.json");
-            m_resourceManager.registerFile(ResourceManager::ResourceId::CHATBOT_MODE_JSON,
-                                           "chatbot_model.json");
-            m_resourceManager.registerFile(ResourceManager::ResourceId::QUERY_MODE_JSON, "queries_model.json");
+                                           "res/order_beverage_intent.json");
+            m_resourceManager.registerFile(ResourceManager::ResourceId::CHATBOT_MODEL_JSON,
+                                           "res/chatbot_model.json");
+            m_resourceManager.registerFile(ResourceManager::ResourceId::QUERY_MODE_JSON, "res/queries_model.json");
             m_resourceManager.registerFile(ResourceManager::ResourceId::TEMPLATE_REPLIES_JSON,
-                                           "template_replies.json");
+                                           "res/template_replies.json");
             m_resourceManager.registerFile(ResourceManager::ResourceId::INTERPRETER_MODEL,
-                                           "interpreter_model.txt");
+                                           "res/interpreter_model.txt");
             m_resourceManager.registerFile(ResourceManager::ResourceId::INTERPRETER_MODEL_W_ERRORS,
-                                           "interpreter_model_w_errors.txt");
-            m_resourceManager.registerFile(ResourceManager::ResourceId::CHATBOT_MODE_JSON_WITHOUT_INTENT_STORY,
-                                           "chatbot_model_without_intent_story.json");
+                                           "res/interpreter_model_w_errors.txt");
+            m_resourceManager.registerFile(ResourceManager::ResourceId::CHATBOT_MODEL_JSON_WITHOUT_INTENT_STORY,
+                                           "res/chatbot_model_without_intent_story.json");
         }
 
     }

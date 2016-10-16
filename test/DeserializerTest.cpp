@@ -43,7 +43,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "../launcher/TestContext.hpp"
+#include "launcher/TestContext.hpp"
 
 #include <string>
 
@@ -171,7 +171,7 @@ TEST(IntentDictionaryDeserializerTest, test_chatbot_deserialization)
     const intent::test::ResourceManager &resourceManager = intent::test::gTestContext->getResourceManager();
 
     std::string jsonContent = resourceManager.getResource(test::ResourceManager::ResourceId::
-                                                          CHATBOT_MODE_JSON);
+                                                          CHATBOT_MODEL_JSON);
 
     std::stringstream ss;
 

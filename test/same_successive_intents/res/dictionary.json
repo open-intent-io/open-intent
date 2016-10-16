@@ -1,0 +1,28 @@
+{
+  "entities": {
+    "greetings": {
+      "bonjour": ["hello", "hi", "salut", "hey", "coucou"]
+    },
+    "yes": {
+      "yes": []
+    },
+    "no": {
+      "no": []
+    },
+    "exhibition": {
+      "salon": []
+    },
+    "eat": {
+      "manger": []
+    },
+    "drink": {
+      "boire": []
+    },
+    "information": {
+      "information": []
+    },
+    "prices": {
+      "prix": ["tarifs"]
+    }
+  }
+}

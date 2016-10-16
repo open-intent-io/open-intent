@@ -43,7 +43,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "../launcher/TestContext.hpp"
+#include "launcher/TestContext.hpp"
 #include "intent/intent_story_service/IntentStoryService.hpp"
 #include "intent/interpreter/SentenceToIntentTranslator.hpp"
 #include "intent/interpreter/EdgeParser.hpp"
@@ -265,7 +265,7 @@ public:
         const intent::test::ResourceManager &resourceManager = intent::test::gTestContext->getResourceManager();
 
         std::string chatbotModelFileContent = resourceManager.getResource(test::ResourceManager::ResourceId::
-                                                              CHATBOT_MODE_JSON_WITHOUT_INTENT_STORY);
+                                                              CHATBOT_MODEL_JSON_WITHOUT_INTENT_STORY);
         std::stringstream ss;
         ss << chatbotModelFileContent;
 
@@ -441,7 +441,7 @@ public:
         const intent::test::ResourceManager &resourceManager = intent::test::gTestContext->getResourceManager();
 
         std::string chatbotModelFileContent = resourceManager.getResource(test::ResourceManager::ResourceId::
-                                                              CHATBOT_MODE_JSON_WITHOUT_INTENT_STORY);
+                                                              CHATBOT_MODEL_JSON_WITHOUT_INTENT_STORY);
         std::stringstream ss;
         ss << chatbotModelFileContent;
 

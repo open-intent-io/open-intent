@@ -1,0 +1,11 @@
+{
+@root
+    -Salut
+        *Pas compris
+    -Salut, je suis dans l'état 1
+@search
+    -Coucou
+    -Salut, je suis dans l'état 2
+@root
+}
+
