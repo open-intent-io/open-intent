@@ -1,14 +1,10 @@
 FROM open-intent
 MAINTAINER open-intent.io
 
-WORKDIR /
-
 RUN npm install -g mocha
 
-RUN open-intent project create --no-npm chatbot-test
+RUN /entrypoint.sh
 
-WORKDIR /chatbot-test
-
-RUN npm link open-intent && npm install
+WORKDIR /chatbot
 
 CMD ["mocha"]

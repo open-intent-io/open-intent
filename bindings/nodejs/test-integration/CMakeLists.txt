@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.2)
 
 ADD_CUSTOM_TARGET(build-integration-test-docker
-        COMMAND docker build -t open-intent-integration ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMAND docker build -t open-intent-integration .
         DEPENDS open-intent-docker
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 ADD_CUSTOM_TARGET(run-integration-tests-js

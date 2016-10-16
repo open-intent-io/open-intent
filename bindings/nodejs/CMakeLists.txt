@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 3.2)
 
 
 ADD_CUSTOM_TARGET(open-intent-js
-        COMMAND npm install
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lib/chatbot-api/open-intent.node
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/open-intent.tgz
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
@@ -11,6 +10,19 @@ SET(SOURCE_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/SerializableChatbot.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/include/intentjs/SerializableChatbot.hpp
+)
+
+file(GLOB_RECURSE JS_SOURCE_FILES LIST_DIRECTORIES false bin/* config/*
+        lib/* project-skeletons/* test/* test-integration/* index.js package.json)
+
+ADD_CUSTOM_COMMAND(
+        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/open-intent.tgz
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lib/chatbot-api/open-intent.node ${JS_SOURCE_FILES}
+        COMMAND echo "Packaging nodejs"
+        COMMAND rm -f open-intent-*.tgz
+        COMMAND npm pack
+        COMMAND mv open-intent-*.tgz open-intent.tgz
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 ADD_CUSTOM_COMMAND(
@@ -41,8 +53,9 @@ ENDIF()
 
 
 ADD_CUSTOM_TARGET(run-unit-tests-js
-    DEPENDS open-intent-js
-    COMMAND npm test
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DEPENDS open-intent-js
+        COMMAND npm install
+        COMMAND npm test
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 

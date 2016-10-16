@@ -1,5 +1,4 @@
 
-build/
 node_modules/
 
 # IDE files
@@ -24,7 +23,7 @@ coverage
 .grunt
 
 # Compiled binary addons (http://nodejs.org/api/addons.html)
-build/Release
+src/build
 
 # Dependency directory
 # Commenting this out is preferred by some people, see
@@ -36,3 +35,5 @@ node_modules
 
 # Runtime configuration for swagger app
 ../config/runtime.yaml
+
+open-intent.tgz
