@@ -86,10 +86,12 @@
       "beveragelist_reply": "Voici les boissons : ${beverages}",
       "price_reply": "Le prix est : ${price}€."
     },
-    "replies_by_action": {
-      "price_action": ["price_reply"],
-      "beverage_action": ["beveragelist_reply"],
-      "category_action": ["beveragelist_reply"]
+    "replies_by_state_action": {
+      "init": {
+        "price_action": ["price_reply"],
+        "beverage_action": ["beveragelist_reply"],
+        "category_action": ["beveragelist_reply"]
+      }
     }
   },
 

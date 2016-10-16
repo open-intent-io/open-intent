@@ -96,11 +96,12 @@ class SingleSessionChatbot : protected Chatbot {
   class UserDefinedActionHandlerAdapter
       : public Chatbot::UserDefinedActionHandler {
    public:
-    UserDefinedActionHandlerAdapter(
+    UserDefinedActionHandlerAdapter(const std::string& state,
         SingleSessionChatbot& chatbot, std::vector<std::string>& replies,
         typename Chatbot::UserDefinedActionHandler::SharedPtr
             userDefinedActionHandler)
-        : m_userDefinedActionHandler(userDefinedActionHandler),
+        : m_state(state),
+          m_userDefinedActionHandler(userDefinedActionHandler),
           m_chatbot(chatbot),
           m_replies(replies) {}
 
@@ -109,11 +110,12 @@ class SingleSessionChatbot : protected Chatbot {
                     Chatbot::VariablesMap& userDefinedVariables) {
       (*m_userDefinedActionHandler)(action, intentVariables,
                                     userDefinedVariables);
-      m_replies = m_chatbot.prepareReplies(action, intentVariables,
+      m_replies = m_chatbot.prepareReplies(m_state, action, intentVariables,
                                            userDefinedVariables);
     }
 
    private:
+      const std::string m_state;
     typename Chatbot::UserDefinedActionHandler::SharedPtr
         m_userDefinedActionHandler;
     SingleSessionChatbot& m_chatbot;

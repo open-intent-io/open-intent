@@ -184,21 +184,32 @@ TEST(IntentDictionaryDeserializerTest, test_chatbot_deserialization)
 
     EXPECT_THAT(chatbotActionModel.replyContentByReplyIdIndex, SizeIs(8));
 
-    ASSERT_THAT(chatbotActionModel.replyIdsByActionId, SizeIs(7));
+    ASSERT_THAT(chatbotActionModel.replyIdsByStateAndActionId, SizeIs(11));
 
-    EXPECT_THAT(chatbotActionModel.replyIdsByActionId["wake"],
+    ChatbotActionModel::StateAndActionId stateAndActionId;
+    stateAndActionId.state = "init";
+    stateAndActionId.actionId = "wake";
+    EXPECT_THAT(chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId],
                 ElementsAre("what_can_i_get_you_reply"));
 
-    EXPECT_THAT(chatbotActionModel.replyIdsByActionId["append_order1"],
+    stateAndActionId.state = "wait_order";
+    stateAndActionId.actionId = "append_order1";
+    EXPECT_THAT(chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId],
                 ElementsAre("want_something_else_reply"));
 
-    EXPECT_THAT(chatbotActionModel.replyIdsByActionId["append_order2"],
+    stateAndActionId.state = "wait_order";
+    stateAndActionId.actionId = "append_order2";
+    EXPECT_THAT(chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId],
                 ElementsAre("want_something_else_reply"));
 
-    EXPECT_THAT(chatbotActionModel.replyIdsByActionId["bye"],
+    stateAndActionId.state = "wait_order";
+    stateAndActionId.actionId = "bye";
+    EXPECT_THAT(chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId],
                 ElementsAre("bye_reply"));
 
-    EXPECT_THAT(chatbotActionModel.replyIdsByActionId["grab_it"],
+    stateAndActionId.state = "wait_another_order";
+    stateAndActionId.actionId = "grab_it";
+    EXPECT_THAT(chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId],
                 ElementsAre("grab_it_reply", "bye_reply"));
 
 }

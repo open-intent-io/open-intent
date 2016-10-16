@@ -139,6 +139,7 @@ class Chatbot {
                     VariablesMap& userDefinedVariables);
 
   /**
+   * \param state                The state for reply templates retrieval
    * \param actionId             The action id for reply templates retrieval
    * \param intentVariables      The variables parsed from the detected intent
    * \param userDefinedVariables The variables exposed by the user commands
@@ -148,7 +149,7 @@ class Chatbot {
    */
 
   std::vector<std::string> prepareReplies(
-      const std::string& actionId, const Chatbot::VariablesMap& intentVariables,
+      const std::string& state, const std::string& actionId, const Chatbot::VariablesMap& intentVariables,
       Chatbot::VariablesMap& userDefinedVariables);
 
   /**

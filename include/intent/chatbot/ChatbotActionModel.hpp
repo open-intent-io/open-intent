@@ -60,16 +60,30 @@ namespace intent {
 class ChatbotActionModel {
  public:
   typedef IntentStoryModel::IndexType IndexType;
-
-  typedef std::map<IndexType, std::vector<IndexType>> ReplyIdsByActionIdIndex;
   typedef std::map<IndexType, std::string> ReplyContentByReplyIdIndex;
   typedef std::shared_ptr<ChatbotActionModel> SharedPtr;
+
+  struct StateAndActionId
+  {
+      IndexType actionId;
+      IndexType state;
+
+      bool operator<(const StateAndActionId& that) const
+      {
+        if(state != that.state)
+          return state < that.state;
+
+        return actionId < that.actionId;
+      }
+  };
+
+  typedef std::map<StateAndActionId, std::vector<IndexType> > ReplyIdsByStateAndActionIdIndex;
 
   /**
    * Index of list of reply IDs by action id. The action can be a reply or a
    * user defined action
    */
-  ReplyIdsByActionIdIndex replyIdsByActionId;
+  ReplyIdsByStateAndActionIdIndex replyIdsByStateAndActionId;
 
   /**
    * Index of replies by reply id.
