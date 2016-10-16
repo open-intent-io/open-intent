@@ -272,8 +272,6 @@ ChatbotModel Interpreter::build(const std::string& script,
 
   const DictionaryModel& dict = *dictionaryModel;
 
-  intentStoryModel.terminalStateIds.insert(
-      firstScenario[firstScenario.size() - 1].content);
   if (!isLine<STATE>(firstScenario[firstScenario.size() - 1].content))
     interpreterFeedback.push_back(InterpreterMessage(
         TERMINAL_STATE_MSG, firstScenario[firstScenario.size() - 1], ERROR));

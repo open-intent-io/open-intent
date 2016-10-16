@@ -83,7 +83,6 @@
 
   "intent_story": {
     "root": "root",
-    "terminals": ["end", "bye"],
     "graph": {
       "root": {
         "order1": "credit_card",

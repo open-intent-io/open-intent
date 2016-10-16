@@ -118,7 +118,6 @@
 
   "intent_story": {
     "root": "init",
-    "terminals": ["bye", "grab_it"],
     "graph": {
       "init": {
         "ask_waiter:wake": "wait_order",
@@ -128,17 +127,15 @@
       "wait_order": {
         "order1:append_order1": "wait_another_order",
         "order2:append_order2": "wait_another_order",
-        "nothing:bye": "bye",
+        "nothing:bye": "init",
         "_:dont_understand": "wait_order"
       },
       "wait_another_order": {
         "order1:append_order1": "wait_another_order",
         "order2:append_order2": "wait_another_order",
-        "nothing:bye": "grab_it",
+        "nothing:grab_it": "init",
         "_:dont_understand": "wait_another_order"
-      },
-      "grab_it": {},
-      "bye" : {}
+      }
     }
   }
 }

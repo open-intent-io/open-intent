@@ -131,7 +131,7 @@ namespace intent
             EXPECT_THAT(reply1, ElementsAre("Que puis-je vous offrir ?"));
             EXPECT_THAT(reply2, ElementsAre("Vous-voulez quelque chose d'autre ?"));
             EXPECT_THAT(reply3,
-                        ElementsAre("Au revoir et à bientôt."));
+                        ElementsAre("Veuillez récupérer vos consommations au bar.", "Au revoir et à bientôt."));
         }
 
         TEST(ChatbotFactoryTest, create_chatbot_from_unexisting_file)

@@ -74,14 +74,6 @@ class IntentStoryModel {
     std::string stateId;
   };
 
-  /**
-   * \brief Returns whether a state is terminal.
-   * \return Return true if the state is terminal, return false otherwise.
-   */
-  bool isStateIdTerminal(const std::string& stateId) const {
-    return terminalStateIds.find(stateId) != terminalStateIds.end();
-  }
-
   typedef Graph<VertexInfo, EdgeInfo> StoryGraph;
   typedef std::map<IndexType, StoryGraph::Vertex> VertexByStateIdIndex;
   typedef std::unordered_set<IndexType> StateIdSet;
@@ -91,12 +83,6 @@ class IntentStoryModel {
    * \brief The root state ID.
    */
   IndexType rootStateId;
-
-  /**
-   * \brief List of terminal states that leads the service to restart from the
-   * root state.
-   */
-  StateIdSet terminalStateIds;
 
   /**
    * \brief Index of the vertices by state ID

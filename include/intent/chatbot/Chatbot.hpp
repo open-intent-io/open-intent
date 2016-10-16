@@ -156,11 +156,6 @@ class Chatbot {
    */
   std::string getInitialState() const;
 
-  /**
-   * \brief Returns the set of terminal states of the model
-   */
-  std::unordered_set<std::string> getTerminalStates() const;
-
   inline ChatbotModel getChatbotModel() const {
     ChatbotModel chatbotModel;
     chatbotModel.chatbotActionModel = m_chatbotActionModel;

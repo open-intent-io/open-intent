@@ -158,11 +158,9 @@ TEST(IntentDictionaryDeserializerTest, test_intent_story_deserialization_from_is
     Deserializer deserializer;
     IntentStoryServiceModel intentStoryServiceModel = deserializer.deserialize<IntentStoryServiceModel>(ss);
 
-    ASSERT_EQ_SIGNED(6, intentStoryServiceModel.intentStoryModel->vertexByStateId.size());
-    ASSERT_EQ_SIGNED(6, intentStoryServiceModel.intentStoryModel->graph.vertexCount());
+    ASSERT_EQ_SIGNED(4, intentStoryServiceModel.intentStoryModel->vertexByStateId.size());
+    ASSERT_EQ_SIGNED(4, intentStoryServiceModel.intentStoryModel->graph.vertexCount());
     ASSERT_EQ_SIGNED(3, intentStoryServiceModel.intentStoryModel->graph.edgeCount());
-
-    ASSERT_THAT(intentStoryServiceModel.intentStoryModel->terminalStateIds, SizeIs(2));
 
     ASSERT_EQ("root", intentStoryServiceModel.intentStoryModel->rootStateId);
 }

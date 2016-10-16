@@ -95,14 +95,13 @@
 
   "intent_story": {
     "root": "init",
-    "terminals": ["end"],
     "graph": 
     {
       "init": 
       {
-        "price_query:price_action": "end",
-        "beverage_query:beverage_action": "end",
-        "category_query:category_action": "end"
+        "price_query:price_action": "init",
+        "beverage_query:beverage_action": "init",
+        "category_query:category_action": "init"
       }
     }
   }

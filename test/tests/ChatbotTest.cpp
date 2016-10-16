@@ -96,12 +96,5 @@ namespace intent
 
             EXPECT_EQ("init", chatbot.getInitialState());
         }
-
-        TEST_F(ChatbotTest, returns_the_right_terminal_states)
-        {
-            Chatbot chatbot(m_chatbotModel);
-
-            EXPECT_THAT(chatbot.getTerminalStates(), UnorderedElementsAre("bye", "grab_it"));
-        }
     }
 }

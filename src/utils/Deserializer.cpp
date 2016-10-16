@@ -237,19 +237,6 @@ void deserializeIntentStory(const nlohmann::json& story,
     intentStoryModel.rootStateId = vInfo.stateId;
   }
 
-  it = story.find("terminals");
-  if (it != story.end() && (*it).is_array()) {
-    const nlohmann::json::array_t& terminals = *it;
-    for (const std::string& terminalStateId : terminals) {
-      IntentStoryModel::VertexInfo vInfo;
-      vInfo.stateId = terminalStateId;
-      IntentStoryModel::StoryGraph::Vertex v =
-          intentStoryModel.graph.addVertex(vInfo);
-      intentStoryModel.vertexByStateId[vInfo.stateId] = v;
-      intentStoryModel.terminalStateIds.insert(terminalStateId);
-    }
-  }
-
   it = story.find("graph");
   if (it != story.end() && (*it).is_object()) {
     deserializeGraph(*it, intentStoryModel);
