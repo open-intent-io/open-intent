@@ -133,9 +133,13 @@ describe("Test Open Intent chatbot factory", function() {
                 return chatbot.talk(sessionId, 'rien');
             })
             .then(function(replies) {
-                expect(replies).to.deep.equal(["Au revoir et à bientôt."]);
+                expect(replies).to.deep.equal(["Veuillez récupérer vos consommations au bar.",
+                    "Au revoir et à bientôt."]);
                 done();
-            });
+            })
+            .fail(function(err) {
+                console.error(err);
+            })
         });
     });
 
@@ -170,9 +174,13 @@ describe("Test Open Intent chatbot factory", function() {
                 return chatbot.talk(sessionId1, 'rien');
             })
             .then(function(replies) {
-                expect(replies).to.deep.equal(["Au revoir et à bientôt."]);
+                expect(replies).to.deep.equal(["Veuillez récupérer vos consommations au bar.",
+                    "Au revoir et à bientôt."]);
                 done();
-            });
+            })
+            .fail(function(err) {
+                console.error(err);
+            })
         });
     });
 
@@ -183,16 +191,6 @@ describe("Test Open Intent chatbot factory", function() {
             var chatbot = OpenIntentChatbot.fromJsonModel(model, sessionManager, userDefinedActionDriver);
 
             assert.equal(chatbot.getInitialState(), "init");
-        })
-    });
-
-    describe("The chatbot returns the right terminal states", function() {
-        it('should return the terminal states', function() {
-            var sessionManager = new StandaloneSessionManager();
-            var userDefinedActionDriver = new SimpleUserCommandsDriver(userCommands);
-            var chatbot = OpenIntentChatbot.fromJsonModel(model, sessionManager, userDefinedActionDriver);
-
-            assert.sameMembers(chatbot.getTerminalStates(), ["bye", "grab_it"]);
         })
     });
 
@@ -303,7 +301,7 @@ describe("Test Open Intent chatbot factory", function() {
                     userDefinedActionDriver);
 
                 var graph = chatbot.getGraph();
-                expect(graph).to.equal('digraph G {\n0[label=<@root>];\n1[label=<@wait_order>];\n2[label=<@wait_another_order>];\n3[label=<@bye>, peripheries=2, color=".7 .3 1.0"];\n0->1 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0004</td></tr><tr><td>intent_desc</td><td>Bob!</td></tr><tr><td>entities</td><td>[@waiter]</td></tr><tr><td>action</td><td>#wake</td></tr><tr><td>reply</td><td>Que puis-je vous offrir ?</td></tr></table> >];\n0->0 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>_</td></tr><tr><td>intent_desc</td><td>Bob!</td></tr><tr><td>entities</td><td></td></tr><tr><td>action</td><td>@root*</td></tr><tr><td>reply</td><td>Je n\'ai pas compris votre demande</td></tr></table> >];\n1->2 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>00030000</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro</td></tr><tr><td>entities</td><td>[@beverage, @number]</td></tr><tr><td>action</td><td>#append_order1</td></tr><tr><td>reply</td><td>Vous-voulez quelque chose d\'autre ?</td></tr></table> >];\n1->1 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>_</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro</td></tr><tr><td>entities</td><td></td></tr><tr><td>action</td><td>@wait_order*</td></tr><tr><td>reply</td><td>Soyez le plus précis possible</td></tr></table> >];\n1->2 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0003000000030000</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro et un coca</td></tr><tr><td>entities</td><td>[@beverage, @number]</td></tr><tr><td>action</td><td>#append_order2</td></tr><tr><td>reply</td><td>Vous-voulez quelque chose d\'autre ?</td></tr></table> >];\n1->3 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0002</td></tr><tr><td>intent_desc</td><td>Rien</td></tr><tr><td>entities</td><td>[@nothing]</td></tr><tr><td>action</td><td>#bye</td></tr><tr><td>reply</td><td>Au revoir et à bientôt.</td></tr></table> >];\n2->2 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0003000000030000</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro et un coca</td></tr><tr><td>entities</td><td>[@beverage, @number]</td></tr><tr><td>action</td><td>#append_order2</td></tr><tr><td>reply</td><td>Vous-voulez quelque chose d\'autre ?</td></tr></table> >];\n2->2 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>00030000</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro</td></tr><tr><td>entities</td><td>[@beverage, @number]</td></tr><tr><td>action</td><td>#append_order1</td></tr><tr><td>reply</td><td>Vous-voulez quelque chose d\'autre ?</td></tr></table> >];\n2->3 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0002</td></tr><tr><td>intent_desc</td><td>Rien</td></tr><tr><td>entities</td><td>[@nothing]</td></tr><tr><td>action</td><td>#grab_it</td></tr><tr><td>reply</td><td>Veuillez récupérer vos consommations au bar. Vous devrez payer _.</td></tr></table> >];\n}\n');
+                expect(graph).to.equal('digraph G {\n0[label=<@root>];\n1[label=<@wait_order>];\n2[label=<@wait_another_order>];\n3[label=<@bye>];\n0->1 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0004</td></tr><tr><td>intent_desc</td><td>Bob!</td></tr><tr><td>entities</td><td>[@waiter]</td></tr><tr><td>action</td><td>#wake</td></tr><tr><td>reply</td><td>Que puis-je vous offrir ?</td></tr></table> >];\n0->0 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>_</td></tr><tr><td>intent_desc</td><td>Bob!</td></tr><tr><td>entities</td><td></td></tr><tr><td>action</td><td>@root*</td></tr><tr><td>reply</td><td>Je n\'ai pas compris votre demande</td></tr></table> >];\n1->2 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>00030000</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro</td></tr><tr><td>entities</td><td>[@beverage, @number]</td></tr><tr><td>action</td><td>#append_order1</td></tr><tr><td>reply</td><td>Vous-voulez quelque chose d\'autre ?</td></tr></table> >];\n1->1 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>_</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro</td></tr><tr><td>entities</td><td></td></tr><tr><td>action</td><td>@wait_order*</td></tr><tr><td>reply</td><td>Soyez le plus précis possible</td></tr></table> >];\n1->2 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0003000000030000</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro et un coca</td></tr><tr><td>entities</td><td>[@beverage, @number]</td></tr><tr><td>action</td><td>#append_order2</td></tr><tr><td>reply</td><td>Vous-voulez quelque chose d\'autre ?</td></tr></table> >];\n1->3 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0002</td></tr><tr><td>intent_desc</td><td>Rien</td></tr><tr><td>entities</td><td>[@nothing]</td></tr><tr><td>action</td><td>#bye</td></tr><tr><td>reply</td><td>Au revoir et à bientôt.</td></tr></table> >];\n2->2 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0003000000030000</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro et un coca</td></tr><tr><td>entities</td><td>[@beverage, @number]</td></tr><tr><td>action</td><td>#append_order2</td></tr><tr><td>reply</td><td>Vous-voulez quelque chose d\'autre ?</td></tr></table> >];\n2->2 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>00030000</td></tr><tr><td>intent_desc</td><td>Je voudrais une kro</td></tr><tr><td>entities</td><td>[@beverage, @number]</td></tr><tr><td>action</td><td>#append_order1</td></tr><tr><td>reply</td><td>Vous-voulez quelque chose d\'autre ?</td></tr></table> >];\n2->3 [label=< <table BORDER="0" CELLBORDER="1" CELLSPACING="0"><tr><td>intent_id</td><td>0002</td></tr><tr><td>intent_desc</td><td>Rien</td></tr><tr><td>entities</td><td>[@nothing]</td></tr><tr><td>action</td><td>#grab_it</td></tr><tr><td>reply</td><td>Veuillez récupérer vos consommations au bar. Vous devrez payer _.</td></tr></table> >];\n}\n');
                 done();
             });
         });

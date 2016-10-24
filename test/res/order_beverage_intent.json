@@ -94,15 +94,12 @@
       "wait_order": {
         "order1:append_order1": "wait_another_order",
         "order2:append_order2": "wait_another_order",
-        "nothing": "bye"
+        "nothing": "init"
       },
       "wait_another_order": {
         "order1:append_order1": "wait_another_order",
         "order2:append_order2": "wait_another_order",
-        "nothing": "grab_it"
-      },
-      "grab_it": {
-        "": "bye"
+        "nothing": "init"
       }
     }
   }

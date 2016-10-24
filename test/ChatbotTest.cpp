@@ -37,24 +37,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//
-// Created by clement on 14/05/16.
-//
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "../launcher/TestContext.hpp"
-
+#include "launcher/TestContext.hpp"
 #include "json.hpp"
 
 #include "intent/utils/Deserializer.hpp"
-#include "intent/chatbot/MultiSessionChatbot.hpp"
+#include "intent/chatbot/SingleSessionChatbot.hpp"
 
 #include "mock/ChatbotMock.hpp"
-
-
-#define EXPECT_EQ_SIGNED(v1, v2) EXPECT_EQ(v1, static_cast<int>(v2))
-#define ASSERT_EQ_SIGNED(v1, v2) ASSERT_EQ(v1, static_cast<int>(v2))
 
 using namespace ::testing;
 
@@ -62,7 +54,7 @@ namespace intent
 {
     namespace test
     {
-        class OrderMultiSessionChatbotTest : public ::testing::Test
+        class ChatbotTest : public ::testing::Test
         {
         public:
             void SetUp()
@@ -70,7 +62,7 @@ namespace intent
                 const intent::test::ResourceManager &resourceManager = intent::test::gTestContext->getResourceManager();
 
                 std::string jsonContent = resourceManager.getResource(
-                        test::ResourceManager::ResourceId::CHATBOT_MODE_JSON);
+                        test::ResourceManager::ResourceId::CHATBOT_MODEL_JSON);
 
                 nlohmann::json json = nlohmann::json::parse(jsonContent);
 
@@ -81,50 +73,24 @@ namespace intent
             ChatbotModel m_chatbotModel;
         };
 
-        TEST_F(OrderMultiSessionChatbotTest, reply_are_handled_correctly)
+        TEST_F(ChatbotTest, do_not_match_any_intent)
         {
-            typedef MultiSessionChatbot<std::string> MyChatbot;
+            Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(
+                    new NiceMock<UserDefinedCommandMock>());
 
-            MyChatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(
-                    new NiceMock<MultiSessionUserDefinedCommandMock >());
+            SingleSessionChatbot chatbot(m_chatbotModel, userDefinedActionHandler);
 
-            MyChatbot chatbot(m_chatbotModel, userDefinedActionHandler);
+            std::vector<std::string> reply1 = chatbot.treatMessage("Paulo");
 
-            chatbot.addSession("sess1");
-            chatbot.addSession("sess2");
-
-            std::vector<std::string> reply1 = chatbot.treatMessage("sess1", "Bob!");
-            std::vector<std::string> reply2 = chatbot.treatMessage("sess2", "Bob!");
-
-            EXPECT_THAT(reply1, ElementsAre("Que puis-je vous offrir ?"));
-            EXPECT_THAT(reply2, ElementsAre("Que puis-je vous offrir ?"));
+            EXPECT_THAT(reply1, ElementsAre("Je ne comprends pas."));
         }
 
-        TEST_F(OrderMultiSessionChatbotTest, test_session_creation_and_deletion)
+
+        TEST_F(ChatbotTest, returns_the_right_initial_state)
         {
-            typedef MultiSessionChatbot<std::string> MyChatbot;
+            Chatbot chatbot(m_chatbotModel);
 
-            MyChatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(
-                    new NiceMock<MultiSessionUserDefinedCommandMock >());
-
-            MyChatbot chatbot(m_chatbotModel, userDefinedActionHandler);
-            EXPECT_EQ_SIGNED(0, chatbot.sessionCount());
-
-            chatbot.addSession("sess1");
-            chatbot.addSession("sess2");
-            EXPECT_EQ_SIGNED(2, chatbot.sessionCount());
-
-            chatbot.removeSession("sess2");
-            EXPECT_EQ_SIGNED(1, chatbot.sessionCount());
-
-            chatbot.removeSession("sess3");
-            EXPECT_EQ_SIGNED(1, chatbot.sessionCount());
-
-            chatbot.removeSession("sess1");
-            EXPECT_EQ_SIGNED(0, chatbot.sessionCount());
-
-            chatbot.addSession("sess3");
-            EXPECT_EQ_SIGNED(1, chatbot.sessionCount());
+            EXPECT_EQ("init", chatbot.getInitialState());
         }
     }
 }

@@ -142,15 +142,21 @@ struct ActionInserter {
         m_chatbotActionModel(chatbotActionModel) {}
 
   void operator()(EdgeDefinition& edge) {
-    const std::string replyId = DEFAULT_REPLY_ID + "_" + edge.edge.actionId;
+    const std::string replyId =
+        DEFAULT_REPLY_ID + "_" + edge.source.stateId + "_" + edge.edge.actionId;
 
     ReplyTemplateInterpreter::adapt(edge.replyTemplate);
     m_chatbotActionModel.replyContentByReplyIdIndex[replyId] =
         edge.replyTemplate;
 
-    if (m_chatbotActionModel.replyIdsByActionId[edge.edge.actionId].empty()) {
-      m_chatbotActionModel.replyIdsByActionId[edge.edge.actionId].push_back(
-          replyId);
+    ChatbotActionModel::StateAndActionId stateAndActionId;
+    stateAndActionId.state = edge.source.stateId;
+    stateAndActionId.actionId = edge.edge.actionId;
+
+    if (m_chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId]
+            .empty()) {
+      m_chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId]
+          .push_back(replyId);
     }
     ++m_repliesCounter;
   }
@@ -272,8 +278,6 @@ ChatbotModel Interpreter::build(const std::string& script,
 
   const DictionaryModel& dict = *dictionaryModel;
 
-  intentStoryModel.terminalStateIds.insert(
-      firstScenario[firstScenario.size() - 1].content);
   if (!isLine<STATE>(firstScenario[firstScenario.size() - 1].content))
     interpreterFeedback.push_back(InterpreterMessage(
         TERMINAL_STATE_MSG, firstScenario[firstScenario.size() - 1], ERROR));

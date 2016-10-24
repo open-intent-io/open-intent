@@ -105,7 +105,8 @@ void BeerBar::run(InputReader &istream, OutputWriter &ostream)
 
     intent::Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(new ActionHandler());
 
-    std::ifstream modelFile("chatbot.json");
+    std::string modelFilepath = std::string(RESSOURCES_DIRECTORY) + "/chatbot.json";
+    std::ifstream modelFile(modelFilepath);
     intent::SingleSessionChatbot::SharedPtr chatbot =
             ChatbotFactory::createSingleSessionChatbotFromJsonModel(modelFile, userDefinedActionHandler);
     std::string inputLine;

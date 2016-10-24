@@ -60,7 +60,7 @@ std::vector<std::string> SingleSessionChatbot::treatMessage(
   Chatbot::VariablesMap userDefinedVariables;
 
   SingleSessionChatbot::UserDefinedActionHandlerAdapter userDefinedAction(
-      *this, replies, m_userDefinedActionHandler);
+      m_context.currentStateId, *this, replies, m_userDefinedActionHandler);
   Chatbot::treatMessage(message, m_context, userDefinedAction, intentVariables,
                         userDefinedVariables);
 

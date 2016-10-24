@@ -44,7 +44,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "../launcher/TestContext.hpp"
+#include "launcher/TestContext.hpp"
 #include "json.hpp"
 
 #include "intent/intent_service/IntentMatcher.hpp"

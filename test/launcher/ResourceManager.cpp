@@ -17,30 +17,34 @@ namespace intent
 
         }
 
+        std::string readFile(const boost::filesystem::path& filepath)
+        {
+            std::ifstream f(filepath.c_str());
+            bool exists = f.good();
+
+            if(exists)
+            {
+                f.open(filepath.c_str(), std::ifstream::in);
+                std::istreambuf_iterator<char> eos;
+                std::string content(std::istreambuf_iterator<char>(f), eos);
+                return content;
+            }
+            else
+            {
+                throw ResourceManagerException(std::string("File \"") + filepath.c_str() + "\" does not exist");
+            }
+        }
+
         void ResourceManager::registerFile(const ResourceId::Id &ressourceId, const std::string &filename)
         {
             boost::filesystem::path file(filename);
             boost::filesystem::path fullPath = m_resourceDirectory / file;
 
             m_resourcePaths[ressourceId] = fullPath.c_str();
-
-            std::ifstream f(fullPath.c_str());
-            bool exists = f.good();
-
-            if(exists)
-            {
-                f.open(fullPath.c_str(), std::ifstream::in);
-                std::istreambuf_iterator<char> eos;
-                std::string content(std::istreambuf_iterator<char>(f), eos);
-                m_fileResources[ressourceId] = content;
-            }
-            else
-            {
-                throw ResourceManagerException(std::string("File \"") + fullPath.c_str() + "\" does not exist");
-            }
+            m_fileResources[ressourceId] = readFile(fullPath);
         }
 
-        const std::string &ResourceManager::getResource(const ResourceId::Id &ressourceId) const
+        const std::string& ResourceManager::getResource(const ResourceId::Id &ressourceId) const
         {
             std::unordered_map<int, std::string>::const_iterator it = m_fileResources.find(ressourceId);
             if(it != m_fileResources.end())
@@ -55,7 +59,7 @@ namespace intent
             }
         }
 
-        const std::string &ResourceManager::getResourcePath(const ResourceId::Id &ressourceId) const
+        const std::string& ResourceManager::getResourcePath(const ResourceId::Id &ressourceId) const
         {
             std::unordered_map<int, std::string>::const_iterator it = m_resourcePaths.find(ressourceId);
             if(it != m_fileResources.end())
@@ -68,6 +72,13 @@ namespace intent
                 ss << "Resource \"" << ressourceId << "\" not found";
                 throw ResourceManagerException(ss.str());
             }
+        }
+
+        std::string ResourceManager::read(const std::string& filepath) const
+        {
+            boost::filesystem::path file(filepath);
+            boost::filesystem::path fullPath = m_resourceDirectory / file;
+            return readFile(fullPath);
         }
 
     }

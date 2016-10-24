@@ -26,12 +26,12 @@ namespace intent
                     INTENT_DICTIONARY_DESERIALIZATION_JSON_EXAMPLE,
                     INTENT_DICTIONARY_DESERIALIZATION_INVALID_JSON_EXAMPLE,
                     ORDER_BEVERAGE_INTENT_JSON,
-                    CHATBOT_MODE_JSON,
+                    CHATBOT_MODEL_JSON,
                     TEMPLATE_REPLIES_JSON,
                     QUERY_MODE_JSON,
                     INTERPRETER_MODEL,
                     INTERPRETER_MODEL_W_ERRORS,
-                    CHATBOT_MODE_JSON_WITHOUT_INTENT_STORY
+                    CHATBOT_MODEL_JSON_WITHOUT_INTENT_STORY
                 };
             };
 
@@ -40,9 +40,9 @@ namespace intent
             void registerFile(const ResourceId::Id &ressourceId, const std::string &filename);
 
             const std::string &getResource(const ResourceId::Id &ressourceId) const;
-
             const std::string &getResourcePath(const ResourceId::Id &ressourceId) const;
 
+            std::string read(const std::string& filename) const;
         private:
             boost::filesystem::path m_resourceDirectory;
             std::unordered_map<int, std::string> m_fileResources;

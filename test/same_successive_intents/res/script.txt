@@ -1,0 +1,13 @@
+{
+@root
+    -Salut
+        #no_action
+        *Pas compris
+    -Salut, je suis dans l'état 1
+@search
+    -Coucou
+        #no_action
+    -Salut, je suis dans l'état 2
+@root
+}
+

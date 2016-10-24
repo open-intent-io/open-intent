@@ -133,11 +133,12 @@ class MultiSessionChatbot : protected Chatbot {
       : public Chatbot::UserDefinedActionHandler {
    public:
     UserDefinedActionHandlerAdapter(
-        MultiSessionChatbot& chatbot, std::vector<std::string>& replies,
-        const SessionIdType& sessionId,
+        const std::string& state, MultiSessionChatbot& chatbot,
+        std::vector<std::string>& replies, const SessionIdType& sessionId,
         typename MultiSessionChatbot::UserDefinedActionHandler::SharedPtr
             userDefinedActionHandler)
-        : m_userDefinedActionHandler(userDefinedActionHandler),
+        : m_state(state),
+          m_userDefinedActionHandler(userDefinedActionHandler),
           m_sessionId(sessionId),
           m_chatbot(chatbot),
           m_replies(replies) {}
@@ -147,11 +148,12 @@ class MultiSessionChatbot : protected Chatbot {
                     Chatbot::VariablesMap& userDefinedVariables) {
       (*m_userDefinedActionHandler)(m_sessionId, action, intentVariables,
                                     userDefinedVariables);
-      m_replies = m_chatbot.prepareReplies(action, intentVariables,
+      m_replies = m_chatbot.prepareReplies(m_state, action, intentVariables,
                                            userDefinedVariables);
     }
 
    private:
+    const std::string m_state;
     typename MultiSessionChatbot::UserDefinedActionHandler::SharedPtr
         m_userDefinedActionHandler;
     SessionIdType m_sessionId;

@@ -11,26 +11,62 @@ SET(INTEGRATION_TEST_TARGET ${PROJECT_NAME}-integration-test)
 INCLUDE_DIRECTORIES(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-ADD_SUBDIRECTORY(tests)
-
-
-SET(RES_FILES
-        res/chatbot_model.json
-        res/template_replies.json
-        res/intent_dictionary_deserialization_test.json
-        res/intent_dictionary_deserialization_invalid_test.json
-        res/order_beverage_intent.json
-        res/queries_model.json
-        res/interpreter_model.txt
-        res/interpreter_model_w_errors.txt
-        res/chatbot_model_without_intent_story.json)
-
-# Copy ressource files
-include(Custom)
-COPY_RES_FILES(RES_FILES ${RES_FILES} DEST_DIR ${CMAKE_CURRENT_BINARY_DIR}/tests)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/json/src)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/spdlog/include)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 
 ADD_CUSTOM_TARGET(run-unit-tests-cpp
     DEPENDS intent-test
-    COMMAND ${CMAKE_BINARY_DIR}/test/tests/intent-test
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test/tests/
+    COMMAND ${CMAKE_BINARY_DIR}/test/intent-test
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test
 )
+
+SET(SOURCE_FILES
+        launcher/main.cpp
+        launcher/ResourceManager.cpp
+        launcher/TestContext.cpp
+
+        same_successive_intents/SameSuccessiveIntentsTest.cpp
+
+        ChatbotFactoryTest.cpp
+        ChatbotTest.cpp
+        EntitiesMatcherTest.cpp
+        DeserializerTest.cpp
+        GraphTest.cpp
+        IntentServiceTest.cpp
+        IntentStoryServiceTest.cpp
+        MultiSessionChatbotTest.cpp
+        SingleCharacterDelimiterTokenizerTest.cpp
+        TermIndexTest.cpp
+        TokenizerTest.cpp
+        TrigramUtilsTest.cpp
+        SingleSessionChatbotTest.cpp
+        IntentMatcherTest.cpp
+        InterpreterTest.cpp
+        IntentStoryModelSerializer.cpp
+)
+
+SET(HEADER_FILES)
+
+INCLUDE_DIRECTORIES(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+
+if(GCOV_ENABLED)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -Wall -fprofile-arcs -ftest-coverage")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -Wall -W -fprofile-arcs -ftest-coverage")
+    SET(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
+
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        include(CodeCoverage)
+        setup_target_for_coverage(${UNIT_TEST_TARGET}_coverage ${UNIT_TEST_TARGET} coverage)
+    endif()
+endif()
+
+add_definitions(-DRESSOURCES_DIRECTORY="${CMAKE_CURRENT_SOURCE_DIR}")
+
+ADD_EXECUTABLE(${UNIT_TEST_TARGET} ${SOURCE_FILES})
+TARGET_LINK_LIBRARIES(${UNIT_TEST_TARGET} ${PROJECT_NAME}-static
+        gtest
+        gmock
+        gcov
+)
+

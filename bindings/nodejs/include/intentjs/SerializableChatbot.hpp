@@ -135,8 +135,6 @@ class SerializableChatbot : public node::ObjectWrap {
 
   static void TreatMessage(const v8::FunctionCallbackInfo<v8::Value> &args);
   static void GetInitialState(const v8::FunctionCallbackInfo<v8::Value> &args);
-  static void GetTerminalStates(
-      const v8::FunctionCallbackInfo<v8::Value> &args);
   static void GetGraph(const v8::FunctionCallbackInfo<v8::Value> &args);
   static void PrepareReplies(const v8::FunctionCallbackInfo<v8::Value> &args);
 

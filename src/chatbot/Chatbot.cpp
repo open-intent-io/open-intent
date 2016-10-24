@@ -109,17 +109,23 @@ std::string replaceTemplateVariables(
 }
 
 std::vector<std::string> Chatbot::prepareReplies(
-    const std::string& actionId, const Chatbot::VariablesMap& intentVariables,
+    const std::string& state, const std::string& actionId,
+    const Chatbot::VariablesMap& intentVariables,
     Chatbot::VariablesMap& userDefinedVariables) {
   INTENT_LOG_INFO() << "Chatbot::prepareReplies starting";
 
   INTENT_LOG_INFO() << "Chatbot::prepareReplies looking for reply : "
                     << actionId;
   std::vector<std::string> replies;
-  ChatbotActionModel::ReplyIdsByActionIdIndex::const_iterator repliesIt =
-      m_chatbotActionModel->replyIdsByActionId.find(actionId);
+  ChatbotActionModel::StateAndActionId stateAndActionId;
+  stateAndActionId.state = state;
+  stateAndActionId.actionId = actionId;
 
-  if (repliesIt != m_chatbotActionModel->replyIdsByActionId.end()) {
+  ChatbotActionModel::ReplyIdsByStateAndActionIdIndex::const_iterator
+      repliesIt = m_chatbotActionModel->replyIdsByStateAndActionId.find(
+          stateAndActionId);
+
+  if (repliesIt != m_chatbotActionModel->replyIdsByStateAndActionId.end()) {
     const std::vector<ChatbotActionModel::IndexType>& replyIds =
         repliesIt->second;
     INTENT_LOG_INFO() << "Chatbot::prepareReplies found reply";
@@ -161,15 +167,7 @@ bool Chatbot::treatMessage(const std::string& msg, Context& context,
     buildParams(intentVariables, result.intent);
 
     INTENT_LOG_DEBUG() << "Next state is \"" + result.nextStateId + "\".";
-    if (m_intentStoryService.getIntentStoryServiceModel()
-            .intentStoryModel->isStateIdTerminal(result.nextStateId)) {
-      INTENT_LOG_DEBUG() << "Next state (" + result.nextStateId +
-                                ") is terminal.";
-      context.currentStateId = m_intentStoryService.getIntentStoryServiceModel()
-                                   .intentStoryModel->rootStateId;
-    } else {
-      context.currentStateId = result.nextStateId;
-    }
+    context.currentStateId = result.nextStateId;
 
     executeActions(*m_chatbotActionModel, result.actionId,
                    userDefinedActionHandler, intentVariables,
@@ -182,10 +180,5 @@ bool Chatbot::treatMessage(const std::string& msg, Context& context,
 std::string Chatbot::getInitialState() const {
   return m_intentStoryService.getIntentStoryServiceModel()
       .intentStoryModel->rootStateId;
-}
-
-std::unordered_set<std::string> Chatbot::getTerminalStates() const {
-  return m_intentStoryService.getIntentStoryServiceModel()
-      .intentStoryModel->terminalStateIds;
 }
 }

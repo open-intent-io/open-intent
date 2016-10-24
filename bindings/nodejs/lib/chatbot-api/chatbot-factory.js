@@ -41,6 +41,7 @@ var OpenIntent = require('./open-intent.node');
 var Q = require('q');
 
 function treatMessage(chatbot, userCommandsDriver, sessionId, context, msg, deferred) {
+    var currentState = context._state;
     var intentFound = chatbot.treatMessage(context, msg, function (actionId, intentVariables) {
         if (userCommandsDriver) {
             userCommandsDriver.execute(actionId, sessionId, intentVariables)
@@ -50,13 +51,13 @@ function treatMessage(chatbot, userCommandsDriver, sessionId, context, msg, defe
                     userDefinedVariables = {};
                 }
 
-                var replies = chatbot.prepareReplies(actionId, intentVariables, userDefinedVariables);
+                var replies = chatbot.prepareReplies(currentState, actionId, intentVariables, userDefinedVariables);
                 deferred.resolve(replies);
             });
         }
         else {
             // No user defined variables.
-            var replies = chatbot.prepareReplies(actionId, intentVariables, {});
+            var replies = chatbot.prepareReplies(currentState, actionId, intentVariables, {});
             deferred.resolve(replies);
         }
     });
@@ -122,10 +123,6 @@ var getInitialStateInternal = function(chatbot) {
     return chatbot.getInitialState();
 };
 
-var getTerminalStatesInternal = function(chatbot) {
-    return chatbot.getTerminalStates();
-};
-
 var getGraphInternal = function(chatbot) {
     return chatbot.getGraph(chatbot);
 };
@@ -145,7 +142,6 @@ function OpenIntentChatbot(serializableChatbot, sessionManagerDriver, userComman
     this.setState = (sessionId, _state) => setStateInternal(_this._sessionManager, sessionId, _state);
     this.getState = (sessionId) => getStateInternal(_this._serializableChatbot, _this._sessionManager, sessionId);
     this.getInitialState = () => getInitialStateInternal(_this._serializableChatbot);
-    this.getTerminalStates = () => getTerminalStatesInternal(_this._serializableChatbot);
     this.getGraph = () => getGraphInternal(_this._serializableChatbot);
 }
 

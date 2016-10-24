@@ -38,22 +38,23 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 //
-// Created by clement on 07/05/16.
+// Created by clement on 14/05/16.
 //
-
-//
-// Created by clement on 07/05/16.
-//
-
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "../launcher/TestContext.hpp"
+#include "launcher/TestContext.hpp"
+
 #include "json.hpp"
 
-#include "intent/intent_service/IntentService.hpp"
 #include "intent/utils/Deserializer.hpp"
-#include "intent/intent_service/IntentEncoder.hpp"
+#include "intent/chatbot/MultiSessionChatbot.hpp"
+
+#include "mock/ChatbotMock.hpp"
+
+
+#define EXPECT_EQ_SIGNED(v1, v2) EXPECT_EQ(v1, static_cast<int>(v2))
+#define ASSERT_EQ_SIGNED(v1, v2) ASSERT_EQ(v1, static_cast<int>(v2))
 
 using namespace ::testing;
 
@@ -61,75 +62,69 @@ namespace intent
 {
     namespace test
     {
-        class IntentServiceBeverageTest : public ::testing::Test
+        class OrderMultiSessionChatbotTest : public ::testing::Test
         {
         public:
             void SetUp()
             {
                 const intent::test::ResourceManager &resourceManager = intent::test::gTestContext->getResourceManager();
 
-                std::string jsonContent = resourceManager.getResource(test::ResourceManager::ResourceId::INTENT_DICTIONARY_DESERIALIZATION_JSON_EXAMPLE);
+                std::string jsonContent = resourceManager.getResource(
+                        test::ResourceManager::ResourceId::CHATBOT_MODEL_JSON);
 
                 nlohmann::json json = nlohmann::json::parse(jsonContent);
 
                 Deserializer deserializer;
-                m_intentServiceModel = deserializer.deserialize<IntentServiceModel>(json);
-
+                m_chatbotModel = deserializer.deserialize<ChatbotModel>(json);
             }
 
-            IntentServiceModel m_intentServiceModel;
+            ChatbotModel m_chatbotModel;
         };
 
-
-        TEST_F(IntentServiceBeverageTest, test_if_simple_intent_is_correctly_found)
+        TEST_F(OrderMultiSessionChatbotTest, reply_are_handled_correctly)
         {
-            IntentService intentService(m_intentServiceModel);
+            typedef MultiSessionChatbot<std::string> MyChatbot;
 
-            EXPECT_FALSE(intentService.evaluate("Coucou, je m'appelle John").found);
+            MyChatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(
+                    new NiceMock<MultiSessionUserDefinedCommandMock >());
 
-            IntentService::Result result;
-            result.found = true;
-            result.intent.intentId = "order1";
-            IntentService::EntityMatch v;
-            v.entity = "@number";
-            v.term = "2";
-            v.text = "2";
+            MyChatbot chatbot(m_chatbotModel, userDefinedActionHandler);
 
-            result.intent.entityMatches.push_back(v);
+            chatbot.addSession("sess1");
+            chatbot.addSession("sess2");
 
-            v.entity = "@beverage";
-            v.term = "Kronenbourg";
-            v.text = "Kro";
+            std::vector<std::string> reply1 = chatbot.treatMessage("sess1", "Bob!");
+            std::vector<std::string> reply2 = chatbot.treatMessage("sess2", "Bob!");
 
-            result.intent.entityMatches.push_back(v);
-
-            EXPECT_EQ(result, intentService.evaluate("Bonjour, j'aimerais 2 pintes de Kro"));
+            EXPECT_THAT(reply1, ElementsAre("Que puis-je vous offrir ?"));
+            EXPECT_THAT(reply2, ElementsAre("Que puis-je vous offrir ?"));
         }
 
-        TEST_F(IntentServiceBeverageTest, test_order_one_coca_cola)
+        TEST_F(OrderMultiSessionChatbotTest, test_session_creation_and_deletion)
         {
-            IntentService intentService(m_intentServiceModel);
+            typedef MultiSessionChatbot<std::string> MyChatbot;
 
-            IntentService::Result result;
-            result.found = true;
-            result.intent.intentId = "order1";
-            IntentService::EntityMatch v;
-            v.entity = "@number";
-            v.term = "2";
-            v.text = "2";
+            MyChatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(
+                    new NiceMock<MultiSessionUserDefinedCommandMock >());
 
-            result.intent.entityMatches.push_back(v);
+            MyChatbot chatbot(m_chatbotModel, userDefinedActionHandler);
+            EXPECT_EQ_SIGNED(0, chatbot.sessionCount());
 
-            v.entity = "@beverage";
-            v.term = "Coca-Cola";
-            v.text = "Coca-Cola";
+            chatbot.addSession("sess1");
+            chatbot.addSession("sess2");
+            EXPECT_EQ_SIGNED(2, chatbot.sessionCount());
 
-            result.intent.entityMatches.push_back(v);
+            chatbot.removeSession("sess2");
+            EXPECT_EQ_SIGNED(1, chatbot.sessionCount());
 
-            EXPECT_EQ(result, intentService.evaluate("Bonjour, j'aimerais 2 Coca-Cola"));
+            chatbot.removeSession("sess3");
+            EXPECT_EQ_SIGNED(1, chatbot.sessionCount());
+
+            chatbot.removeSession("sess1");
+            EXPECT_EQ_SIGNED(0, chatbot.sessionCount());
+
+            chatbot.addSession("sess3");
+            EXPECT_EQ_SIGNED(1, chatbot.sessionCount());
         }
-
-
-
     }
 }

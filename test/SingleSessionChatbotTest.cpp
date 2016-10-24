@@ -44,7 +44,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "../launcher/TestContext.hpp"
+#include "launcher/TestContext.hpp"
 #include "json.hpp"
 
 #include "intent/utils/Deserializer.hpp"
@@ -65,7 +65,7 @@ namespace intent
             {
                 const intent::test::ResourceManager &resourceManager = intent::test::gTestContext->getResourceManager();
 
-                std::string jsonContent = resourceManager.getResource(test::ResourceManager::ResourceId::CHATBOT_MODE_JSON);
+                std::string jsonContent = resourceManager.getResource(test::ResourceManager::ResourceId::CHATBOT_MODEL_JSON);
 
                 nlohmann::json json = nlohmann::json::parse(jsonContent);
 
@@ -97,7 +97,7 @@ namespace intent
 
             EXPECT_CALL(*userDefinedCommandMock, execute("wake", _, _));
             EXPECT_CALL(*userDefinedCommandMock, execute("append_order1", _, _));
-            EXPECT_CALL(*userDefinedCommandMock, execute("bye", _, _));
+            EXPECT_CALL(*userDefinedCommandMock, execute("grab_it", _, _));
 
             chatbot.treatMessage("Bob!");
             chatbot.treatMessage("Je voudrais un Coca, s'il te plaît.");
@@ -114,41 +114,12 @@ namespace intent
 
             EXPECT_CALL(*userDefinedCommandMock, execute("wake", _, _));
             EXPECT_CALL(*userDefinedCommandMock, execute("append_order1", _, _)).Times(2);
-            EXPECT_CALL(*userDefinedCommandMock, execute("bye", _, _));
+            EXPECT_CALL(*userDefinedCommandMock, execute("grab_it", _, _));
 
             chatbot.treatMessage("Bob!");
             chatbot.treatMessage("Je voudrais un Coca, s'il te plaît.");
             chatbot.treatMessage("Avec une kro!");
             chatbot.treatMessage("rien");
-        }
-
-        TEST_F(OrderSingleChatbotTest, go_back_to_initial_state)
-        {
-            UserDefinedCommandMock *userDefinedCommandMock = new NiceMock<UserDefinedCommandMock>();
-            Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(userDefinedCommandMock);
-
-            SingleSessionChatbot chatbot(m_chatbotModel, userDefinedActionHandler);
-
-            chatbot.treatMessage("Bob!");
-            chatbot.treatMessage("Je voudrais un Coca, s'il te plaît.");
-            chatbot.treatMessage("Rien");
-
-            std::vector<std::string> replies = chatbot.treatMessage("Bob!");
-
-            EXPECT_THAT(replies, ElementsAre("Que puis-je vous offrir ?"));
-        }
-
-        TEST_F(OrderSingleChatbotTest, go_back_to_initial_state_request_after_ordering_nothing)
-        {
-            UserDefinedCommandMock *userDefinedCommandMock = new NiceMock<UserDefinedCommandMock>();
-            Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(userDefinedCommandMock);
-
-
-            SingleSessionChatbot chatbot(m_chatbotModel, userDefinedActionHandler);
-            chatbot.treatMessage("Bob!");
-            chatbot.treatMessage("Rien");
-
-            EXPECT_EQ("init", chatbot.getContext().currentStateId);
         }
 
         TEST_F(OrderSingleChatbotTest, fallback_reply_when_do_not_understand_an_intent)

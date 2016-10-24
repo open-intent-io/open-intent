@@ -80,7 +80,7 @@ namespace intent
                     test::ResourceManager::ResourceId::INTERPRETER_MODEL);
 
             std::string dictionaryPath = resourceManager.getResourcePath(
-                    test::ResourceManager::ResourceId::CHATBOT_MODE_JSON_WITHOUT_INTENT_STORY);
+                    test::ResourceManager::ResourceId::CHATBOT_MODEL_JSON_WITHOUT_INTENT_STORY);
 
             NiceMock<UserDefinedCommandMock> *userDefinedCommandMock = new NiceMock<UserDefinedCommandMock>();
             Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(userDefinedCommandMock);
@@ -111,7 +111,7 @@ namespace intent
             const intent::test::ResourceManager &resourceManager = intent::test::gTestContext->getResourceManager();
 
             std::string chatbotModelPath = resourceManager.getResourcePath(
-                    test::ResourceManager::ResourceId::CHATBOT_MODE_JSON);
+                    test::ResourceManager::ResourceId::CHATBOT_MODEL_JSON);
 
             NiceMock<UserDefinedCommandMock> *userDefinedCommandMock = new NiceMock<UserDefinedCommandMock>();
             Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(userDefinedCommandMock);
@@ -131,7 +131,7 @@ namespace intent
             EXPECT_THAT(reply1, ElementsAre("Que puis-je vous offrir ?"));
             EXPECT_THAT(reply2, ElementsAre("Vous-voulez quelque chose d'autre ?"));
             EXPECT_THAT(reply3,
-                        ElementsAre("Au revoir et à bientôt."));
+                        ElementsAre("Veuillez récupérer vos consommations au bar.", "Au revoir et à bientôt."));
         }
 
         TEST(ChatbotFactoryTest, create_chatbot_from_unexisting_file)
@@ -174,7 +174,7 @@ namespace intent
                     test::ResourceManager::ResourceId::INTERPRETER_MODEL);
 
             std::string dictionaryPath = resourceManager.getResourcePath(
-                    test::ResourceManager::ResourceId::CHATBOT_MODE_JSON_WITHOUT_INTENT_STORY);
+                    test::ResourceManager::ResourceId::CHATBOT_MODEL_JSON_WITHOUT_INTENT_STORY);
 
             typedef MultiSessionChatbot<std::string> MyChatbot;
             NiceMock<MultiSessionUserDefinedCommandMock> *userDefinedCommandMock = new NiceMock<MultiSessionUserDefinedCommandMock>();

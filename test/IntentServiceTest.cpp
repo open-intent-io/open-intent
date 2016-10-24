@@ -38,19 +38,22 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 //
-// Created by clement on 29/05/16.
+// Created by clement on 07/05/16.
+//
+
+//
+// Created by clement on 07/05/16.
 //
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "../launcher/TestContext.hpp"
+#include "launcher/TestContext.hpp"
 #include "json.hpp"
 
+#include "intent/intent_service/IntentService.hpp"
 #include "intent/utils/Deserializer.hpp"
-#include "intent/chatbot/SingleSessionChatbot.hpp"
-
-#include "mock/ChatbotMock.hpp"
+#include "intent/intent_service/IntentEncoder.hpp"
 
 using namespace ::testing;
 
@@ -58,50 +61,75 @@ namespace intent
 {
     namespace test
     {
-        class ChatbotTest : public ::testing::Test
+        class IntentServiceBeverageTest : public ::testing::Test
         {
         public:
             void SetUp()
             {
                 const intent::test::ResourceManager &resourceManager = intent::test::gTestContext->getResourceManager();
 
-                std::string jsonContent = resourceManager.getResource(
-                        test::ResourceManager::ResourceId::CHATBOT_MODE_JSON);
+                std::string jsonContent = resourceManager.getResource(test::ResourceManager::ResourceId::INTENT_DICTIONARY_DESERIALIZATION_JSON_EXAMPLE);
 
                 nlohmann::json json = nlohmann::json::parse(jsonContent);
 
                 Deserializer deserializer;
-                m_chatbotModel = deserializer.deserialize<ChatbotModel>(json);
+                m_intentServiceModel = deserializer.deserialize<IntentServiceModel>(json);
+
             }
 
-            ChatbotModel m_chatbotModel;
+            IntentServiceModel m_intentServiceModel;
         };
 
-        TEST_F(ChatbotTest, do_not_match_any_intent)
+
+        TEST_F(IntentServiceBeverageTest, test_if_simple_intent_is_correctly_found)
         {
-            Chatbot::UserDefinedActionHandler::SharedPtr userDefinedActionHandler(
-                    new NiceMock<UserDefinedCommandMock>());
+            IntentService intentService(m_intentServiceModel);
 
-            SingleSessionChatbot chatbot(m_chatbotModel, userDefinedActionHandler);
+            EXPECT_FALSE(intentService.evaluate("Coucou, je m'appelle John").found);
 
-            std::vector<std::string> reply1 = chatbot.treatMessage("Paulo");
+            IntentService::Result result;
+            result.found = true;
+            result.intent.intentId = "order1";
+            IntentService::EntityMatch v;
+            v.entity = "@number";
+            v.term = "2";
+            v.text = "2";
 
-            EXPECT_THAT(reply1, ElementsAre("Je ne comprends pas."));
+            result.intent.entityMatches.push_back(v);
+
+            v.entity = "@beverage";
+            v.term = "Kronenbourg";
+            v.text = "Kro";
+
+            result.intent.entityMatches.push_back(v);
+
+            EXPECT_EQ(result, intentService.evaluate("Bonjour, j'aimerais 2 pintes de Kro"));
+        }
+
+        TEST_F(IntentServiceBeverageTest, test_order_one_coca_cola)
+        {
+            IntentService intentService(m_intentServiceModel);
+
+            IntentService::Result result;
+            result.found = true;
+            result.intent.intentId = "order1";
+            IntentService::EntityMatch v;
+            v.entity = "@number";
+            v.term = "2";
+            v.text = "2";
+
+            result.intent.entityMatches.push_back(v);
+
+            v.entity = "@beverage";
+            v.term = "Coca-Cola";
+            v.text = "Coca-Cola";
+
+            result.intent.entityMatches.push_back(v);
+
+            EXPECT_EQ(result, intentService.evaluate("Bonjour, j'aimerais 2 Coca-Cola"));
         }
 
 
-        TEST_F(ChatbotTest, returns_the_right_initial_state)
-        {
-            Chatbot chatbot(m_chatbotModel);
 
-            EXPECT_EQ("init", chatbot.getInitialState());
-        }
-
-        TEST_F(ChatbotTest, returns_the_right_terminal_states)
-        {
-            Chatbot chatbot(m_chatbotModel);
-
-            EXPECT_THAT(chatbot.getTerminalStates(), UnorderedElementsAre("bye", "grab_it"));
-        }
     }
 }

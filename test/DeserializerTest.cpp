@@ -43,7 +43,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "../launcher/TestContext.hpp"
+#include "launcher/TestContext.hpp"
 
 #include <string>
 
@@ -158,11 +158,9 @@ TEST(IntentDictionaryDeserializerTest, test_intent_story_deserialization_from_is
     Deserializer deserializer;
     IntentStoryServiceModel intentStoryServiceModel = deserializer.deserialize<IntentStoryServiceModel>(ss);
 
-    ASSERT_EQ_SIGNED(6, intentStoryServiceModel.intentStoryModel->vertexByStateId.size());
-    ASSERT_EQ_SIGNED(6, intentStoryServiceModel.intentStoryModel->graph.vertexCount());
+    ASSERT_EQ_SIGNED(4, intentStoryServiceModel.intentStoryModel->vertexByStateId.size());
+    ASSERT_EQ_SIGNED(4, intentStoryServiceModel.intentStoryModel->graph.vertexCount());
     ASSERT_EQ_SIGNED(3, intentStoryServiceModel.intentStoryModel->graph.edgeCount());
-
-    ASSERT_THAT(intentStoryServiceModel.intentStoryModel->terminalStateIds, SizeIs(2));
 
     ASSERT_EQ("root", intentStoryServiceModel.intentStoryModel->rootStateId);
 }
@@ -173,7 +171,7 @@ TEST(IntentDictionaryDeserializerTest, test_chatbot_deserialization)
     const intent::test::ResourceManager &resourceManager = intent::test::gTestContext->getResourceManager();
 
     std::string jsonContent = resourceManager.getResource(test::ResourceManager::ResourceId::
-                                                          CHATBOT_MODE_JSON);
+                                                          CHATBOT_MODEL_JSON);
 
     std::stringstream ss;
 
@@ -186,21 +184,32 @@ TEST(IntentDictionaryDeserializerTest, test_chatbot_deserialization)
 
     EXPECT_THAT(chatbotActionModel.replyContentByReplyIdIndex, SizeIs(8));
 
-    ASSERT_THAT(chatbotActionModel.replyIdsByActionId, SizeIs(7));
+    ASSERT_THAT(chatbotActionModel.replyIdsByStateAndActionId, SizeIs(11));
 
-    EXPECT_THAT(chatbotActionModel.replyIdsByActionId["wake"],
+    ChatbotActionModel::StateAndActionId stateAndActionId;
+    stateAndActionId.state = "init";
+    stateAndActionId.actionId = "wake";
+    EXPECT_THAT(chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId],
                 ElementsAre("what_can_i_get_you_reply"));
 
-    EXPECT_THAT(chatbotActionModel.replyIdsByActionId["append_order1"],
+    stateAndActionId.state = "wait_order";
+    stateAndActionId.actionId = "append_order1";
+    EXPECT_THAT(chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId],
                 ElementsAre("want_something_else_reply"));
 
-    EXPECT_THAT(chatbotActionModel.replyIdsByActionId["append_order2"],
+    stateAndActionId.state = "wait_order";
+    stateAndActionId.actionId = "append_order2";
+    EXPECT_THAT(chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId],
                 ElementsAre("want_something_else_reply"));
 
-    EXPECT_THAT(chatbotActionModel.replyIdsByActionId["bye"],
+    stateAndActionId.state = "wait_order";
+    stateAndActionId.actionId = "bye";
+    EXPECT_THAT(chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId],
                 ElementsAre("bye_reply"));
 
-    EXPECT_THAT(chatbotActionModel.replyIdsByActionId["grab_it"],
+    stateAndActionId.state = "wait_another_order";
+    stateAndActionId.actionId = "grab_it";
+    EXPECT_THAT(chatbotActionModel.replyIdsByStateAndActionId[stateAndActionId],
                 ElementsAre("grab_it_reply", "bye_reply"));
 
 }

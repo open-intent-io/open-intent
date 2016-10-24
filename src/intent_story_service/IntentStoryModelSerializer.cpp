@@ -64,14 +64,8 @@ struct VertexWriter {
   void operator()(std::ostream &out, const Vertex &v) const {
     const std::string &actionId = m_stateId[v];
 
-    out << "[label=<" << actionId << ">";
-
-    if (m_intentStoryServiceModel.intentStoryModel->isStateIdTerminal(
-            actionId)) {
-      out << ", peripheries=2, color=\".7 .3 1.0\"";
-    }
-
-    out << "]";
+    out << "[label=<" << actionId << ">"
+        << "]";
   }
 
   VertexStringPropertyMap m_stateId;
