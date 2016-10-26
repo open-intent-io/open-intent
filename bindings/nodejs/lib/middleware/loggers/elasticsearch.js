@@ -111,7 +111,6 @@ function ElasticSearchLogger(config) {
                 console.trace(err);
                 return 1;
             }
-            console.log(res);
         });
     }
 }

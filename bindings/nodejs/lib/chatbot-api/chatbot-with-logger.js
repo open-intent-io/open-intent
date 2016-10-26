@@ -52,7 +52,7 @@ function ChatbotWithLogger(chatbot) {
 
         if (logger) {
             logger.log({
-                'sessionId': sessionId,
+                'session_id': sessionId,
                 'message': message,
                 'type': 'intent'
             });
@@ -65,7 +65,7 @@ function ChatbotWithLogger(chatbot) {
                     logger.log({
                         'session_id': sessionId,
                         'message': replies[i],
-                        'type': 'replies'
+                        'type': 'reply'
                     });
                 }
             }
