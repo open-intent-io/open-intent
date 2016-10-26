@@ -115,10 +115,6 @@ var setStateInternal = function(sessionManager, sessionId, state) {
     return sessionManager.save(sessionId, context);
 };
 
-var getNextState = function(state, actionId) {
-    chatbot.getNextState(state, actionId);
-}
-
 function getStateInternal(chatbot, sessionManager, sessionId) {
     var deferred = Q.defer();
     sessionManager.load(sessionId)
