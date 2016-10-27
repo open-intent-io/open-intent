@@ -80,9 +80,8 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
         var timeOfMessage = event.timestamp;
         var message = event.message;
 
-        console.log("Received message for user %d and page %d at %d with message:",
-            senderID, recipientID, timeOfMessage);
-        console.log(JSON.stringify(message));
+        //console.log("Received message for user %d and page %d at %d with message:",
+         //   senderID, recipientID, timeOfMessage);
 
         var isEcho = message.is_echo;
         var messageId = message.mid;
@@ -96,13 +95,13 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
 
         if (isEcho) {
             // Just logging message echoes to console
-            console.log("Received echo for message %s and app %d with metadata %s",
-                messageId, appId, metadata);
+            //console.log("Received echo for message %s and app %d with metadata %s",
+            //    messageId, appId, metadata);
             return;
         } else if (quickReply) {
             var quickReplyPayload = quickReply.payload;
-            console.log("Quick reply for message %s with payload %s",
-                messageId, quickReplyPayload);
+            //console.log("Quick reply for message %s with payload %s",
+            //   messageId, quickReplyPayload);
 
             sendTextMessage(senderID, "Quick reply tapped");
             return;
@@ -111,7 +110,7 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
         if (messageText) {
             chatbotClient.talk(senderID, messageText).then(function(replies) {
                 var reply = replies.length ? replies[0] : "An error occured";
-                console.log("[messenger] Sending reply : "+reply);
+                //console.log("[messenger] Sending reply : "+reply);
                 sendTextMessage(senderID, reply);
             });
         } else if (messageAttachments) {
@@ -152,7 +151,7 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
 
         }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
-                var recipientId = body.recipient_id;
+                /*var recipientId = body.recipient_id;
                 var messageId = body.message_id;
 
                 if (messageId) {
@@ -161,7 +160,7 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
                 } else {
                     console.log("Successfully called Send API for recipient %s",
                         recipientId);
-                }
+                }*/
             } else {
                 var errorMessage = response.error.message;
                 var errorCode = response.error.code;
@@ -183,7 +182,7 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
             var method = elements[0];
             var signatureHash = elements[1];
 
-            console.log('Request signature', signature);
+            //console.log('Request signature', signature);
             var expectedHash = crypto.createHmac(method, FACEBOOK_APP_SECRET).update(buf).digest('hex');
 
             if (signatureHash != expectedHash) {
@@ -197,7 +196,7 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
      */
     function attachContentTypeHeader(req, res, next) {
         req.headers["content-type"] = "application/json";
-        console.log("req.body : "+req.body.toString());
+        //console.log("req.body : "+req.body.toString());
         next();
     }
 
@@ -209,16 +208,16 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
     app.use(messengerJsonParser);
 
     app.get('/messenger/chat', attachContentTypeHeader, messengerJsonParser, function(req, res) {
-        console.log("headers : "+JSON.stringify(req.headers));
+        //console.log("headers : "+JSON.stringify(req.headers));
         if (req.query['hub.mode'] === 'subscribe' &&
             req.query['hub.verify_token'] === FACEBOOK_VALIDATION_TOKEN) {
-            console.log("Validating webhook");
+            //console.log("Validating webhook");
             res.status(200).send(req.query['hub.challenge']);
         } else {
-            console.log("Request headers : "+JSON.stringify(req.headers))
-            console.log("Request body : "+JSON.stringify(req.body))
-            console.log("Current validation token : "+FACEBOOK_VALIDATION_TOKEN)
-            console.error("Failed validation. Make sure the validation tokens match.");
+            //console.log("Request headers : "+JSON.stringify(req.headers))
+            //console.log("Request body : "+JSON.stringify(req.body))
+            //console.log("Current validation token : "+FACEBOOK_VALIDATION_TOKEN)
+            //console.error("Failed validation. Make sure the validation tokens match.");
             res.sendStatus(403);
         }
     });
@@ -238,12 +237,9 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
                 pageEntry.messaging.forEach(function(messagingEvent) {
                     if (messagingEvent.message) {
                         receivedMessage(chatbotClient, messagingEvent);
-                    } else {
-                        console.log("Webhook received unknown messagingEvent: ", messagingEvent);
                     }
                 });
             });
-
             res.sendStatus(200);
         }
         else
