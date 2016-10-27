@@ -98,7 +98,7 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
     }
 
     function extractAttachment(message) {
-        var myRegexp = /^attachment\((.*?)\)$/g;
+        var myRegexp = /^Attachment\((.*?)\)$/g;
         var match = myRegexp.exec(message);
         var attachment = undefined;
         if(match && match.length > 0) {
