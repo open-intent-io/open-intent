@@ -41,6 +41,13 @@ module.exports = {
     "#get_food_type": function(intentVariables, sessionId, next) {
         var replyVariables = {};
         replyVariables['0'] = intentVariables['food_type0'];
+
+        //if the user chooses the pizza, he gets a special offer
+        if (intentVariables['food_type0'] === 'pizza') {
+            replyVariables['_target_state'] = "@specialoffer";
+            replyVariables['_reply'] = "Congratulations, you get a special offer";
+        }
+
         next(replyVariables);
     },
     "#confirm": function(intentVariables, sessionId, next) {
