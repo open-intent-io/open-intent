@@ -49,7 +49,7 @@ var Q = require('q');
 
 
 function publishIntentStory(app) {
-    app.get('/intent-story', function(req, res) {
+    app.get('/', function(req, res) {
         var chatbot = req.app.get('chatbot');
         var templateFilepath = path.resolve(__dirname, 'templates/intent-story.html');
         var template = fs.readFileSync(templateFilepath, 'utf-8');

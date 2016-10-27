@@ -79,7 +79,7 @@ describe('Test docu publisher middleware', function() {
 
     it('should return the intent story graph in an HTML page', function(done) {
         request(Middleware._server)
-        .get('/intent-story')
+        .get('/')
         .set('Accept', 'application/json')
         .expect('Content-Type', 'text/html')
         .expect(200)
