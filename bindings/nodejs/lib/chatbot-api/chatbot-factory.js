@@ -40,7 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var OpenIntent = require('./open-intent.node');
 var Q = require('q');
 
-function treatMessage(chatbot, userCommandsDriver, sessionId, context, msg, deferred) {
+function treatMessage(chatbot, userCommandsDriver, sessionId, context, msg, deferred, saveContext) {
     var currentState = context._state;
     var intentFound = chatbot.treatMessage(context, msg, function (actionId, intentVariables) {
         if (userCommandsDriver) {
@@ -51,7 +51,20 @@ function treatMessage(chatbot, userCommandsDriver, sessionId, context, msg, defe
                     userDefinedVariables = {};
                 }
 
-                var replies = chatbot.prepareReplies(currentState, actionId, intentVariables, userDefinedVariables);
+                //let the user override the branching completely, by specifying
+                //the target state and a dynamic reply from the user_command
+                var replies = [];
+                if('_target_state' in userDefinedVariables && '_reply' in userDefinedVariables) {
+                    var targetState = userDefinedVariables['_target_state'];
+                    var reply = userDefinedVariables['_reply'];
+
+                    context._state = targetState;
+                    replies.push(reply);
+                } else {
+                    replies = chatbot.prepareReplies(currentState, actionId, intentVariables, userDefinedVariables);
+                }
+
+                saveContext(context);
                 deferred.resolve(replies);
             });
         }
@@ -68,14 +81,14 @@ function treatMessage(chatbot, userCommandsDriver, sessionId, context, msg, defe
 }
 
 function callTreatMessageWithContext(chatbot, sessionManager, userCommandsDriver, sessionId, context, msg, deferred) {
-   try {
-        treatMessage(chatbot, userCommandsDriver, sessionId, context, msg, deferred);
+    try {
+        var saveContext = (context) => (sessionManager.save(sessionId, context));
+        treatMessage(chatbot, userCommandsDriver, sessionId, context, msg, deferred, saveContext);
     }
     catch(err) {
         console.log(err);
         deferred.reject(err);
     }
-    sessionManager.save(sessionId, context);
 }
 
 var talkInternal = function(chatbot, sessionManager, userCommandsDriver, sessionId, msg) {
