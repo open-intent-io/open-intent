@@ -42,13 +42,14 @@ var request = require('supertest');
 var fs = require('fs');
 var path = require('path');
 
-var createChatbot = require('../../lib/chatbot');
+var Chatbot = require('../../lib/chatbot');
 var Rest = require('../../lib/middleware/rest');
 
 var REST_PORT = 10010;
 
 describe('Test REST middleware', function() {
     var RestMiddleware = undefined;
+    var chatbot;
 
     var file = path.resolve(__dirname, '../res/food_bot/dictionary.json');
     var dictionary = JSON.parse(fs.readFileSync(file, 'utf-8'));
@@ -58,28 +59,23 @@ describe('Test REST middleware', function() {
 
     var userCommands = require(path.resolve(__dirname, '../res/food_bot/user_commands.js'));
 
-    before(function(done) {
+    before(function() {
         var botmodel = {
             dictionary: dictionary,
             oiml: oiml,
             user_commands: userCommands
         };
 
-        createChatbot(botmodel)
-        .then(function(chatbot) {
-            RestMiddleware = Rest(REST_PORT);
-            chatbot.use(RestMiddleware)
-            .then(function() {
-                return chatbot.start();
-            })
-            .then(function() {
-                done();
-            })
-        });
+        chatbot = new Chatbot();
+        RestMiddleware = Rest(REST_PORT);
+        var config = {}
+        config.middlewares = [RestMiddleware];
+
+        return chatbot.start(botmodel, config);
     });
 
     after(function() {
-        RestMiddleware.detach();
+        chatbot.stop();
     });
 
     it('should return the state when calling getSate', function(done) {

@@ -42,14 +42,14 @@ var request = require('supertest');
 var fs = require('fs');
 var path = require('path');
 
-var createChatbot = require('../../lib/chatbot');
+var Chatbot = require('../../lib/chatbot');
 var DocPublisher = require('../../lib/middleware/doc-publisher');
 
 var REST_PORT = 10010;
 
 describe('Test docu publisher middleware', function() {
-    var Middleware = undefined;
-
+    var Middleware;
+    var chatbot;
     var file = path.resolve(__dirname, '../res/food_bot/dictionary.json');
     var dictionary = JSON.parse(fs.readFileSync(file, 'utf-8'));
 
@@ -58,23 +58,28 @@ describe('Test docu publisher middleware', function() {
 
     var userCommands = require(path.resolve(__dirname, '../res/food_bot/user_commands.js'));
 
-    before(function(done) {
+    before(function() {
         var botmodel = {
             dictionary: dictionary,
             oiml: oiml,
             user_commands: userCommands
         };
 
-        createChatbot(botmodel)
-        .then(function(chatbot) {
-            Middleware = DocPublisher(REST_PORT);
-            chatbot.use(Middleware);
-            done();
-        });
+        Middleware = DocPublisher(REST_PORT);
+        var middlewares = [];
+
+        middlewares.push(Middleware);
+
+        chatbot = new Chatbot();
+        var config = {
+            middlewares: middlewares
+        };
+
+        return chatbot.start(botmodel, config);
     });
 
     after(function() {
-        Middleware.detach();
+        return chatbot.stop();
     });
 
     it('should return the intent story graph in an HTML page', function(done) {
@@ -91,16 +96,16 @@ describe('Test docu publisher middleware', function() {
 
     it('should return static viz script', function(done) {
         request(Middleware._server)
-            .get('/static/viz.js')
-            .expect('Content-Type', 'application/javascript')
-            .expect(200)
-            .end(function(err, res) {
-                if(!err) {
-                    done();
-                }
-                else {
-                    console.error(err);
-                }
-            });
+        .get('/static/viz.js')
+        .expect('Content-Type', 'application/javascript')
+        .expect(200)
+        .end(function(err, res) {
+            if(!err) {
+                done();
+            }
+            else {
+                console.error(err);
+            }
+        });
     });
 });

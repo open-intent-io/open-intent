@@ -82,7 +82,8 @@ function MiddlewareInterface(config) {
     if(config.selection.telegram)
         this._platforms['telegram'] = require(path.resolve(__dirname, "platforms/controllers/telegram"));
 
-    this.attach = function(chatbot) {
+
+    this.start = function(chatbot) {
         var deferred = Q.defer();
         var app = express();
 
@@ -92,29 +93,22 @@ function MiddlewareInterface(config) {
             deployPlatforms(chatbot, this._platforms, config, app);
         }
         catch(err) {
-            console.error(err);
             throw Error(err);
         }
         this._app = app;
-        deferred.resolve();
 
-        return deferred.promise;
-    };
-
-    this.detach = function() {
-        if(this._server) {
-            this._server.close();
-        }
-    };
-
-    this.start = function() {
-        var deferred = Q.defer();
         var port = process.env.PORT || (config.general.port) || 5000;
 
         this._server = this._app.listen(port, function() {
             deferred.resolve();
         });
         return deferred.promise;
+    };
+
+    this.stop = function() {
+        if(this._server) {
+            this._server.close();
+        }
     }
 }
 

@@ -41,7 +41,7 @@ var expect    = require("chai").expect;
 var fs = require('fs');
 var foodBotModel = require('../food-bot-model');
 var Rest = require('../../lib/middleware/rest');
-var createChatbot = require('../../lib/chatbot');
+var Chatbot = require('../../lib/chatbot');
 var ChatbotClient = require('../../lib/chatbot-client');
 
 var SERVICE_HOST = 'http://127.0.0.1';
@@ -55,21 +55,19 @@ describe('Testing the chatbot client of REST API', function() {
     describe('Interact with the chatbot', function() {
         before(function(done) {
             middleware = Rest(SERVICE_PORT);
-            createChatbot(botmodel)
-            .then(function(newChatbot) {
-                chatbot = newChatbot;
-                chatbot.use(middleware)
-                .then(function() {
-                    return chatbot.start();
-                })
-                .then(function() {
-                    done();
-                });
+            chatbot = new Chatbot();
+            var config = {
+                middlewares: [middleware]
+            };
+
+            chatbot.start(botmodel, config)
+            .then(function() {
+                done();
             });
         });
 
         after(function() {
-            middleware.detach();
+            return chatbot.stop();
         });
 
         it('should handle a static scenario correctly', function(done) {
@@ -98,16 +96,19 @@ describe('Testing the chatbot client of REST API', function() {
     describe('Get state on initialized chatbot', function() {
         before(function(done) {
             middleware = Rest(SERVICE_PORT);
-            createChatbot(botmodel)
+            var chatbot = new Chatbot();
+            var config = {
+                middlewares: [middleware]
+            };
+
+            chatbot.start(botmodel, config)
             .then(function(newChatbot) {
-                chatbot = newChatbot;
-                chatbot.use(middleware);
                 done();
             });
         });
 
         after(function() {
-            middleware.detach();
+            return chatbot.stop();
         });
 
         it('should set and return the state correctly when asked', function() {

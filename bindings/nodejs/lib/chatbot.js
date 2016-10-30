@@ -40,44 +40,38 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var createChatbot = require('./chatbot-api/chatbot');
 var Q = require('q');
 
-function ChatbotInterface(chatbot) {
-    this._chatbot = chatbot;
+function ChatbotWithMiddleware() {
+    var self = this;
+    this._chatbot;
     this._middlewares = [];
-
-    this.use = function(middleware) {
-        var middlewares = this._middlewares;
-        var promise = middleware.attach(this._chatbot);
-        promise.then(function() {
-            middlewares.push(middleware);
-        });
-        return promise;
-    };
-
-    this.start = function() {
-        var middlewares = this._middlewares;
-        var promises = [];
-        for(var i in middlewares) {
-            promises.push(middlewares[i].start());
-        }
-        return Q.all(promises);
-    };
-
     return this;
 }
 
-function createChatbotInternal(botmodel, config) {
-    var deferred = Q.defer();
+ChatbotWithMiddleware.prototype.start = function(botmodel, config) {
+    var self = this;
+    this._middlewares = config['middlewares'];
+    var middlewares = this._middlewares;
+    var promises = [];
 
-    createChatbot(botmodel, config)
+    return createChatbot(botmodel, config)
     .then(function(chatbot) {
-        var chatbotInterface = new ChatbotInterface(chatbot);
-        deferred.resolve(chatbotInterface);
-    })
-    .fail(function(err) {
-        deferred.reject(err);
+        self._chatbot = chatbot;
+        promises.push(self._chatbot.setupUserCommands());
+        for(var i in middlewares) {
+            promises.push(middlewares[i].start(self._chatbot));
+        }
+        return Q.all(promises);
     });
+};
 
-    return deferred.promise;
-}
+ChatbotWithMiddleware.prototype.stop = function() {
+    var middlewares = this._middlewares;
+    var promises = [];
+    for(var i in middlewares) {
+        promises.push(middlewares[i].stop());
+    }
+    promises.push(this._chatbot.cleanupUserCommands());
+    return Q.all(promises);
+};
 
-module.exports = createChatbotInternal;
+module.exports = ChatbotWithMiddleware;

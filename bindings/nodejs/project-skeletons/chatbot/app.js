@@ -40,7 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var openintent = require('open-intent');
 
-var chatbot =  require('./app/chatbot');
+var Chatbot =  require('./app/chatbot');
 var config = require('./app/config');
 
 var REST_PORT = process.env.REST_PORT || 5001;
@@ -52,10 +52,12 @@ middlewares.push(openintent.middleware.Irc());
 middlewares.push(openintent.middleware.Rest(REST_PORT));
 middlewares.push(openintent.middleware.Platforms(config));
 
-middlewares.push(openintent.middleware.DocPublisher(DOC_PUBLISHER_PORT))
+middlewares.push(openintent.middleware.DocPublisher(DOC_PUBLISHER_PORT));
 middlewares.push(openintent.middleware.Logger(config.loggers));
 
-chatbot(middlewares)
+var chatbot = new Chatbot();
+
+chatbot.start(middlewares)
 .fail(function(err) {
-    console.error('Error:', err);
+    console.error('Error: ', err);
 });

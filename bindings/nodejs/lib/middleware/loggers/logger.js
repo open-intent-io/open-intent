@@ -70,7 +70,7 @@ function Logger(config) {
 function MiddlewareInterface(config) {
     this._logger = new Logger(config);
 
-    this.attach = function(chatbot) {
+    this.start = function(chatbot) {
         var logger = this._logger;
         var promise = this._logger.initialize();
 
@@ -81,9 +81,7 @@ function MiddlewareInterface(config) {
         return promise;
     };
 
-    this.detach = function(chatbot) {
-        chatbot.setLogger(this._logger);
+    this.stop = function(chatbot) {
+        chatbot.setLogger(undefined);
     };
-
-    this.start = function() {};
 }
