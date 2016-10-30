@@ -41,10 +41,10 @@ function getDateTime() {
     return new Date().toString().substring(16,24);
 }
 
-module.exports = {
-    '#telltime': function(intentVariables, sessionId, next) {
+module.exports = function(handler) {
+    handler.on('#telltime', function(intentVariables, sessionId, next) {
         var replyVariables = {};
         replyVariables['0'] = getDateTime();
         next(replyVariables);
-    }
+    });
 };

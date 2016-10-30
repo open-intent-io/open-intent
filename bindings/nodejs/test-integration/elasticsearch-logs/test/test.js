@@ -120,13 +120,12 @@ describe('ElasticSearch logs tests', function() {
    });
 
    describe('After launching the bot', function() {
-      function executeChatbot() {
+      function executeChatbot(done) {
          this.timeout(5000);
-         var defer = Q.defer();
          var app = spawn('nodejs', ['app.js'], {});
 
          app.on('exit', function() {
-            defer.resolve();
+            done();
          });
 
          /*app.stdout.on('data', function(data) {
@@ -140,8 +139,6 @@ describe('ElasticSearch logs tests', function() {
                app.kill();
             }, 2000)
          }, 1500);
-
-         return defer.promise;
       }
 
 
@@ -219,7 +216,13 @@ describe('ElasticSearch logs tests', function() {
             host: 'elasticsearch:9200'
          });
 
-         getDocumentCount().then(getAllDocuments).then(call(done));
+         function throwError(err) {
+            throw err;
+         }
+
+         getDocumentCount()
+          .then(getAllDocuments, throwError)
+          .then(call(done), throwError);
       });
    });
 });

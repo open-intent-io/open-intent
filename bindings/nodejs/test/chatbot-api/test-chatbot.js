@@ -70,7 +70,10 @@ describe("Test open intent chatbot", function() {
         })
         .then(function(state) {
             done();
-        });
+        })
+        .fail(function(err) {
+            console.error(err);
+        })
     });
 
     it('should succeed on talk call', function(done) {
