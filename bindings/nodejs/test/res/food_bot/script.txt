@@ -22,3 +22,19 @@
     -Tell me what you want. Pizza, hamburger or salad?
 @get_food_type
 }
+
+{
+@specialoffer
+    -Yes!
+        #confirm
+    -Congratulations on the special offer, it is gonna be _$.
+@end
+}
+
+{
+@specialoffer
+    -No!
+        #notunderstood
+    -Tell me what you want. Pizza, hamburger or salad?
+@get_food_type
+}

@@ -144,9 +144,9 @@ describe('Test the IRC client', function() {
             "Hello\n", 
             "Would you want to eat a pizza, a hamburger or a salad?\n",
             "Pizza\n", 
-            "Got it, you want pizza, right?\n",
+            "Congratulations, you get a special offer\n",
             "yes\n",
-            "I'm ordering, it is gonna be 5$.\n"
+            "Congratulations on the special offer, it is gonna be 5$.\n"
         ];
 
         handleScript(script, done);
@@ -168,7 +168,7 @@ describe('Test the IRC client', function() {
             "Hello\n", 
             "Would you want to eat a pizza, a hamburger or a salad?\n",
             "Pizza\n", 
-            "Got it, you want pizza, right?\n",
+            "Congratulations, you get a special offer\n",
             "No\n",
             "Tell me what you want. Pizza, hamburger or salad?\n",
             "Salad\n",
