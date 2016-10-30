@@ -2,10 +2,12 @@
 var path = require('path');
 var fs = require('fs');
 var openintent = require('open-intent');
-var Q = require('q');
 
-module.exports = function(middlewares) {
-    var deferred = Q.defer();
+function Chatbot() {
+    this._chatbot;
+}
+
+Chatbot.prototype.start = function(middlewares) {
     var modelDirectory = path.join(__dirname, '..', 'res');
 
     var dictionaryFilepath = path.join(modelDirectory, 'dictionary.json');
@@ -18,30 +20,16 @@ module.exports = function(middlewares) {
         user_commands: require(userCommandsFilepath)
     };
 
-    openintent.createChatbot(botmodel)
-    .then(function(chatbot) {
-        var promises = [];
-        for(var i in middlewares) {
-            promises.push(chatbot.use(middlewares[i]));
-        }
+    var config = {
+        middlewares: middlewares
+    };
 
-        Q.all(promises)
-        .then(function() {
-            chatbot.start()
-            .then(function() {
-                deferred.resolve();
-            })
-            .fail(function(err) {
-                deferred.reject(err);
-            })
-        })
-        .fail(function(err) {
-            deferred.reject(err);
-        })
-    })
-    .fail(function(err) {
-        deferred.reject(err);
-    });
-
-    return deferred.promise;
+    this._chatbot = new openintent.Chatbot();
+    return this._chatbot.start(botmodel, config);
 };
+
+Chatbot.prototype.stop = function() {
+    return this._chatbot.stop();
+};
+
+module.exports = Chatbot;

@@ -37,17 +37,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-module.exports = {
-    'wake': function(intentVariables, sessionId, next) {
+module.exports = function(handler) {
+    handler.on('wake', function(intentVariables, sessionId, next) {
         next();
-    },
-    'append_order1': function(intentVariables, sessionId, next) {
+    });
+
+    handler.on('append_order1', function(intentVariables, sessionId, next) {
         var variables = {};
         variables['0'] = 'variable0';
 
         next(variables);
-    },
-    'bye': function(intentVariables, sessionId, next) {
+    });
+
+    handler.on('bye', function(intentVariables, sessionId, next) {
         next();
-    }
-}
+    });
+};

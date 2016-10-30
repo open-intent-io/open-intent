@@ -49,7 +49,7 @@ module.exports = function() {
         this._sessions[sessionId] = context;
         deferred.resolve();
         return deferred.promise;
-    }
+    };
 
     this.load = function(sessionId) {
         var deferred = Q.defer();
@@ -61,7 +61,7 @@ module.exports = function() {
             deferred.reject('No session ' + sessionId + ' stored');
         }
         return deferred.promise;
-    }
+    };
 
     return this;
-}
+};

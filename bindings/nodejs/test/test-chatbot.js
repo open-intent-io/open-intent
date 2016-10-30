@@ -37,62 +37,58 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-module.exports = function(port) {
-    return new MiddlewareInterface(port);
-};
+var sinon = require('sinon');
+var assert = require('assert');
 
-var express = require('express');
-var bodyParser = require('body-parser');
-var fs = require('fs');
-var path = require('path');
-var Q = require('q');
+var Chatbot = require('../lib/chatbot');
+var foodBotModel = require('./food-bot-model');
 
+describe('Test Chatbot with middlewares', function() {
 
-function publishIntentStory(app) {
-    app.get('/', function(req, res) {
-        var chatbot = req.app.get('chatbot');
-        var templateFilepath = path.resolve(__dirname, 'templates/intent-story.html');
-        var template = fs.readFileSync(templateFilepath, 'utf-8');
+    it('should call setup of the user commands when the chatbot starts', function(done) {
+        var chatbot = new Chatbot();
+        var config = {};
+        var setup_spy = sinon.spy();
 
-        chatbot.getGraph()
-        .then(function(graph) {
-            template = template.replace(/\$\{GRAPH\}/, graph);
+        foodBotModel.user_commands = function(handler) {
+            handler.on('_setup', function(next) {
+                setup_spy();
+                next();
+            });
+        };
 
-            res.type('html');
-            res.send(template);
+        chatbot.start(foodBotModel, config)
+        .then(function() {
+            assert(setup_spy.calledOnce);
+            done();
         })
-        .fail(function(err) {
-            res.status(500).send({'message': err});
+        .fail(function(error) {
+            console.error('Error', error);
         });
     });
-}
 
-function MiddlewareInterface(port) {
-    var _this = this;
-    this._app = express();
-    this._server = undefined;
+    it('should call cleanup of the user commands when the chatbot stops', function(done) {
+        var chatbot = new Chatbot();
+        var config = {};
+        var spy = sinon.spy();
 
+        foodBotModel.user_commands = function(handler) {
+            handler.on('_cleanup', function(next) {
+                spy();
+                next();
+            });
+        };
 
-    this.start = function(chatbot) {
-        var deferred = Q.defer();
-        _this._app.use(bodyParser.json()); // support json encoded bodies
-        _this._app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
-        _this._app.set('chatbot', chatbot);
-
-        _this._app.use('/static', express.static(path.resolve(__dirname, 'public_html')));
-        publishIntentStory(_this._app);
-
-        var _port = (port) ? port : 8080;
-        _this._server = _this._app.listen(_port, function() {
-            deferred.resolve();
+        chatbot.start(foodBotModel, config)
+        .then(function() {
+            return chatbot.stop()
+        })
+        .then(function() {
+            assert(spy.calledOnce);
+            done();
+        })
+        .fail(function(error) {
+            console.error('Error', error);
         });
-
-        return deferred.promise;
-    };
-
-    this.stop = function() {
-        if(_this._server) {
-            _this._server.close();
-        }
-    }
-}
+    });
+});

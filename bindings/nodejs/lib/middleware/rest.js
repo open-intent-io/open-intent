@@ -94,7 +94,7 @@ function MiddlewareInterface(port) {
     this._app = express();
     this._server = undefined;
 
-    this.attach = function(chatbot) {
+    this.start = function(chatbot) {
         var deferred = Q.defer();
         _this._app.use(bodyParser.json()); // support json encoded bodies
         _this._app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
@@ -103,23 +103,17 @@ function MiddlewareInterface(port) {
         _this._app.get('/state/:sessionId', getstate);
         _this._app.put('/state/:sessionId', setstate);
         _this._app.post('/talk/:sessionId', talk);
-        deferred.resolve();
-        return deferred.promise;
-    };
 
-    this.detach = function() {
-        if(_this._server) {
-            _this._server.close();
-        }
-    };
-
-    this.start = function() {
-        var deferred = Q.defer();
         var _port = (port) ? port : 8080;
-
         _this._server = _this._app.listen(_port, function() {
             deferred.resolve();
         });
         return deferred.promise;
+    };
+
+    this.stop = function() {
+        if(_this._server) {
+            _this._server.close();
+        }
     }
 }

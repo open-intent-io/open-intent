@@ -38,27 +38,58 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var Q = require('q');
+const EventEmitter = require('events');
 
-function executeInternal(commandByActionId, actionId, sessionId, intentVariables) {
+function setupEmitter(commandEmitter, setupAction) {
     var deferred = Q.defer();
 
-    if(actionId in commandByActionId) {
-        commandByActionId[actionId](intentVariables, sessionId, deferred.resolve);
-    }
-    else {
+    var handlerFound = commandEmitter.emit(setupAction, deferred.resolve);
+
+    // We resolve even if the listener has not been found.
+    if(!handlerFound) {
         deferred.resolve();
     }
+    return deferred.promise;
+}
 
+function beginInternal(commandEmitter) {
+    return setupEmitter(commandEmitter, '_setup');
+}
+
+function endInternal(commandEmitter) {
+    return setupEmitter(commandEmitter, '_cleanup');
+}
+
+function executeInternal(commandEmitter, actionId, sessionId, intentVariables) {
+    var deferred = Q.defer();
+
+    var handlerFound = commandEmitter.emit(actionId, intentVariables, sessionId, deferred.resolve);
+
+    // We resolve even if the listener has not been found.
+    if(!handlerFound) {
+        deferred.resolve();
+    }
     return deferred.promise;
 }
 
 
-module.exports = function(commandByActionId) {
-    this._commandByActionId = commandByActionId;
+module.exports = function(commandHandler) {
+    this._emitter = new EventEmitter();
+
+    // Pass the emitter to the command handler
+    commandHandler(this._emitter);
+
+    this.setup = function() {
+        return beginInternal(this._emitter);
+    };
+
+    this.cleanup = function() {
+        return endInternal(this._emitter);
+    };
 
     this.execute = function(actionId, sessionId, intentVariables) {
-        return executeInternal(this._commandByActionId, actionId, sessionId, intentVariables);
-    }
+        return executeInternal(this._emitter, actionId, sessionId, intentVariables);
+    };
 
     return this;
-}
+};

@@ -41,48 +41,48 @@ var ChatbotInterface = require('./chatbot-interface');
 var util = require('util');
 var Q = require('q');
 
-function ChatbotWithLogger(chatbot) {
+function ChatbotWithLogger(serializableChatbot, sessionManagerDriver, userCommandsDriver) {
     this._logger = undefined;
 
-    ChatbotInterface.call(this, chatbot);
-
-    this.talk = function(sessionId, message) {
-        var deferred = Q.defer();
-        var logger = this._logger;
-
-        if (logger) {
-            logger.log({
-                'session_id': sessionId,
-                'message': message,
-                'type': 'intent'
-            });
-        }
-
-        this._chatbot.talk(sessionId, message)
-        .then(function (replies) {
-            if (logger) {
-                for(var i in replies) {
-                    logger.log({
-                        'session_id': sessionId,
-                        'message': replies[i],
-                        'type': 'reply'
-                    });
-                }
-            }
-            deferred.resolve(replies);
-        })
-        .fail(function (err) {
-            deferred.reject(err);
-        });
-
-        return deferred.promise;
-    };
-
-    this.setLogger = function(logger) {
-        this._logger = logger;
-    };
+    ChatbotInterface.call(this, serializableChatbot, sessionManagerDriver, userCommandsDriver);
 }
 
 util.inherits(ChatbotWithLogger, ChatbotInterface);
+
+ChatbotWithLogger.prototype.talk = function(sessionId, message) {
+    var deferred = Q.defer();
+    var logger = this._logger;
+
+    if (logger) {
+        logger.log({
+            'session_id': sessionId,
+            'message': message,
+            'type': 'intent'
+        });
+    }
+
+    ChatbotInterface.prototype.talk.call(this, sessionId, message)
+    .then(function (replies) {
+        if (logger) {
+            for(var i in replies) {
+                logger.log({
+                    'session_id': sessionId,
+                    'message': replies[i],
+                    'type': 'reply'
+                });
+            }
+        }
+        deferred.resolve(replies);
+    })
+    .fail(function (err) {
+        deferred.reject(err);
+    });
+
+    return deferred.promise;
+};
+
+ChatbotWithLogger.prototype.setLogger = function(logger) {
+    this._logger = logger;
+};
 
 module.exports = ChatbotWithLogger;
