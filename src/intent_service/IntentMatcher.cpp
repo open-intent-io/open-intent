@@ -156,14 +156,13 @@ IntentMatcher::IntentResult IntentMatcher::match(
   return intentResult;
 }
 
-IntentMatcher::Intent IntentMatcher::buildFullMatchIntent(const std::string& message)
-{
-    Intent intent;
-    EntityMatch fullMatch(message, message, "", "_full");
-    intent.entityMatches.push_back(fullMatch);
-    return intent;
+IntentMatcher::Intent IntentMatcher::buildFullMatchIntent(
+    const std::string& message) {
+  Intent intent;
+  EntityMatch fullMatch(message, message, "", "_full");
+  intent.entityMatches.push_back(fullMatch);
+  return intent;
 }
-
 
 std::ostream& operator<<(std::ostream& os,
                          const IntentMatcher::Intent& intent) {

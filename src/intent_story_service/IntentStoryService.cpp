@@ -108,26 +108,20 @@ IntentStoryService::Result IntentStoryService::evaluate(
     EdgeByIntentIdIndex::const_iterator foundEdgeIt =
         edgeByIntentIdIndex.find(intentResult.intent.intentId);
 
-
     IntentStoryModel::StoryGraph::Edge foundEdge;
-    if (foundEdgeIt != edgeByIntentIdIndex.end())
-    {
-        foundEdge = foundEdgeIt->second;
-        intentStoryResult.intent = intentResult.intent;
-    }
-    else if (otherwiseIntent)
-    {
-        INTENT_LOG_DEBUG() << "Otherwise intent detected.";
-        foundEdge = *otherwiseIntent;
-        intentStoryResult.intent = IntentMatcher::buildFullMatchIntent(message);
-    }
-    else
-        intentStoryResult.found = false;
+    if (foundEdgeIt != edgeByIntentIdIndex.end()) {
+      foundEdge = foundEdgeIt->second;
+      intentStoryResult.intent = intentResult.intent;
+    } else if (otherwiseIntent) {
+      INTENT_LOG_DEBUG() << "Otherwise intent detected.";
+      foundEdge = *otherwiseIntent;
+      intentStoryResult.intent = IntentMatcher::buildFullMatchIntent(message);
+    } else
+      intentStoryResult.found = false;
 
-    if (intentStoryResult.found)
-    {
-        intentStoryResult.actionId = foundEdge.getInfo().actionId;
-        intentStoryResult.nextStateId = foundEdge.getTarget().getInfo().stateId;
+    if (intentStoryResult.found) {
+      intentStoryResult.actionId = foundEdge.getInfo().actionId;
+      intentStoryResult.nextStateId = foundEdge.getTarget().getInfo().stateId;
     }
   } else {
     INTENT_LOG_ERROR() << "There are no neighboor edges from state \"" +

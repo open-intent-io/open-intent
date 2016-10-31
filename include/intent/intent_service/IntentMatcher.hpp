@@ -66,17 +66,11 @@ class IntentMatcher {
     std::string entity;
     std::string name;
 
-    EntityMatch(){}
+    EntityMatch() {}
 
-    EntityMatch(const std::string& text,
-                const std::string& term,
-                const std::string& entity,
-                const std::string& name):
-        text(text),
-        term(term),
-        entity(entity),
-        name(name)
-    {}
+    EntityMatch(const std::string& text, const std::string& term,
+                const std::string& entity, const std::string& name)
+        : text(text), term(term), entity(entity), name(name) {}
 
     bool operator==(const EntityMatch& that) const {
       return this->text == that.text && this->term == that.term &&
@@ -131,7 +125,6 @@ class IntentMatcher {
    */
 
   static Intent buildFullMatchIntent(const std::string& message);
-
 };
 
 std::ostream& operator<<(std::ostream& os, const IntentMatcher::Intent& intent);
