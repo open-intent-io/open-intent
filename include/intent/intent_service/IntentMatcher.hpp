@@ -66,6 +66,18 @@ class IntentMatcher {
     std::string entity;
     std::string name;
 
+    EntityMatch(){}
+
+    EntityMatch(const std::string& text,
+                const std::string& term,
+                const std::string& entity,
+                const std::string& name):
+        text(text),
+        term(term),
+        entity(entity),
+        name(name)
+    {}
+
     bool operator==(const EntityMatch& that) const {
       return this->text == that.text && this->term == that.term &&
              this->entity == that.entity;
@@ -112,6 +124,14 @@ class IntentMatcher {
   static IntentResult match(const DictionaryModel& dictionaryModel,
                             const Variables& variables,
                             const IntentIndex& intentByIdIndex);
+
+  /**
+   * Build full match intent, with one matching entity, the full user message
+   *
+   */
+
+  static Intent buildFullMatchIntent(const std::string& message);
+
 };
 
 std::ostream& operator<<(std::ostream& os, const IntentMatcher::Intent& intent);

@@ -54,7 +54,7 @@ Chatbot::Chatbot(const ChatbotModel& chatbotModel)
 
 void buildParams(Chatbot::VariablesMap& params,
                  IntentStoryService::Intent& intent) {
-  std::for_each(intent.entityMatches.begin(), intent.entityMatches.end(),
+    std::for_each(intent.entityMatches.begin(), intent.entityMatches.end(),
                 [&params](const IntentStoryService::EntityMatch& match) {
                   params[match.name] =
                       match.term.empty() ? match.text : match.term;

@@ -202,13 +202,19 @@ std::unique_ptr<EdgeDefinition> EdgeParser::parseFallback(
       parse(scenario, inquiryToReply, previousStateInScenario);
   std::unique_ptr<EdgeDefinition> fallbackEdge;
 
+  //A fallback should be exactly 2 lines from the inquiry
   int potentialFallbackReplyIdIndex = inquiryBounds.upper + 2;
+
+  //if the line number is in the boundaries and the potential fallback is really a fallback
   if (checkBoundaries(potentialFallbackReplyIdIndex, scenario) &&
       isLine<FALLBACK>(scenario[potentialFallbackReplyIdIndex])) {
+
+    //maybe replace the pointer by an optional
     fallbackEdge.reset(new EdgeDefinition(edge));
     fallbackEdge->replyTemplate =
         extractSentence(scenario[potentialFallbackReplyIdIndex]);
     fallbackEdge->target = fallbackEdge->source;
+    //associate an anonymous id with the action which will be called
     fallbackEdge->edge.actionId = fallbackEdge->source.stateId + "*";
     fallbackEdge->edge.intent.intentId = ANY_INTENT_TOKEN;
     fallbackEdge->edge.reply = fallbackEdge->replyTemplate;
