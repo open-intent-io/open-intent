@@ -56,11 +56,8 @@ describe('Testing the chatbot client of REST API', function() {
         before(function(done) {
             middleware = Rest(SERVICE_PORT);
             chatbot = new Chatbot();
-            var config = {
-                middlewares: [middleware]
-            };
-
-            chatbot.start(botmodel, config)
+            chatbot.set('rest', Rest(SERVICE_PORT));
+            chatbot.start(botmodel)
             .then(function() {
                 done();
             });
@@ -95,14 +92,11 @@ describe('Testing the chatbot client of REST API', function() {
 
     describe('Get state on initialized chatbot', function() {
         before(function(done) {
-            middleware = Rest(SERVICE_PORT);
             var chatbot = new Chatbot();
-            var config = {
-                middlewares: [middleware]
-            };
+            chatbot.set('rest', Rest(SERVICE_PORT));
 
-            chatbot.start(botmodel, config)
-            .then(function(newChatbot) {
+            chatbot.start(botmodel)
+            .then(function() {
                 done();
             });
         });
