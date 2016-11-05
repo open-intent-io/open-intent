@@ -65,17 +65,10 @@ describe('Test docu publisher middleware', function() {
             user_commands: userCommands
         };
 
-        Middleware = DocPublisher(REST_PORT);
-        var middlewares = [];
-
-        middlewares.push(Middleware);
-
         chatbot = new Chatbot();
-        var config = {
-            middlewares: middlewares
-        };
+        chatbot.set('doc', DocPublisher(REST_PORT));
 
-        return chatbot.start(botmodel, config);
+        return chatbot.start(botmodel);
     });
 
     after(function() {
@@ -83,7 +76,7 @@ describe('Test docu publisher middleware', function() {
     });
 
     it('should return the intent story graph in an HTML page', function(done) {
-        request(Middleware._server)
+        request(chatbot.get('doc')._server)
         .get('/')
         .set('Accept', 'application/json')
         .expect('Content-Type', 'text/html')
@@ -95,7 +88,7 @@ describe('Test docu publisher middleware', function() {
     });
 
     it('should return static viz script', function(done) {
-        request(Middleware._server)
+        request(chatbot.get('doc')._server)
         .get('/static/viz.js')
         .expect('Content-Type', 'application/javascript')
         .expect(200)

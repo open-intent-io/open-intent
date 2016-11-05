@@ -109,10 +109,9 @@ describe('Test platforms middleware', function() {
             };
 
             var chatbot = new Chatbot();
-            var botconfig = {};
-            config.middlewares = [ Platforms(config) ]
+            chatbot.set('platforms', Platforms(config));
 
-            return chatbot.start(botmodel, botconfig)
+            return chatbot.start(botmodel)
             .then(function() {
                 return chatbot.stop();
             });
@@ -121,7 +120,6 @@ describe('Test platforms middleware', function() {
 
     describe('When platforms middleware is attached, the chatbot', function() {
         var chatbot;
-        var PlatformMiddleware;
 
         before(function() {
             var config = {
@@ -145,12 +143,9 @@ describe('Test platforms middleware', function() {
 
 
             chatbot = new Chatbot();
-            PlatformMiddleware = Platforms(config);
+            chatbot.set('platforms', Platforms(config));
 
-            var botconfig = {};
-            botconfig.middlewares = [PlatformMiddleware];
-
-            return chatbot.start(botmodel, botconfig)
+            return chatbot.start(botmodel)
         });
 
         after(function() {
@@ -182,7 +177,7 @@ describe('Test platforms middleware', function() {
                 ]
             };
 
-            request(PlatformMiddleware._server)
+            request(chatbot.get('platforms')._server)
                 .post('/messenger/chat')
                 .send(body)
                 .set('x-hub-signature', "sha1=46d851011a6b3e870962f1eac707aff70f865729")

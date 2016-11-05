@@ -41,15 +41,25 @@ var createChatbot = require('./chatbot-api/chatbot');
 var Q = require('q');
 
 function ChatbotWithMiddleware() {
-    var self = this;
     this._chatbot;
     this._middlewares = [];
-    return this;
 }
+
+
+ChatbotWithMiddleware.prototype.set = function(key, middleware) {
+  this._middlewares[key] = middleware;
+};
+
+ChatbotWithMiddleware.prototype.unset = function(key) {
+    delete this._middlewares[key];
+};
+
+ChatbotWithMiddleware.prototype.get = function(key) {
+    return this._middlewares[key];
+};
 
 ChatbotWithMiddleware.prototype.start = function(botmodel, config) {
     var self = this;
-    this._middlewares = config['middlewares'];
     var middlewares = this._middlewares;
     var promises = [];
 

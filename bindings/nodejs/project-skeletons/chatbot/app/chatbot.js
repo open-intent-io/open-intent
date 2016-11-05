@@ -4,10 +4,19 @@ var fs = require('fs');
 var openintent = require('open-intent');
 
 function Chatbot() {
-    this._chatbot;
+    this._chatbot = new openintent.Chatbot();
 }
 
-Chatbot.prototype.start = function(middlewares) {
+Chatbot.prototype.set = function(key, middleware) {
+    this._chatbot.set(key, middleware);
+};
+
+Chatbot.prototype.get = function(key) {
+    return this._chatbot.get(key);
+};
+
+
+Chatbot.prototype.start = function() {
     var modelDirectory = path.join(__dirname, '..', 'res');
 
     var dictionaryFilepath = path.join(modelDirectory, 'dictionary.json');
@@ -20,12 +29,7 @@ Chatbot.prototype.start = function(middlewares) {
         user_commands: require(userCommandsFilepath)
     };
 
-    var config = {
-        middlewares: middlewares
-    };
-
-    this._chatbot = new openintent.Chatbot();
-    return this._chatbot.start(botmodel, config);
+    return this._chatbot.start(botmodel);
 };
 
 Chatbot.prototype.stop = function() {

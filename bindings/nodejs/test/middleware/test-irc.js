@@ -104,10 +104,10 @@ describe('Test the IRC client', function() {
         };
 
         var chatbot = new Chatbot();
-        var config = {};
-        config.middlewares = [IrcClient(stdio)];
 
-        return chatbot.start(botmodel, config)
+        chatbot.set('irc', IrcClient(stdio));
+
+        return chatbot.start(botmodel);
     });
     
     it('should handle a conversation in which the user order a hamburger', function(done) {

@@ -59,11 +59,10 @@ module.exports = function() {
             stdout: stdoutMock
         };
 
-        var middlewares = [openintent.middleware.Irc(stdio)];
-
         chatbot = new Chatbot();
+        chatbot.set('irc', openintent.middleware.Irc(stdio));
 
-        return chatbot.start(middlewares)
+        return chatbot.start()
         .then(function() {
             talk = function(input) {
                 var deferred = Q.defer();
