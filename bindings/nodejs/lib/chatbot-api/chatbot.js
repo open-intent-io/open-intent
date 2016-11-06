@@ -40,6 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var OpenIntentChatbotFactory = require('./chatbot-factory');
 var SimpleUserCommandsDriver = require('./user-defined-actions/simple-driver');
 var StandaloneSessionManager = require('./session-manager/standalone-driver');
+var RedisSessionManager = require('./session-manager/redis-driver');
 var ChatbotWithLogger = require('./chatbot-with-logger');
 var Q = require('q');
 
