@@ -1,58 +1,54 @@
 /*
-|---------------------------------------------------------|
-|    ___                   ___       _             _      |
-|   / _ \ _ __   ___ _ __ |_ _|_ __ | |_ ___ _ __ | |_    |
-|  | | | | '_ \ / _ \ '_ \ | || '_ \| __/ _ \ '_ \| __|   |
-|  | |_| | |_) |  __/ | | || || | | | ||  __/ | | | |_    |
-|   \___/| .__/ \___|_| |_|___|_| |_|\__\___|_| |_|\__|   |
-|        |_|                                              |
-|                                                         |
-|     - The users first...                                |
-|                                                         |
-|     Authors:                                            |
-|        - Clement Michaud                                |
-|        - Sergei Kireev                                  |
-|                                                         |
-|     Version: 1.0.0                                      |
-|                                                         |
-|---------------------------------------------------------|
+ |---------------------------------------------------------|
+ |    ___                   ___       _             _      |
+ |   / _ \ _ __   ___ _ __ |_ _|_ __ | |_ ___ _ __ | |_    |
+ |  | | | | '_ \ / _ \ '_ \ | || '_ \| __/ _ \ '_ \| __|   |
+ |  | |_| | |_) |  __/ | | || || | | | ||  __/ | | | |_    |
+ |   \___/| .__/ \___|_| |_|___|_| |_|\__\___|_| |_|\__|   |
+ |        |_|                                              |
+ |                                                         |
+ |     - The users first...                                |
+ |                                                         |
+ |     Authors:                                            |
+ |        - Clement Michaud                                |
+ |        - Sergei Kireev                                  |
+ |                                                         |
+ |     Version: 1.0.0                                      |
+ |                                                         |
+ |---------------------------------------------------------|
 
-The MIT License (MIT)
-Copyright (c) 2016 - Clement Michaud, Sergei Kireev
+ The MIT License (MIT)
+ Copyright (c) 2016 - Clement Michaud, Sergei Kireev
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 'use strict';
 
 module.exports.attach = MessengerBot;
 
-var bodyParser = require("body-parser");
-var crypto = require('crypto');
-var request = require('request');
+var Bot = require('messenger-bot');
 
 function MessengerBot(chatbotClient, messengerConfig, app) {
-
-    var messengerJsonParser = bodyParser.json({type:"application/json", verify: verifyRequestSignature });
 
     const FACEBOOK_APP_SECRET = process.env.MESSENGER_APP_SECRET ||
         messengerConfig.MESSENGER_APP_SECRET;
 
-     // Arbitrary value used to validate a webhook
+    // Arbitrary value used to validate a webhook
     const FACEBOOK_VALIDATION_TOKEN = process.env.MESSENGER_VALIDATION_TOKEN ||
         messengerConfig.MESSENGER_VALIDATION_TOKEN;
 
@@ -74,19 +70,86 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
         throw new Error("FACEBOOK_PAGE_ACCESS_TOKEN is missing");
     }
 
-    function receivedMessage(chatbotClient, event) {
+    var bot = new Bot({
+        token: FACEBOOK_PAGE_ACCESS_TOKEN,
+        verify: FACEBOOK_VALIDATION_TOKEN,
+        app_secret: FACEBOOK_APP_SECRET
+    });
+
+    app.use(bot.middleware());
+
+
+    bot.on('message', function(payload, reply) {
+        receivedMessage(chatbotClient, payload, reply);
+    });
+
+    bot.on('postback', function(payload, reply) {
+        receivedPostback(chatbotClient, payload, reply);
+    });
+
+    function JsonParseWithExceptionHandling(str) {
+        var data = undefined;
+        try {
+            data = JSON.parse(str);
+        } catch (e) {
+            return;
+        }
+        return data;
+    }
+
+    function extractAttachment(message) {
+        var myRegexp = /^Attachment\((.*?)\)$/g;
+        var match = myRegexp.exec(message);
+        var attachment = undefined;
+        if(match && match.length > 0) {
+            attachment = JsonParseWithExceptionHandling(match[1]);
+        }
+        return attachment;
+    }
+
+    function receivedPostback(chatbotClient, event, reply) {
+        //console.log(event);
         var senderID = event.sender.id;
-        var recipientID = event.recipient.id;
-        var timeOfMessage = event.timestamp;
+        var postback = event.postback;
+        if(postback) {
+            var message = postback.payload;
+            chatbotClient.talk(senderID, message).then(function(replies) {
+                var reply_data = replies.length ? replies[0] : "Error while getting reply.";
+                reply({ text: reply_data }, function(err, res) {
+                    if(err) {
+                        console.error(err);
+                        return;
+                    }
+                });
+            });
+        }
+    }
+
+    function talkTo(chatbot, senderId, message, reply) {
+        console.log(senderId, message);
+        chatbot.talk(senderId, message).then(function(replies) {
+            var reply_data = replies.length ? replies[0] : "Error while getting reply.";
+            var attachment = extractAttachment(reply_data);
+
+            if(attachment) {
+                reply(attachment);
+            }
+            else {
+                reply({ text: reply_data });
+            }
+        });
+    }
+
+    function handleQuickReply(chatbot, senderId, quickReply, reply) {
+        console.log(quickReply);
+        talkTo(chatbot, senderId, quickReply.payload, reply);
+    }
+
+    function receivedMessage(chatbotClient, event, reply) {
+        //console.log(event);
+        var senderId = event.sender.id;
         var message = event.message;
-
-        //console.log("Received message for user %d and page %d at %d with message:",
-         //   senderID, recipientID, timeOfMessage);
-
         var isEcho = message.is_echo;
-        var messageId = message.mid;
-        var appId = message.app_id;
-        var metadata = message.metadata;
 
         // You may get a text or attachment but not both
         var messageText = message.text;
@@ -94,157 +157,14 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
         var quickReply = message.quick_reply;
 
         if (isEcho) {
-            // Just logging message echoes to console
-            //console.log("Received echo for message %s and app %d with metadata %s",
-            //    messageId, appId, metadata);
             return;
         } else if (quickReply) {
-            var quickReplyPayload = quickReply.payload;
-            //console.log("Quick reply for message %s with payload %s",
-            //   messageId, quickReplyPayload);
-
-            sendTextMessage(senderID, "Quick reply tapped");
-            return;
+            handleQuickReply(chatbotClient, senderId, quickReply, reply);
         }
-
-        if (messageText) {
-            chatbotClient.talk(senderID, messageText).then(function(replies) {
-                var reply = replies.length ? replies[0] : "An error occured";
-                //console.log("[messenger] Sending reply : "+reply);
-                sendTextMessage(senderID, reply);
-            });
+        else if (messageText) {
+            talkTo(chatbotClient, senderId, messageText, reply);
         } else if (messageAttachments) {
-            sendTextMessage(senderID, "Message with attachment received");
+            reply({ text: "I do not handle attachments yet..." });
         }
     }
-
-    /*
-     * Send a text message using the Send API.
-     *
-     */
-    function sendTextMessage(recipientId, messageText) {
-        var messageData = {
-            recipient: {
-                id: recipientId
-            },
-            message: {
-                text: messageText,
-                metadata: "DEVELOPER_DEFINED_METADATA"
-            }
-        };
-
-        callSendAPI(messageData);
-    }
-
-
-    /*
-     * Call the Send API. The message data goes in the body. If successful, we'll
-     * get the message id in a response
-     *
-     */
-    function callSendAPI(messageData) {
-        request({
-            uri: SEND_API_URI,
-            qs: { access_token: FACEBOOK_PAGE_ACCESS_TOKEN },
-            method: 'POST',
-            json: messageData
-
-        }, function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                /*var recipientId = body.recipient_id;
-                var messageId = body.message_id;
-
-                if (messageId) {
-                    console.log("Successfully sent message with id %s to recipient %s",
-                        messageId, recipientId);
-                } else {
-                    console.log("Successfully called Send API for recipient %s",
-                        recipientId);
-                }*/
-            } else {
-                var errorMessage = response.error.message;
-                var errorCode = response.error.code;
-                console.error("Unable to send message. Error %d: %s",
-                    errorCode, errorMessage);
-            }
-        });
-    }
-
-    function verifyRequestSignature(req, res, buf) {
-        var signature = req.headers["x-hub-signature"];
-
-        if (!signature) {
-            // For testing, let's log an error. In production, you should throw an
-            // error.
-            console.error("Couldn't validate the signature.");
-        } else {
-            var elements = signature.split('=');
-            var method = elements[0];
-            var signatureHash = elements[1];
-
-            //console.log('Request signature', signature);
-            var expectedHash = crypto.createHmac(method, FACEBOOK_APP_SECRET).update(buf).digest('hex');
-
-            if (signatureHash != expectedHash) {
-                throw new Error("Couldn't validate the request signature. Expected=" + expectedHash);
-            }
-        }
-    }
-
-    /**
-     * Super ugly workaround because facebook doesn't send the type:'application/json' header
-     */
-    function attachContentTypeHeader(req, res, next) {
-        req.headers["content-type"] = "application/json";
-        //console.log("req.body : "+req.body.toString());
-        next();
-    }
-
-    /*
-     * Use your own validation token. Check that the token used in the Webhook
-     * setup is the same token used here.
-     *
-     */
-    app.use(messengerJsonParser);
-
-    app.get('/messenger/chat', attachContentTypeHeader, messengerJsonParser, function(req, res) {
-        //console.log("headers : "+JSON.stringify(req.headers));
-        if (req.query['hub.mode'] === 'subscribe' &&
-            req.query['hub.verify_token'] === FACEBOOK_VALIDATION_TOKEN) {
-            //console.log("Validating webhook");
-            res.status(200).send(req.query['hub.challenge']);
-        } else {
-            //console.log("Request headers : "+JSON.stringify(req.headers))
-            //console.log("Request body : "+JSON.stringify(req.body))
-            //console.log("Current validation token : "+FACEBOOK_VALIDATION_TOKEN)
-            //console.error("Failed validation. Make sure the validation tokens match.");
-            res.sendStatus(403);
-        }
-    });
-
-    /*
-     * All callbacks for Messenger are POST-ed. They will be sent to the same
-     * webhook. Be sure to subscribe your app to your page to receive callbacks
-     * for your page.
-     * https://developers.facebook.com/docs/messenger-platform/product-overview/setup#subscribe_app
-     *
-     */
-    app.post('/messenger/chat', attachContentTypeHeader, messengerJsonParser, function (req, res) {
-        var data = req.body;
-
-        if (data.object == 'page') {
-            data.entry.forEach(function(pageEntry) {
-                pageEntry.messaging.forEach(function(messagingEvent) {
-                    if (messagingEvent.message) {
-                        receivedMessage(chatbotClient, messagingEvent);
-                    }
-                });
-            });
-            res.sendStatus(200);
-        }
-        else
-        {
-            res.sendStatus(404);
-        }
-    });
 }
