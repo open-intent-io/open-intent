@@ -38,10 +38,11 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var redis = require('redis');
+var Q = require('q');
 
 var REDIS_CONTEXT_KEY = 'context';
 
-module.exports = function(redisHost, redisPort) {
+module.exports = function(redisUrl) {
     this._redisClient = undefined;
 
     this.save = function(sessionId, context) {
@@ -64,6 +65,10 @@ module.exports = function(redisHost, redisPort) {
             if(err) {
                 deferred.reject(err);
             }
+            //redis client returns the string "null" if the key wasn't found
+            else if (!data || data === "null") {
+                deferred.reject();
+            }
             else {
                 deferred.resolve(JSON.parse(data));
             }
@@ -71,15 +76,11 @@ module.exports = function(redisHost, redisPort) {
         return deferred.promise;
     };
 
-    if(!redisPort) {
-        redisPort = 6379;
+    if(!redisUrl) {
+        redisUrl = "//127.0.0.1:6379";
     }
 
-    if(!redisHost) {
-        redisHost = '127.0.0.1';
-    }
-    
-    this._redisClient = redis.createClient(redisPort, redisHost);
+    this._redisClient = redis.createClient(redisUrl);
 
     this._redisClient.on("error", function (err) {
         console.error(err);
