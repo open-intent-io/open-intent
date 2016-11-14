@@ -6,7 +6,7 @@
 @get_food_type
     -Pizza, please.
         #get_food_type
-        *I did not understand. Pizza, hamburger or salad?
+        *I did not understand _. Pizza, hamburger or salad?
     -Got it, you want _, right?
 @yesno
     -Yes!
