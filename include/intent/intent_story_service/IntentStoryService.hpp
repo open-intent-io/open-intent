@@ -64,7 +64,7 @@ class IntentStoryService : protected IntentService {
    * evaluating a single user intent.
    */
   struct Result {
-    Result() : found(false) {}
+    Result() : found(true) {}
 
     bool found;
     std::string actionId;

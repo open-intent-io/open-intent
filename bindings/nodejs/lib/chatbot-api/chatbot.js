@@ -40,6 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var OpenIntentChatbotFactory = require('./chatbot-factory');
 var SimpleUserCommandsDriver = require('./user-defined-actions/simple-driver');
 var StandaloneSessionManager = require('./session-manager/standalone-driver');
+var RedisSessionManager = require('./session-manager/redis-driver');
 var ChatbotWithLogger = require('./chatbot-with-logger');
 var Q = require('q');
 
@@ -50,15 +51,11 @@ function createChatbotNoCatch(botmodel, config) {
     if(config && 'redis' in config) {
         var redisConfig = config['redis'];
 
-        var hostname = '127.0.0.1';
-        var port = 6379;
-        if ('host' in redisConfig) {
-            hostname = redisConfig['host'];
+        var redisUrl = process.env.REDIS_URL || '//127.0.0.1:6379';
+        if ('url' in redisConfig) {
+            redisUrl = redisConfig['url'];
         }
-        if ('port' in redisConfig) {
-            port = redisConfig['port'];
-        }
-        sessionManagerDriver = new RedisSessionManager(hostname, port);
+        sessionManagerDriver = new RedisSessionManager(redisUrl);
     }
     
     return OpenIntentChatbotFactory.fromOIML(botmodel['dictionary'], botmodel['oiml'],

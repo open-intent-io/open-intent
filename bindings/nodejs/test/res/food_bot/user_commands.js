@@ -51,6 +51,12 @@ module.exports = function(handler) {
         next(replyVariables);
     });
 
+    handler.on("@get_food_type*", function(intentVariables, sessionId, next) {
+        var replyVariables = {};
+        replyVariables['0'] = intentVariables['_full'];
+        next(replyVariables);
+    });
+
     handler.on("#confirm", function(intentVariables, sessionId, next) {
         var replyVariables = {};
         replyVariables['0'] = '5';
