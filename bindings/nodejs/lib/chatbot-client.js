@@ -52,7 +52,7 @@ module.exports = function(uri) {
             { 'message': message }, { 
             'timeout': REQUEST_TIMEOUT,
             'dataType': 'form-url-encoded'
-        })
+            })
         .then(function(response) {
             var replies = JSON.parse(response.body).replies;
             deferred.resolve(replies);
