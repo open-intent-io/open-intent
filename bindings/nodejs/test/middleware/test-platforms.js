@@ -185,7 +185,7 @@ describe('Test platforms middleware', function() {
                 .expect('Content-Type', 'text/plain; charset=utf-8')
                 .expect(200)
                 .end(function(err, res) {
-                    res.text.should.eql('OK');
+                    res.text.should.eql('{"status":"ok"}');
                     done();
                 });
         });
