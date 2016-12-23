@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://www.open-intent.io">
-    <img src="/doc/img/logo.png" alt="Logo"/>
+    <img src="https://raw.githubusercontent.com/open-intent-io/open-intent/master/doc/img/logo.png" alt="Logo"/>
   </a>
 </p>
 
@@ -38,21 +38,18 @@ You can also follow the [tutorial](https://github.com/open-intent-io/open-intent
 
     {
       "entities": {
-        "@greetings": {
+        "greetings": {
           "hello": ["hi", "yep", "yo", "hey"]
         },
-        "@food_type": {
+        "food_type": {
           "pizza": [],
           "hamburger": ["big mac", "cheeseburger", "burger"],
           "salad": []
         },
-        "@number": {
-          "regex": "[0-9]+"
-        },
-        "@yes": {
+        "yes": {
           "yes": []
         },
-        "@no": {
+        "no": {
           "no": []
         }
       }
@@ -79,7 +76,7 @@ This is like teaching a little story that will drive the conversations of your u
         -I'm ordering, it is gonna be _$.
     @end
     }
-
+    
     {
     @yesno
         -No!
@@ -91,14 +88,16 @@ This is like teaching a little story that will drive the conversations of your u
 Of course, there is a Javascript file to handle your business logic when actions (keyword prefixed with #) are triggered.
 
     var food_type;
-    module.exports = {
-        "#get_food_type": function(intentVariables, sessionId, next) {
+    
+    module.exports = function(handler) {
+        handler.on("#get_food_type", function(intentVariables, sessionId, next) {
             var replyVariables = {};
             food_type = intentVariables['food_type0'];
             replyVariables['0'] = food_type;
             next(replyVariables);
-        },
-        "#confirm": function(intentVariables, sessionId, next) {
+        });
+    
+        handler.on("#confirm", function(intentVariables, sessionId, next) {
             var replyVariables = {};
             if(food_type == 'pizza') {
                 replyVariables['0'] = '8';
@@ -107,9 +106,8 @@ Of course, there is a Javascript file to handle your business logic when actions
                 replyVariables['0'] = '5';
             }
             next(replyVariables);
-        }
-    }
-
+        });
+    };
 
 This bot is a very simple one but there is a lot more in the open-intent framework. If you want to fully understand the model, we have created a
 [tutorial](https://github.com/open-intent-io/open-intent/wiki/Time-bot-tutorial) to help you quickly
