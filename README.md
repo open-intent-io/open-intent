@@ -37,20 +37,20 @@ You can also follow the [tutorial](https://github.com/open-intent-io/open-intent
 3 files are required to describe a bot: the dictionary file, the model file and the user actions file. Below is the initial dictionary file you'll find in **mychatbot/res/** when you create the bot. It is used to teach your bot what words and concepts it'll have to deal with:
 
     {
-      "entities":
-      {
+      "entities": {
         "greetings": {
-          "Hello": ["Hi", "Hey"],
-          "What's up": []
+          "hello": ["hi", "yep", "yo", "hey"]
         },
-        "time": {
-          "time": []
+        "food_type": {
+          "pizza": [],
+          "hamburger": ["big mac", "cheeseburger", "burger"],
+          "salad": []
         },
-        "question": {
-          "what": []
+        "yes": {
+          "yes": []
         },
-        "name": {
-          "name": []
+        "no": {
+          "no": []
         }
       }
     }
@@ -61,42 +61,53 @@ It uses the entities in the dictionary to detect the user intents (an ordered li
 This is like teaching a little story that will drive the conversations of your user.
 
     {
-    @root_state
+    @root
         -Hello
             #greetings
-            *Be gentle, say hello!
-        -Hello, I can tell you what time it is if you ask.
-    @ask_state
-        -What time is it?
-            #telltime
-            *I don't understand what you mean...
-         -It is _.
-    @end_state
+        -Would you want to eat a pizza, a hamburger or a salad?
+    @get_food_type
+        -Pizza, please.
+            #get_food_type
+            *I did not understand. Pizza, hamburger or salad?
+        -Got it, you want _, right?
+    @yesno
+        -Yes!
+            #confirm
+        -I'm ordering, it is gonna be _$.
+    @end
     }
     
     {
-    @ask_state
-        -What is your name?
-            #tellname
-            *I don't understand what you mean...
-         -My name is Bob.
-    @ask_state
+    @yesno
+        -No!
+            #notunderstood
+        -Tell me what you want. Pizza, hamburger or salad?
+    @get_food_type
     }
 
 Of course, there is a Javascript file to handle your business logic when actions (keyword prefixed with #) are triggered.
 
-    function getDateTime() {                                                        
-        return new Date().toString().substring(16,24);                              
-    }                                                                               
-                                                                                    
-    module.exports = function(handler) {                                            
-        handler.on('#telltime', function(intentVariables, sessionId, next) {        
-            var replyVariables = {};                                                
-            replyVariables['0'] = getDateTime();                                    
-            next(replyVariables);                                                   
-        });                                                                         
+    var food_type;
+    
+    module.exports = function(handler) {
+        handler.on("#get_food_type", function(intentVariables, sessionId, next) {
+            var replyVariables = {};
+            food_type = intentVariables['food_type0'];
+            replyVariables['0'] = food_type;
+            next(replyVariables);
+        });
+    
+        handler.on("#confirm", function(intentVariables, sessionId, next) {
+            var replyVariables = {};
+            if(food_type == 'pizza') {
+                replyVariables['0'] = '8';
+            }
+            else {
+                replyVariables['0'] = '5';
+            }
+            next(replyVariables);
+        });
     };
-
 
 This bot is a very simple one but there is a lot more in the open-intent framework. If you want to fully understand the model, we have created a
 [tutorial](https://github.com/open-intent-io/open-intent/wiki/Time-bot-tutorial) to help you quickly
