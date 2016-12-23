@@ -106,6 +106,28 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
         }
         return attachment;
     }
+    
+    function handleError(err) {
+        if(err)
+            console.error(err);
+    }
+
+    function replyHelper(reply, replies) {
+        var reply_data = replies.length ? replies[0] : "Error while getting reply.";
+        var attachment = extractAttachment(reply_data);
+        
+        if(attachment)
+            reply(attachment, handleError);
+        else
+            reply({ text: reply_data }, handleError);
+    }
+
+    function talkTo(chatbot, senderId, message, reply) {
+        console.log(senderId, message);
+        chatbot.talk(senderId, message).then(function(replies) {
+            replyHelper(reply, replies);
+        });
+    }
 
     function receivedPostback(chatbotClient, event, reply) {
         //console.log(event);
@@ -113,31 +135,8 @@ function MessengerBot(chatbotClient, messengerConfig, app) {
         var postback = event.postback;
         if(postback) {
             var message = postback.payload;
-            chatbotClient.talk(senderID, message).then(function(replies) {
-                var reply_data = replies.length ? replies[0] : "Error while getting reply.";
-                reply({ text: reply_data }, function(err, res) {
-                    if(err) {
-                        console.error(err);
-                        return;
-                    }
-                });
-            });
+            talkTo(chatbotClient, senderID, message, reply);
         }
-    }
-
-    function talkTo(chatbot, senderId, message, reply) {
-        console.log(senderId, message);
-        chatbot.talk(senderId, message).then(function(replies) {
-            var reply_data = replies.length ? replies[0] : "Error while getting reply.";
-            var attachment = extractAttachment(reply_data);
-
-            if(attachment) {
-                reply(attachment);
-            }
-            else {
-                reply({ text: reply_data });
-            }
-        });
     }
 
     function handleQuickReply(chatbot, senderId, quickReply, reply) {
