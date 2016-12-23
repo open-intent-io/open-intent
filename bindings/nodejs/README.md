@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://www.open-intent.io">
-    <img src="/doc/img/logo.png" alt="Logo"/>
+    <img src="https://raw.githubusercontent.com/open-intent-io/open-intent/master/doc/img/logo.png" alt="Logo"/>
   </a>
 </p>
 
