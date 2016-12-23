@@ -8,7 +8,7 @@ image_name=open-intent-${test_directory}-test
 
 docker build -t ${image_name} ${test_directory}
 
-docker run -d -i -p 9200:9200 --name elasticsearch elasticsearch
+docker run -d -i -p 9200:9200 --name elasticsearch elasticsearch:2.4
 
 echo "Sleep 7 seconds during elasticsearch initialization to be sure everything is up and running."
 sleep 7

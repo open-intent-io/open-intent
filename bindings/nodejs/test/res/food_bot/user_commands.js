@@ -37,13 +37,8 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-module.exports = {
-    "@get_food_type*": function(intentVariables, sessionId, next){
-        var replyVariables = {};
-        replyVariables['0'] = intentVariables['_full'];
-        next(replyVariables);
-    },
-    "#get_food_type": function(intentVariables, sessionId, next) {
+module.exports = function(handler) {
+    handler.on("#get_food_type", function(intentVariables, sessionId, next) {
         var replyVariables = {};
         replyVariables['0'] = intentVariables['food_type0'];
 
@@ -54,10 +49,17 @@ module.exports = {
         }
 
         next(replyVariables);
-    },
-    "#confirm": function(intentVariables, sessionId, next) {
+    });
+
+    handler.on("@get_food_type*", function(intentVariables, sessionId, next) {
+        var replyVariables = {};
+        replyVariables['0'] = intentVariables['_full'];
+        next(replyVariables);
+    });
+
+    handler.on("#confirm", function(intentVariables, sessionId, next) {
         var replyVariables = {};
         replyVariables['0'] = '5';
         next(replyVariables);
-    }
-}
+    });
+};

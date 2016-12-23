@@ -46,8 +46,9 @@ var talk = undefined;
 var chatbot = undefined;
 
 module.exports = function() {
-    var chatbot = require('../chatbot');
+    var Chatbot = require('../chatbot');
     var openintent = require('open-intent');
+    var chatbot;
 
     var _beforeEach = function(done) {
         var stdinMock = new stream.MockReadableStream();
@@ -58,12 +59,11 @@ module.exports = function() {
             stdout: stdoutMock
         };
 
-        var middlewares = [];
+        chatbot = new Chatbot();
+        chatbot.set('irc', openintent.middleware.Irc(stdio));
 
-        middlewares.push(openintent.middleware.Irc(stdio));
-
-        chatbot(middlewares)
-        .then(function(error) {
+        return chatbot.start()
+        .then(function() {
             talk = function(input) {
                 var deferred = Q.defer();
 
@@ -80,6 +80,14 @@ module.exports = function() {
             done();
         });
     };
+
+    function _afterEach(done) {
+        chatbot.stop()
+        .then(function() {
+            done();
+        });
+    }
+
 
     return {
         checkScript: handleScript,
@@ -122,9 +130,3 @@ function handleScript(script, done) {
     });
 }
 
-function _afterEach(done) {
-    if(chatbot) {
-        delete chatbot;
-    }
-    done();
-}

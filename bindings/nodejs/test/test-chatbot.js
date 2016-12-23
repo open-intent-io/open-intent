@@ -37,31 +37,58 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-var Q = require('q');
+var sinon = require('sinon');
+var assert = require('assert');
 
-module.exports = function() {
+var Chatbot = require('../lib/chatbot');
+var foodBotModel = require('./food-bot-model');
 
-    this._sessions = {};
+describe('Test Chatbot with middlewares', function() {
 
-    this.save = function(sessionId, context) {
-        var deferred = Q.defer();
+    it('should call setup of the user commands when the chatbot starts', function(done) {
+        var chatbot = new Chatbot();
+        var config = {};
+        var setup_spy = sinon.spy();
 
-        this._sessions[sessionId] = context;
-        deferred.resolve();
-        return deferred.promise;
-    };
+        foodBotModel.user_commands = function(handler) {
+            handler.on('_setup', function(next) {
+                setup_spy();
+                next();
+            });
+        };
 
-    this.load = function(sessionId) {
-        var deferred = Q.defer();
+        chatbot.start(foodBotModel, config)
+        .then(function() {
+            assert(setup_spy.calledOnce);
+            done();
+        })
+        .fail(function(error) {
+            console.error('Error', error);
+        });
+    });
 
-        if(sessionId in this._sessions) {
-            deferred.resolve(this._sessions[sessionId]);
-        }
-        else {
-            deferred.reject('No session ' + sessionId + ' stored');
-        }
-        return deferred.promise;
-    };
+    it('should call cleanup of the user commands when the chatbot stops', function(done) {
+        var chatbot = new Chatbot();
+        var config = {};
+        var spy = sinon.spy();
 
-    return this;
-};
+        foodBotModel.user_commands = function(handler) {
+            handler.on('_cleanup', function(next) {
+                spy();
+                next();
+            });
+        };
+
+        chatbot.start(foodBotModel, config)
+        .then(function() {
+            return chatbot.stop()
+        })
+        .then(function() {
+            assert(spy.calledOnce);
+            done();
+        })
+        .fail(function(error) {
+            console.error('Error', error);
+        });
+    });
+});

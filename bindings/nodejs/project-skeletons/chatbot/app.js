@@ -40,22 +40,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var openintent = require('open-intent');
 
-var chatbot =  require('./app/chatbot');
+var Chatbot =  require('./app/chatbot');
 var config = require('./app/config');
 
 var REST_PORT = process.env.REST_PORT || 5001;
 var DOC_PUBLISHER_PORT = process.env.DOC_PUBLISHER_PORT || 5002;
 
-var middlewares = [];
+var chatbot = new Chatbot();
 
-middlewares.push(openintent.middleware.Irc());
-middlewares.push(openintent.middleware.Rest(REST_PORT));
-middlewares.push(openintent.middleware.Platforms(config));
+chatbot.set('irc', openintent.middleware.Irc());
+chatbot.set('rest', openintent.middleware.Rest(REST_PORT));
+chatbot.set('platforms', openintent.middleware.Platforms(config));
 
-middlewares.push(openintent.middleware.DocPublisher(DOC_PUBLISHER_PORT))
-middlewares.push(openintent.middleware.Logger(config.loggers));
+chatbot.set('doc', openintent.middleware.DocPublisher(DOC_PUBLISHER_PORT));
+chatbot.set('logger', openintent.middleware.Logger(config.loggers));
 
-chatbot(middlewares)
+chatbot.start()
 .fail(function(err) {
-    console.error('Error:', err);
+    console.error('Error: ', err);
 });

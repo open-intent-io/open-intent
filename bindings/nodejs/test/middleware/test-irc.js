@@ -43,7 +43,7 @@ var Q = require('q');
 var fs = require('fs');
 
 var IrcClient = require('../../lib/middleware/irc');
-var createChatbot = require('../../lib/chatbot');
+var Chatbot = require('../../lib/chatbot');
 
 var foodBotModel = require('../food-bot-model');
 
@@ -80,7 +80,7 @@ describe('Test the IRC client', function() {
         });
     };
 
-    beforeEach(function(done) {
+    beforeEach(function() {
         var stdinMock = new stream.MockReadableStream();
         var stdoutMock = new stream.MockReadableStream();
 
@@ -103,14 +103,11 @@ describe('Test the IRC client', function() {
             return deferred.promise;
         };
 
-        createChatbot(botmodel)
-        .then(function(newChatbot) {
-            newChatbot.use(IrcClient(stdio))
-            .then(function() {
-                newChatbot.start();
-                done();
-            });
-        });
+        var chatbot = new Chatbot();
+
+        chatbot.set('irc', IrcClient(stdio));
+
+        return chatbot.start(botmodel);
     });
     
     it('should handle a conversation in which the user order a hamburger', function(done) {

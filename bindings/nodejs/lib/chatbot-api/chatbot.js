@@ -58,10 +58,8 @@ function createChatbotNoCatch(botmodel, config) {
         sessionManagerDriver = new RedisSessionManager(redisUrl);
     }
     
-    var openIntentChatbot = OpenIntentChatbotFactory.fromOIML(botmodel['dictionary'], botmodel['oiml'],
+    return OpenIntentChatbotFactory.fromOIML(botmodel['dictionary'], botmodel['oiml'],
         sessionManagerDriver, userCommandsDriver);
-
-    return new ChatbotWithLogger(openIntentChatbot);
 }
 
 function createChatbot(botmodel, config) {

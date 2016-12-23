@@ -47,13 +47,14 @@ describe("Test simple user commands driver", function() {
 
     describe("When user command exists for the actionId, the driver executes it", function(done) {
         it('should execute the command1', function() {
-            var userCommands = {
-                'command1': function(intentVariables, sessionId, next) {
+            var userCommands = function(handler) {
+                handler.on('command1', function(intentVariables, sessionId, next) {
                     next();
-                },
-                'command2': function(intentVariables, sessionId, next) {
+                });
+
+                handler.on('command2', function(intentVariables, sessionId, next) {
                     next();
-                }
+                });
             };
 
             var userCommandsDriver = new SimpleUserCommands(userCommands);
@@ -66,13 +67,14 @@ describe("Test simple user commands driver", function() {
 
     describe("When user command does not exist for the actionId, the driver does not execute any command", function() {
         it('should call next callback even if there is no user command', function(done) {
-            var userCommands = {
-                'command1': function(intentVariables, sessionId, next) {
+            var userCommands = function(handler) {
+                handler.on('command1', function(intentVariables, sessionId, next) {
                     next();
-                },
-                'command2': function(intentVariables, sessionId, next) {
+                });
+
+                handler.on('command2', function(intentVariables, sessionId, next) {
                     next();
-                }
+                });
             };
 
             var userCommandsDriver = new SimpleUserCommands(userCommands);
@@ -98,6 +100,53 @@ describe("Test simple user commands driver", function() {
                     should.equal(userVariables.state, 7);
                     done();
                 });
+            });
+        });
+    });
+
+    describe('The driver handle setup/cleanup actions', function() {
+        it('should call setup if defined in the user_commands', function(done) {
+            var userCommands = require('./user-commands');
+
+            var userCommandsDriver = new SimpleUserCommands(userCommands);
+
+            userCommandsDriver.setup()
+            .then(function(setup) {
+                setup.should.be.true;
+                done();
+            });
+        });
+
+        it('should call setup if defined in the user_commands', function(done) {
+            var userCommands = require('./user-commands');
+            var userCommandsDriver = new SimpleUserCommands(userCommands);
+
+            userCommandsDriver.cleanup()
+            .then(function(cleanup) {
+                cleanup.should.be.true;
+                done();
+            });
+        });
+
+        it('should resolve the promise when setup is not declared', function(done) {
+            var userCommands = function(handler) {};
+            var userCommandsDriver = new SimpleUserCommands(userCommands);
+
+            userCommandsDriver.setup()
+            .then(function(setup) {
+                should(setup).be.undefined;
+                done();
+            });
+        });
+
+        it('should resolve the promise when cleanup is not declared', function(done) {
+            var userCommands = function(handler) {};
+            var userCommandsDriver = new SimpleUserCommands(userCommands);
+
+            userCommandsDriver.cleanup()
+            .then(function(cleanup) {
+                should(cleanup).be.undefined;
+                done();
             });
         });
     });

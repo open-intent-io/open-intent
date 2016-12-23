@@ -39,13 +39,27 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 var state = 4;
 
-module.exports = {
-    'command1': function(intentVariables, sessionId, next) {
+module.exports = function(handler) {
+    var setup = false;
+    var cleanup = false;
+
+    handler.on('_setup', function(next) {
+        setup = true;
+        next(setup);
+    });
+
+    handler.on('_cleanup', function(next) {
+        cleanup = true;
+        next(cleanup);
+    });
+
+    handler.on('command1', function(intentVariables, sessionId, next) {
         state += 1;
         next({state: state});
-    },
-    'command2': function(intentVariables, sessionId, next) {
-        state += 2
+    });
+
+    handler.on('command2', function(intentVariables, sessionId, next) {
+        state += 2;
         next({state: state});
-    }
-}
+    });
+};

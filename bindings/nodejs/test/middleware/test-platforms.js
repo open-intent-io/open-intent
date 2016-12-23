@@ -43,7 +43,7 @@ var path = require('path');
 var request = require('supertest');
 var crypto = require('crypto');
 
-var createChatbot = require('../../lib/chatbot');
+var Chatbot = require('../../lib/chatbot');
 var Platforms = require('../../lib/middleware/platforms');
 
 var SERVICE_PORT = 10300;
@@ -72,7 +72,7 @@ describe('Test platforms middleware', function() {
     });
 
     describe('When attaching the platforms middleware', function() {
-        it('should attach the middleware without error', function(done) {
+        it('should attach the middleware without error', function() {
             var config = {
                 general: {
                     port: SERVICE_PORT,
@@ -108,27 +108,20 @@ describe('Test platforms middleware', function() {
                 }
             };
 
-            var PlatformsMiddleware;
+            var chatbot = new Chatbot();
+            chatbot.set('platforms', Platforms(config));
 
-            createChatbot(botmodel)
-            .then(function(chatbot) {
-                PlatformsMiddleware = Platforms(config);
-                chatbot.use(PlatformsMiddleware)
-                .then(function() {
-                    PlatformsMiddleware.detach();
-                    done();
-                });
-            })
-            .fail(function(err) {
-                console.error('Error:', err);
+            return chatbot.start(botmodel)
+            .then(function() {
+                return chatbot.stop();
             });
         });
     });
 
     describe('When platforms middleware is attached, the chatbot', function() {
-        var PlatformsMiddleware;
+        var chatbot;
 
-        before(function(done) {
+        before(function() {
             var config = {
                 general: {
                     port: SERVICE_PORT,
@@ -149,24 +142,14 @@ describe('Test platforms middleware', function() {
             };
 
 
-            createChatbot(botmodel)
-            .then(function(chatbot) {
-                PlatformsMiddleware = Platforms(config);
-                chatbot.use(PlatformsMiddleware)
-                .then(function() {
-                    chatbot.start()
-                    .then(function() {
-                        done();
-                    });
-                });
-            })
-            .fail(function(err) {
-                console.error('Error:', err);
-            });
+            chatbot = new Chatbot();
+            chatbot.set('platforms', Platforms(config));
+
+            return chatbot.start(botmodel)
         });
 
         after(function() {
-            PlatformsMiddleware.detach();
+            return chatbot.stop();
         });
 
         it('should interact with messenger', function(done) {
@@ -194,7 +177,7 @@ describe('Test platforms middleware', function() {
                 ]
             };
 
-            request(PlatformsMiddleware._server)
+            request(chatbot.get('platforms')._server)
                 .post('/messenger/chat')
                 .send(body)
                 .set('x-hub-signature', "sha1=46d851011a6b3e870962f1eac707aff70f865729")
@@ -202,7 +185,7 @@ describe('Test platforms middleware', function() {
                 .expect('Content-Type', 'text/plain; charset=utf-8')
                 .expect(200)
                 .end(function(err, res) {
-                    res.text.should.eql('OK');
+                    res.text.should.eql('{"status":"ok"}');
                     done();
                 });
         });

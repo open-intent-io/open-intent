@@ -40,44 +40,48 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 var createChatbot = require('./chatbot-api/chatbot');
 var Q = require('q');
 
-function ChatbotInterface(chatbot) {
-    this._chatbot = chatbot;
+function ChatbotWithMiddleware() {
+    this._chatbot;
     this._middlewares = [];
+}
 
-    this.use = function(middleware) {
-        var middlewares = this._middlewares;
-        var promise = middleware.attach(this._chatbot);
-        promise.then(function() {
-            middlewares.push(middleware);
-        });
-        return promise;
-    };
 
-    this.start = function() {
-        var middlewares = this._middlewares;
-        var promises = [];
+ChatbotWithMiddleware.prototype.set = function(key, middleware) {
+  this._middlewares[key] = middleware;
+};
+
+ChatbotWithMiddleware.prototype.unset = function(key) {
+    delete this._middlewares[key];
+};
+
+ChatbotWithMiddleware.prototype.get = function(key) {
+    return this._middlewares[key];
+};
+
+ChatbotWithMiddleware.prototype.start = function(botmodel, config) {
+    var self = this;
+    var middlewares = this._middlewares;
+    var promises = [];
+
+    return createChatbot(botmodel, config)
+    .then(function(chatbot) {
+        self._chatbot = chatbot;
+        promises.push(self._chatbot.setupUserCommands());
         for(var i in middlewares) {
-            promises.push(middlewares[i].start());
+            promises.push(middlewares[i].start(self._chatbot));
         }
         return Q.all(promises);
-    };
-
-    return this;
-}
-
-function createChatbotInternal(botmodel, config) {
-    var deferred = Q.defer();
-
-    createChatbot(botmodel, config)
-    .then(function(chatbot) {
-        var chatbotInterface = new ChatbotInterface(chatbot);
-        deferred.resolve(chatbotInterface);
-    })
-    .fail(function(err) {
-        deferred.reject(err);
     });
+};
 
-    return deferred.promise;
-}
+ChatbotWithMiddleware.prototype.stop = function() {
+    var middlewares = this._middlewares;
+    var promises = [];
+    for(var i in middlewares) {
+        promises.push(middlewares[i].stop());
+    }
+    promises.push(this._chatbot.cleanupUserCommands());
+    return Q.all(promises);
+};
 
-module.exports = createChatbotInternal;
+module.exports = ChatbotWithMiddleware;

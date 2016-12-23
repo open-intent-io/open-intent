@@ -42,13 +42,13 @@ var request = require('supertest');
 var fs = require('fs');
 var path = require('path');
 
-var createChatbot = require('../../lib/chatbot');
+var Chatbot = require('../../lib/chatbot');
 var Rest = require('../../lib/middleware/rest');
 
 var REST_PORT = 10010;
 
 describe('Test REST middleware', function() {
-    var RestMiddleware = undefined;
+    var chatbot;
 
     var file = path.resolve(__dirname, '../res/food_bot/dictionary.json');
     var dictionary = JSON.parse(fs.readFileSync(file, 'utf-8'));
@@ -58,32 +58,24 @@ describe('Test REST middleware', function() {
 
     var userCommands = require(path.resolve(__dirname, '../res/food_bot/user_commands.js'));
 
-    before(function(done) {
+    before(function() {
         var botmodel = {
             dictionary: dictionary,
             oiml: oiml,
             user_commands: userCommands
         };
 
-        createChatbot(botmodel)
-        .then(function(chatbot) {
-            RestMiddleware = Rest(REST_PORT);
-            chatbot.use(RestMiddleware)
-            .then(function() {
-                return chatbot.start();
-            })
-            .then(function() {
-                done();
-            })
-        });
+        chatbot = new Chatbot();
+        chatbot.set('rest', Rest(REST_PORT));
+        return chatbot.start(botmodel);
     });
 
     after(function() {
-        RestMiddleware.detach();
+        chatbot.stop();
     });
 
     it('should return the state when calling getSate', function(done) {
-        request(RestMiddleware._server)
+        request(chatbot.get('rest')._server)
         .get('/state/ABC')
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
@@ -95,7 +87,7 @@ describe('Test REST middleware', function() {
     });
 
     it('should return ok status code when calling setSate', function(done) {
-        request(RestMiddleware._app )
+        request(chatbot.get('rest')._app )
         .put('/state/ABC')
         .type('json')
         .send({ 'state': '@yesno' })
@@ -109,7 +101,7 @@ describe('Test REST middleware', function() {
     });
 
     it('should return a reply when calling talk', function(done) {
-        request(RestMiddleware._server)
+        request(chatbot.get('rest')._server)
         .post('/talk/ABC')
         .send({ 'message': 'yes' })
         .set('Accept', 'application/json')

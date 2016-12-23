@@ -100,22 +100,17 @@ function MiddlewareInterface(stdio) {
         };
     }
 
-    this.attach = function(chatbot) {
-        var deferred = Q.defer();
+    this.start = function(chatbot) {
         _this._chatbot = chatbot;
         _this._readline = readline.createInterface({
             input: stdio.stdin,
             output: stdio.stdout,
             prompt: '> '
         });
-        deferred.resolve();
-        return deferred.promise;
-    };
-
-    this.detach = function() {
-    };
-
-    this.start = function() {
         return startIRCClient(_this._chatbot, _this._readline, stdio.stdout);
     };
+
+    this.stop = function() {
+        _this._readline.close();
+    }
 }
